@@ -67,3 +67,42 @@ AGPL v3 — 详见 [LICENSE](LICENSE)
 ## 贡献 | Contributing
 
 欢迎提交 Issue 和 Pull Request。详见 [CONTRIBUTING.md](CONTRIBUTING.md)
+
+---
+
+## 🛠️ 招募贡献者 | Call for Contributors
+
+**Somn** 是开源协作项目，我们欢迎各类开发者加入！
+
+### 🔍 我们需要的帮助
+
+| 领域 | 描述 | 难度 |
+|------|------|------|
+| **推理引擎优化** | 提升 LongCoT/ToT/GoT/ReAct 推理效率 | ⭐⭐⭐ |
+| **知识系统扩展** | 丰富 21 智慧学派与知识格子内容 | ⭐⭐ |
+| **前端开发** | PyQt6 UI 优化与新功能开发 | ⭐⭐ |
+| **后端架构** | FastAPI 服务扩展与性能优化 | ⭐⭐⭐ |
+| **测试覆盖** | 编写单元测试与集成测试 | ⭐ |
+| **文档翻译** | 中英文文档互译 | ⭐ |
+
+### 🚀 如何开始
+
+1. **Fork** 本仓库
+2. 创建特性分支：`git checkout -b feature/your-idea`
+3. 提交代码：`git commit -m 'Add: your feature'`
+4. 推送分支：`git push origin feature/your-idea`
+5. 提交 **Pull Request**
+
+### 💬 社区交流
+
+- 📧 邮箱：marcwadehan@gmail.com
+- 🐛 问题反馈：[GitHub Issues](https://github.com/marcwadehan-png/somn-agent/issues)
+- 💡 功能建议：[GitHub Discussions](https://github.com/marcwadehan-png/somn-agent/discussions)
+
+### 🌟 贡献者福利
+
+- 贡献代码将出现在项目的 **Contributors** 列表
+- 优秀贡献者可获得 **Repository Write** 权限
+- 定期评选 **月度最佳贡献者**
+
+**无论大小，每一份贡献都值得感谢！**
