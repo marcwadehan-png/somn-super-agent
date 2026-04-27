@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "somn"
 version = "6.2.0"
-description = "Somn智能助手 - 万维智能系统"
+description = "Somn — 自主进化的 LLM 智能体，集成多层级推理引擎、知识系统与 21 格动态知识库"
 requires-python = ">=3.11"
 license = {text = "AGPL-3.0-or-later"}
 authors = [
