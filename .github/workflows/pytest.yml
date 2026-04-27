@@ -36,11 +36,11 @@ jobs:
         run: pip install flake8 pylint
 
       - name: Run flake8
-        run: flake8 somn/ --max-line-length=120 --extend-ignore=E203,W503,E501
+        run: flake8 smart_office_assistant/ api/ --max-line-length=120 --extend-ignore=E203,W503,E501
         continue-on-error: true
 
       - name: Run pylint
-        run: pylint somn/ --max-line-length=120 --disable=C0114,C0115,C0116 || true
+        run: pylint smart_office_assistant/ api/ --max-line-length=120 --disable=C0114,C0115,C0116 || true
 
   # ============================================================
   # Type Check
@@ -63,5 +63,5 @@ jobs:
         run: pip install mypy
 
       - name: Run mypy
-        run: mypy somn/ --ignore-missing-imports
+        run: mypy smart_office_assistant/ api/ --ignore-missing-imports
         continue-on-error: true

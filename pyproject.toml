@@ -95,11 +95,11 @@ suggestion-mode = true       # 建议模式
 
 # 排除目录
 ignore-paths = [
-    "^somn/smart_office_assistant/data/",
-    "^somn/smart_office_assistant/tests/",
-    "^somn/smart_office_assistant/__pycache__/",
-    "^somn/smart_office_assistant/\\.git/",
-    "^somn/smart_office_assistant/node_modules/",
+    "^smart_office_assistant/data/",
+    "^smart_office_assistant/tests/",
+    "^smart_office_assistant/__pycache__/",
+    "^smart_office_assistant/\\.git/",
+    "^smart_office_assistant/node_modules/",
 ]
 
 # 忽略的消息类别

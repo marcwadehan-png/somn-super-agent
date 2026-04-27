@@ -45,17 +45,16 @@ python Somn-GUI/main.py
 ## 项目结构 | Project Structure
 
 ```
-somn/                          # Python 子包
-├── api/                       # FastAPI 服务 (61 端点)
-├── global_control_center/    # 全局控制中心
-├── knowledge_cells/          # 21 格知识系统
-├── smart_office_assistant/   # 核心引擎
-Somn-GUI/                      # PyQt6 前端
-api/                           # FastAPI 服务入口
-docs/                          # 文档 (ADR 架构决策)
+smart_office_assistant/       # 核心引擎 (主程序)
+api/                          # FastAPI 服务 (61 端点)
+Somn-GUI/                     # PyQt6 前端
+knowledge_cells/              # 21 格知识系统
+docs/                         # 文档 (ADR 架构决策)
+tests/                        # 测试套件
 ```
 
 ---
+
 ## 联系
 邮箱：marcwadehan@gmail.com
 

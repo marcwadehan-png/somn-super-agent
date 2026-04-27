@@ -85,7 +85,6 @@ pnpm-lock.yaml
 
 # Documentation
 docs/_build
-somn/docs/_build
 
 # Development files (should not be in image)
 *.md
