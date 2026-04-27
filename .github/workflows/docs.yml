@@ -1,61 +1,57 @@
-# GitHub Pages Documentation Deploy
-# 自动构建并部署 Sphinx 文档到 GitHub Pages
-
-name: Deploy Documentation
-
-on:
-  push:
-    branches: [main]
-    paths:
-      - 'docs/**'
-      - 'somn/docs/**'
-      - 'README.md'
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
-jobs:
-  build:
-    name: Build Documentation
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-
-      - name: Install dependencies
-        run: |
-          pip install sphinx sphinx-rtd-theme myst-parser
-
-      - name: Build documentation
-        run: |
-          cd docs
-          sphinx-build -b html source _build/html
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs/_build/html
-
-  deploy:
-    name: Deploy to GitHub Pages
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+# ============================================================
+# ⚠️ GitHub Pages 文档部署已禁用
+# README.md 即为项目文档，无需额外部署
+# 如需启用：在仓库 Settings → Pages → Source 选择 gh-pages 分支
+# ============================================================
+# name: Deploy Documentation
+# on:
+#   push:
+#     branches: [main]
+#     paths:
+#       - 'docs/**'
+#       - 'somn/docs/**'
+#       - 'README.md'
+#   workflow_dispatch:
+#
+# permissions:
+#   contents: read
+#   pages: write
+#   id-token: write
+#
+# concurrency:
+#   group: "pages"
+#   cancel-in-progress: false
+#
+# jobs:
+#   build:
+#     name: Build Documentation
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+#       - name: Set up Python
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: '3.13'
+#       - name: Install dependencies
+#         run: |
+#           pip install sphinx sphinx-rtd-theme myst-parser
+#       - name: Build documentation
+#         run: |
+#           cd somn/docs
+#           sphinx-build -b html source _build/html
+#       - name: Upload artifact
+#         uses: actions/upload-pages-artifact@v3
+#         with:
+#           path: somn/docs/_build/html
+#   deploy:
+#     name: Deploy to GitHub Pages
+#     needs: build
+#     runs-on: ubuntu-latest
+#     environment:
+#       name: github-pages
+#       url: ${{ steps.deployment.outputs.page_url }}
+#     steps:
+#       - name: Deploy to GitHub Pages
+#         id: deployment
+#         uses: actions/deploy-pages@v4

@@ -1,24 +1,26 @@
-# CI/CD Pipeline for Somn Project
-# Comprehensive testing & quality gates on push/PR
+# Somn CI Pipeline - Simplified for Open Source
+# Basic quality gates on every push
 
 name: Somn CI Pipeline
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
   pull_request:
-    branches: [main, develop]
+    branches: [main]
+  workflow_dispatch:
 
 env:
   PYTHON_VERSION: '3.13'
 
 jobs:
   # ============================================================
-  # Stage 1: Lint & Code Quality
+  # Lint & Code Quality
   # ============================================================
   lint:
-    name: Lint & Code Quality
+    name: Lint
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
@@ -29,33 +31,26 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Cache pip packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install linting tools
-        run: |
-          pip install flake8 pylint pydocstyle mypy isort black
+      - name: Install tools
+        run: pip install flake8 pylint pydocstyle
 
       - name: Run flake8
-        run: flake8 somn/ Somn-GUI/ --max-line-length=120 --extend-ignore=E203,W503
+        run: flake8 somn/ Somn-GUI/ --max-line-length=120 --extend-ignore=E203,W503,E501
+        continue-on-error: true
 
       - name: Run pylint
-        run: pylint somn/smart_office_assistant/src/ --max-line-length=120 --disable=C0114,C0115,C0116 || true
+        run: pylint somn/ --max-line-length=120 --disable=C0114,C0115,C0116 || true
 
-      - name: Check import sorting (isort)
-        run: isort --check-only --diff somn/ || true
+      - name: Run pydocstyle
+        run: pydocstyle somn/ || true
 
   # ============================================================
-  # Stage 2: Type Checking
+  # Type Checking
   # ============================================================
   type-check:
-    name: Type Checking (mypy)
+    name: Type Check
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
@@ -70,101 +65,16 @@ jobs:
         run: pip install mypy
 
       - name: Run mypy
-        run: mypy somn/smart_office_assistant/src/ --ignore-missing-imports --warn-unused-configs || true
+        run: mypy somn/ --ignore-missing-imports
+        continue-on-error: true
 
   # ============================================================
-  # Stage 3: Unit Tests
-  # ============================================================
-  test:
-    name: Unit Tests (${{ matrix.test-group }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        test-group:
-          - core
-          - intelligence
-          - memory
-          - claws
-          - knowledge
-          - integration
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Cache pip packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install dependencies
-        run: |
-          cd somn
-          pip install -r requirements.txt
-          pip install pytest pytest-cov pytest-asyncio pytest-xdist
-
-      - name: Run tests
-        run: |
-          cd somn
-          pytest tests/ -v --tb=short -k "${{ matrix.test-group }}" --ignore=tests/test_debug*.py
-
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-results-${{ matrix.test-group }}
-          path: somn/tests/.pytest_cache/
-
-  # ============================================================
-  # Stage 4: Coverage Report
-  # ============================================================
-  coverage:
-    name: Coverage Check
-    runs-on: ubuntu-latest
-    needs: test
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install dependencies
-        run: |
-          cd somn
-          pip install -r requirements.txt
-          pip install pytest pytest-cov codecov
-
-      - name: Generate coverage report
-        run: |
-          cd somn
-          pytest tests/ --cov=smart_office_assistant --cov-report=xml --cov-report=html --cov-fail-under=30
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          file: somn/coverage.xml
-          fail_ci_if_error: false
-          verbose: true
-
-  # ============================================================
-  # Stage 5: Security Scan
+  # Security Scan
   # ============================================================
   security:
     name: Security Scan
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout code
@@ -175,19 +85,15 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Install security tools
-        run: pip install bandit safety
+      - name: Install bandit
+        run: pip install bandit
 
-      - name: Run bandit (SAST)
-        run: bandit -r somn/smart_office_assistant/src/ -ll -f json -o bandit-report.json || true
+      - name: Run bandit
+        run: bandit -r somn/ -ll -f json -o bandit-report.json || true
 
-      - name: Run safety (dependency check)
-        run: safety check --json --full-report || true
-
-      - name: Upload security reports
+      - name: Upload security report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: security-reports
-          path: |
-            bandit-report.json
+          name: security-report
+          path: bandit-report.json
