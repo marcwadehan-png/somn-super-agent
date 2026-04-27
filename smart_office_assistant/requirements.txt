@@ -20,7 +20,7 @@ numpy>=1.24.0
 
 # AI/ML & Vector Storage
 openai>=1.0.0
-sentence-transformers>=2.2.0
+sentence-transformers>=5.4.1
 chromadb>=1.5.8
 
 # Database & Storage
