@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日学习报告 - 2026-04-04</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #4F46E5;
+            --secondary-color: #10B981;
+            --warning-color: #F59E0B;
+            --danger-color: #EF4444;
+            --bg-color: #F3F4F6;
+            --card-bg: #FFFFFF;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --border-color: #E5E7EB;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), #7C3AED);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.3);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header .subtitle {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .metric-card {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+        
+        .metric-card .icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+        
+        .metric-card .value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 4px;
+        }
+        
+        .metric-card .label {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        
+        .metric-card.success .value { color: var(--secondary-color); }
+        .metric-card.warning .value { color: var(--warning-color); }
+        .metric-card.danger .value { color: var(--danger-color); }
+        
+        /* Charts Section */
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-card {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .chart-card h3 {
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        
+        /* Details Section */
+        .details-section {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        
+        .details-section h2 {
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        
+        .detail-item {
+            padding: 16px;
+            background: var(--bg-color);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .detail-item.success { border-left-color: var(--secondary-color); }
+        .detail-item.warning { border-left-color: var(--warning-color); }
+        .detail-item.danger { border-left-color: var(--danger-color); }
+        
+        .detail-item h4 {
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+        
+        .detail-item p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        
+        .detail-item .meta {
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .status-badge.success {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+        
+        .status-badge.warning {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+        
+        .status-badge.danger {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .metric-card .value {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🧠 每日学习报告</h1>
+            <div class="subtitle">
+                2026-04-04 | 神经记忆系统自动生成
+            </div>
+        </div>
+        
+        <!-- Metrics Overview -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="icon">📊</div>
+                <div class="value">0</div>
+                <div class="label">总学习事件</div>
+            </div>
+            <div class="metric-card success">
+                <div class="icon">💡</div>
+                <div class="value">0</div>
+                <div class="label">实例学习</div>
+            </div>
+            <div class="metric-card">
+                <div class="icon">✅</div>
+                <div class="value">0</div>
+                <div class="label">验证学习</div>
+            </div>
+            <div class="metric-card warning">
+                <div class="icon">🔧</div>
+                <div class="value">0</div>
+                <div class="label">错误学习</div>
+            </div>
+            <div class="metric-card">
+                <div class="icon">🔗</div>
+                <div class="value">0</div>
+                <div class="label">关联学习</div>
+            </div>
+            <div class="metric-card success">
+                <div class="icon">📚</div>
+                <div class="value">0</div>
+                <div class="label">知识更新</div>
+            </div>
+        </div>
+        
+        <!-- Charts -->
+        <div class="charts-section">
+            <div class="chart-card">
+                <h3>学习类型分布</h3>
+                <div class="chart-container">
+                    <canvas id="learningTypeChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>知识增长趋势</h3>
+                <div class="chart-container">
+                    <canvas id="knowledgeTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Learning Details -->
+        <div class="details-section">
+            <h2>📋 学习详情</h2>
+            
+            <div class="detail-item">
+                <h4>📝 今日暂无新的学习事件</h4>
+                <p>系统持续监控中，将在发现新数据时自动触发学习。</p>
+            </div>
+            
+        </div>
+        
+        <!-- System Status -->
+        <div class="details-section">
+            <h2>🔍 系统状态</h2>
+            
+        <div class="detail-item success">
+            <h4>🏥 系统健康度</h4>
+            <p>当前评分: <strong>80%</strong> <span class="status-badge success">健康</span></p>
+            <div class="meta">
+                知识库规模: 0概念 | 
+                记忆网络密度: 0.72 | 
+                最近更新: 刚刚
+            </div>
+        </div>
+        
+        <div class="detail-item">
+            <h4>📈 学习效能</h4>
+            <p>今日学习效率良好，共处理 0 个学习事件。</p>
+            <div class="meta">
+                数据扫描范围: 过去24小时 | 
+                新发现: 13 个 | 
+                模式提取: 0 个
+            </div>
+        </div>
+        
+        <div class="detail-item success">
+            <h4>🎯 建议与展望</h4>
+            <p>数据量充足但未提取到模式，建议检查数据质量</p>
+            <div class="meta">
+                下次自动学习: 明日 09:00
+            </div>
+        </div>
+        
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>🌙 Somn 神经记忆系统 | 报告生成时间: 2026-04-04 09:19:43</p>
+        </div>
+    </div>
+    
+    <script>
+        // 学习类型分布图表
+        const learningTypeCtx = document.getElementById('learningTypeChart').getContext('2d');
+        new Chart(learningTypeCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['实例学习', '验证学习', '错误学习', '关联学习'],
+                datasets: [{
+                    data: [0, 0, 0, 0],
+                    backgroundColor: [
+                        '#10B981',
+                        '#4F46E5',
+                        '#F59E0B',
+                        '#8B5CF6'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // 知识增长趋势图表
+        const knowledgeTrendCtx = document.getElementById('knowledgeTrendChart').getContext('2d');
+        new Chart(knowledgeTrendCtx, {
+            type: 'line',
+            data: {
+                labels: ['概念', '规则', '关系', '模式'],
+                datasets: [{
+                    label: '知识增长',
+                    data: [
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    borderColor: '#4F46E5',
+                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

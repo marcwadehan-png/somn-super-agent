@@ -1,0 +1,110 @@
+# Release Workflow - 自动发布 GitHub Release
+# 当推送版本标签 (v*) 时触发，自动构建并发布 Release
+
+name: Somn Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # 推送 v1.0.0, v2.1.3 等标签时触发
+
+permissions:
+  contents: write
+
+jobs:
+  # ============================================================
+  # Job 1: 生成 Release Notes + 创建 Release
+  # ============================================================
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 获取完整历史用于生成 changelog
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Generate Release Notes
+        run: |
+          # 使用 Python 脚本从 CHANGELOG.md 提取当前版本的变更内容
+          python << 'EOF'
+          import re
+          
+          with open("CHANGELOG.md", "r", encoding="utf-8") as f:
+              content = f.read()
+          
+          # 查找对应版本的变更段落
+          version = "${{ steps.version.outputs.VERSION }}"
+          pattern = rf'\## \[{re.escape(version)}\].*?\n(.*?)(?=\n## |\Z)'
+          match = re.search(pattern, content, re.DOTALL)
+          
+          if match:
+              notes = match.group(1).strip()
+              with open("release_notes.md", "w", encoding="utf-8") as f:
+                  f.write(f"## Somn {version}\n\n{notes}")
+              print(f"✅ Release notes generated for v{version}")
+          else:
+              # 如果找不到精确匹配，使用 Unreleased 或默认信息
+              with open("release_notes.md", "w", encoding="utf-8") as f:
+                  f.write(f"## Somn {version}\n\nSee [CHANGELOG.md](CHANGELOG.md) for details.\n")
+              print("⚠️ Version not found in CHANGELOG, using default notes")
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: release_notes.md
+          name: Somn ${{ steps.version.outputs.VERSION }}
+          draft: false
+          prerelease: false
+          files: |
+            LICENSE
+            README.md
+            CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================================
+  # Job 2: 构建 PyPI 兼容包 (未来可用)
+  # ============================================================
+  build:
+    name: Build Distribution Package
+    runs-on: ubuntu-latest
+    needs: release
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install build tools
+        run: pip install build twine
+
+      - name: Build package
+        run: python -m build
+
+      - name: Check package
+        run: twine check dist/*
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: somn-dist-${{ github.ref_name }}
+          path: dist/
+          retention-days: 30

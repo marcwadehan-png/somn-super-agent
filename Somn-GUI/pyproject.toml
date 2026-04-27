@@ -1,0 +1,36 @@
+﻿[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "somn-gui"
+version = "6.2.0"
+description = "Somn 智能助手 - 独立前端交互程序"
+requires-python = ">=3.11"
+license = {text = "AGPL-3.0-or-later"}
+authors = [
+    {name = "Somn Project", email = "marcwadehan@gmail.com"}
+]
+keywords = ["gui", "pyqt6", "desktop", "somn", "frontend"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU Affero General Public License v3 (AGPLv3)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Framework :: PyQt6",
+]
+dependencies = [
+    "PyQt6>=6.5.0",
+    "httpx>=0.24.0",
+    "pyyaml>=6.0",
+    "loguru>=0.7.0",
+    "python-docx>=1.0.0",
+    "reportlab>=4.0.0",
+    "websockets>=14.0",
+]

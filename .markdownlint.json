@@ -1,0 +1,29 @@
+{
+  "default": true,
+  "MD003": {
+    "style": "atx"
+  },
+  "MD007": {
+    "indent": 2
+  },
+  "MD013": {
+    "line_length": 120,
+    "stern": false,
+    "tables": false,
+    "headings": true,
+    "code_blocks": true
+  },
+  "MD024": {
+    "allow_different_nesting": true
+  },
+  "MD033": {
+    "allowed_elements": ["div", "details", "summary", "span", "br"]
+  },
+  "MD034": {
+    "auto": true
+  },
+  "MD041": false,
+  "MD046": {
+    "style": "fenced"
+  }
+}

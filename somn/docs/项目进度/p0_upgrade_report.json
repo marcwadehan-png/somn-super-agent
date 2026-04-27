@@ -1,0 +1,29 @@
+{
+  "timestamp": "2026-04-22T01:26:16.851833",
+  "total_docs": 742,
+  "before": {
+    "A": 10,
+    "B": 10,
+    "C": 241,
+    "D": 83,
+    "E": 89,
+    "F": 309,
+    "X": 0
+  },
+  "after": {
+    "A": 178,
+    "B": 412,
+    "C": 0,
+    "D": 23,
+    "E": 10,
+    "F": 119,
+    "X": 0
+  },
+  "upgraded": 722,
+  "errors": 0,
+  "operations": {
+    "legacy_converted": 239,
+    "f_grade_rewritten": 183,
+    "cde_fixed": 300
+  }
+}

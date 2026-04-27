@@ -1,0 +1,151 @@
+# Pre-commit hooks configuration
+# See https://pre-commit.com/hooks.html
+
+repos:
+  # ============================================================
+  # Pygrep - Python-specific checks
+  # ============================================================
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.9.0
+    hooks:
+      - id: python-check-mock-methods
+      - id: python-use-type-generics
+      - id: python-lang-template-missing
+      - id: rst-backticks
+      - id: rst-directive-colons
+      - id: rst-inline-touching-normal
+
+  # ============================================================
+  # Black - Code formatter
+  # ============================================================
+  - repo: https://github.com/psf/black
+    rev: 24.1.1
+    hooks:
+      - id: black
+        language_version: python3.11
+        args: ['--config=./somn/pyproject.toml']
+
+  # ============================================================
+  # isort - Import sorter
+  # ============================================================
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: isort (python)
+        args: ['--profile=black', '--config=./somn/pyproject.toml']
+
+  # ============================================================
+  # Flake8 - Linter
+  # ============================================================
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        name: flake8
+        args: ['--config=./somn/pyproject.toml']
+        types: [python]
+
+  # ============================================================
+  # Pylint - Code quality checker
+  # ============================================================
+  - repo: https://github.com/PyCQA/pylint
+    rev: v3.0.3
+    hooks:
+      - id: pylint
+        name: pylint
+        args: ['--rcfile=./somn/pyproject.toml']
+        types: [python]
+        pass_filenames: false
+
+  # ============================================================
+  # Bandit - Security linter
+  # ============================================================
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.6
+    hooks:
+      - id: bandit
+        name: bandit
+        args: ['-c', './somn/pyproject.toml', '-r', 'somn/']
+        types: [python]
+
+  # ============================================================
+  # MyPy - Type checker
+  # ============================================================
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        name: mypy
+        additional_dependencies: [types-all]
+        args: ['--config-file=./somn/pyproject.toml', 'somn/']
+        types: [python]
+        pass_filenames: false
+
+  # ============================================================
+  # Markdown linting
+  # ============================================================
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.37.0
+    hooks:
+      - id: markdownlint
+        name: markdownlint
+        args: ['--config=.markdownlint.json']
+        types: [markdown]
+
+  # ============================================================
+  # YAML linting
+  # ============================================================
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        name: prettier
+        args: ['--parser=yaml']
+        types: [yaml]
+
+  # ============================================================
+  # Trailing whitespace fixer
+  # ============================================================
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: ['--unsafe', '--allow-multiple-documents']
+      - id: check-json
+      - id: check-toml
+      - id: check-added-large-files
+        args: ['--maxkb=5000']
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: name-tests-test
+        args: ['--django']
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  # ============================================================
+  # Markdown links validation
+  # ============================================================
+  - repo: https://github.com/tcort/markdown-link-check
+    rev: v3.11.2
+    hooks:
+      - id: markdown-link-check
+        name: markdown-link-check
+        args: ['--config=.markdownlinkcheck.json']
+        types: [markdown]
+
+# Exclude patterns
+exclude: |
+  (?x)^(
+    data/.*|
+    .*\.sqlite.*|
+    .*\.db.*|
+    models/.*|
+    .venv/.*|
+    venv/.*|
+    somn/data/.*|
+    somn/logs/.*|
+    somn/.workbuddy/.*
+  )

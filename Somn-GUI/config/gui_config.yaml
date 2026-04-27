@@ -1,0 +1,66 @@
+# Somn GUI 前端配置
+# ============================================================
+# 此配置仅在前端GUI中生效
+# ============================================================
+
+# 后端连接配置
+backend:
+  # 手动指定后端地址 (优先级最高，留空则自动发现)
+  server_url: ""
+  # API前缀
+  api_prefix: "/api/v1"
+  # 连接超时 (秒)
+  connect_timeout: 5
+  # 请求超时 (秒)
+  request_timeout: 120
+  # 重试次数
+  retry_count: 3
+  # 重试间隔 (秒)
+  retry_delay: 2
+
+# GUI 界面配置
+ui:
+  # 界面主题
+  theme: "auto"  # "light" | "dark" | "auto"
+  # 语言
+  language: "zh-CN"
+  # 窗口默认大小
+  window:
+    width: 1400
+    height: 900
+    min_width: 800
+    min_height: 600
+  # 字体
+  font_family: "Microsoft YaHei"
+  font_size: 10
+  # 高DPI
+  high_dpi: true
+  # 系统托盘
+  tray_icon: true
+  minimize_to_tray: true
+
+# 缓存配置
+cache:
+  # 缓存数据库路径 (相对于GUI根目录)
+  db_path: "cache_data/cache.db"
+  # 预加载目录
+  preload_dir: "cache_data/preloaded"
+  # 离线缓存目录
+  offline_dir: "cache_data/offline"
+  # 缓存默认TTL (秒)
+  default_ttl: 1800
+  # 知识库索引TTL (秒)
+  knowledge_ttl: 86400
+  # 配置快照TTL (秒)
+  config_ttl: 0  # 永不过期
+  # 系统状态TTL (秒)
+  status_ttl: 300
+  # 最大缓存条目数
+  max_entries: 10000
+
+# 日志配置
+logging:
+  level: "INFO"
+  file: "logs/somngui_{time}.log"
+  rotation: "10 MB"
+  retention: "30 days"

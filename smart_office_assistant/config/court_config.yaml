@@ -1,0 +1,251 @@
+# ══════════════════════════════════════════════════════════════
+# 神之架构·动态配置文件
+# Court Architecture Dynamic Configuration
+# 版本：v1.0.0
+# 日期：2026-04-11
+# ══════════════════════════════════════════════════════════════
+#
+# 核心原则：
+#   1. 此文件为基准配置（baseline），可直接编辑
+#   2. 运行时变更由皇家藏书阁持久化，优先级高于此文件
+#   3. 启动时加载顺序：YAML基准 → 藏书阁运行时覆盖 → 内存
+#   4. 所有架构岗位、约束条件均可随系统发展智能迭代
+#
+
+# ══════════════════════════════════════════════════════════════
+# 七人决策代表大会
+# ══════════════════════════════════════════════════════════════
+
+decision_congress:
+
+  # 通过阈值
+  pass_threshold: 4
+  # 重大决策阈值
+  major_threshold: 5
+
+  # ── 成员配置 ──
+  # 每个成员包含：
+  #   name: 名称
+  #   role: 角色（CHIEF/ECONOMY/SOCIOLOGY/MANAGEMENT/DEBATE/SPECIALIST_A/WHITE_CLOTH）
+  #   other_position: 其他部门任职描述
+  #   is_white_cloth: 是否白衣（无任何任职）
+  #   is_western: 是否西方贤者
+  #   expert_tags: 能力标签列表
+  #   vote_weight: 投票权重（默认1）
+  #   active: 是否在任（false则视为暂时离任）
+  members:
+
+    - name: "孔子"
+      role: "CHIEF"
+      other_position: "王爵·太师·皇家系统"
+      is_white_cloth: false
+      is_western: false
+      expert_tags: ["儒家", "教育", "伦理"]
+      vote_weight: 1
+      active: true
+
+    - name: "管仲"
+      role: "ECONOMY"
+      other_position: "伯爵·户部尚书"
+      is_white_cloth: false
+      is_western: false
+      expert_tags: ["经济学家", "宏观经济", "国家治理"]
+      vote_weight: 1
+      active: true
+
+    - name: "韦伯（Max Weber）"
+      role: "SOCIOLOGY"
+      other_position: "专员·礼部专员团队"
+      is_white_cloth: false
+      is_western: true
+      expert_tags: ["社会学家", "系统管理", "官僚制理论", "组织管理"]
+      vote_weight: 1
+      active: true
+
+    - name: "德鲁克（Peter Drucker）"
+      role: "MANAGEMENT"
+      other_position: "伯爵·工部"
+      is_white_cloth: false
+      is_western: true
+      expert_tags: ["系统管理", "现代管理学之父", "组织效能"]
+      vote_weight: 1
+      active: true
+
+    - name: "孟子"
+      role: "DEBATE"
+      other_position: "公爵·太傅·皇家系统"
+      is_white_cloth: false
+      is_western: false
+      expert_tags: ["辩论质疑", "性善论", "仁政", "辟杨墨"]
+      vote_weight: 1
+      active: true
+
+    - name: "张衡"
+      role: "SPECIALIST_A"
+      other_position: "专员·皇家科学院团队"
+      is_white_cloth: false
+      is_western: false
+      expert_tags: ["科技创新", "天文", "科学"]
+      vote_weight: 1
+      active: true
+
+    - name: "范蠡"
+      role: "WHITE_CLOTH"
+      other_position: "无任何任职"
+      is_white_cloth: true
+      is_western: false
+      expert_tags: ["商业智慧", "经济周期", "韬略"]
+      vote_weight: 1
+      active: true
+
+  # ── 成员约束条件 ──
+  # 这些约束用于 validate_constraints() 验证
+  # 格式: key: minimum_count
+  constraints:
+    department_holders:      # 在其他部门有任职管理
+      min: 4
+      check: "not is_white_cloth"
+      label: "部门任职≥4"
+    specialists:             # 核心板块下专员
+      min: 2
+      check: "contains 其他职位 '专员'"
+      label: "专员≥2"
+    white_cloth:             # 白衣（无任何任职）
+      min: 1
+      max: 1
+      check: "is_white_cloth"
+      label: "白衣=1"
+    westerners:              # 西方贤者
+      min: 1
+      check: "is_western"
+      label: "西方≥1"
+    sociologists:            # 社会学家
+      min: 1
+      check: "expert_tags contains '社会学家'"
+      label: "社会学家≥1"
+    economists:              # 经济学家
+      min: 1
+      check: "expert_tags contains '经济学家'"
+      label: "经济学家≥1"
+    system_managers:         # 系统管理
+      min: 1
+      check: "expert_tags contains '系统管理' or '组织管理'"
+      label: "系统管理≥1"
+    debaters:                # 辩论和质疑
+      min: 1
+      check: "expert_tags contains '辩论' or '质疑'"
+      label: "辩论质疑≥1"
+    wangjue:                 # 王爵
+      min: 1
+      check: "other_position contains '王爵'"
+      label: "王爵≥1"
+    gongjue:                 # 公爵
+      min: 1
+      check: "other_position contains '公爵'"
+      label: "公爵≥1"
+    bojue:                   # 伯爵
+      min: 1
+      check: "other_position contains '伯爵'"
+      label: "伯爵≥1"
+
+
+# ══════════════════════════════════════════════════════════════
+# 皇家藏书阁
+# ══════════════════════════════════════════════════════════════
+
+imperial_library:
+
+  # 藏书阁大学士
+  chancellor: "司马迁"
+  chancellor_title: "藏书阁大学士·王爵"
+  chancellor_nickname: "太史公"
+
+  # 藏书阁内部人员（拥有写入/删除权限）
+  staff:
+    - "司马迁"
+    - "左丘明"
+    - "班固"
+    - "司马光"
+    - "藏书阁专员团队"
+
+  # 持久化配置
+  persistence:
+    enabled: true
+    # 存储目录（相对于项目根）
+    storage_path: "data/imperial_library"
+    # 自动保存间隔（秒），0=不自动保存
+    auto_save_interval: 300
+    # 文件格式
+    format: "yaml"
+
+  # 记忆分级审查周期（天）
+  review_cycles:
+    jia: null       # 永不删除
+    yi: 365         # 1年审查
+    bing: 30        # 30天审查
+    ding: 7         # 7天自动清理
+
+
+# ══════════════════════════════════════════════════════════════
+# 翰林院审核
+# ══════════════════════════════════════════════════════════════
+
+hanlin_review:
+
+  # 三轮审核
+  rounds:
+    - name: "逻辑论证"
+      description: "检查决策的逻辑一致性"
+    - name: "多视角反驳"
+      description: "从反对角度审视决策"
+    - name: "综合评审"
+      description: "综合前两轮给出最终评级"
+
+  # 评级体系
+  grades:
+    jia: "甲等"
+    yi: "乙等"
+    bing: "丙等"
+    ding: "丁等"
+
+
+# ══════════════════════════════════════════════════════════════
+# 大秦指标考核
+# ══════════════════════════════════════════════════════════════
+
+daqin_metrics:
+
+  # 评分权重
+  scoring_weights:
+    self_eval: 0.4
+    supervisor_eval: 0.4
+    peer_eval: 0.2
+
+  # 考核层级
+  levels:
+    senior: "高级考核"
+    intermediate: "中级考核"
+    junior: "执行考核"
+
+
+# ══════════════════════════════════════════════════════════════
+# 行政之鞭
+# ══════════════════════════════════════════════════════════════
+
+whip_engine:
+
+  # 信号灯阈值
+  signal_thresholds:
+    green:    # 正常运行
+      min_score: 0.7
+    yellow:   # 请命上行
+      min_score: 0.5
+    orange:   # 双向鞭策
+      min_score: 0.3
+    red:      # 全面施压
+      min_score: 0.15
+    black:    # 最高干预
+      min_score: 0.0
+
+  # 创新保护阈值（放宽50%）
+  innovation_protection_multiplier: 0.5

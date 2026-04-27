@@ -1,0 +1,41 @@
+# Somn API Server 配置
+# ============================================================
+# 此配置仅在后端服务模式下生效，控制API服务的行为
+# ============================================================
+
+server:
+  # API服务绑定地址
+  host: "127.0.0.1"
+  # API服务端口
+  port: 8964
+  # 允许跨域的来源 (CORSMiddleware 不支持通配符端口, 只能用 * 或精确 origin)
+  cors_origins:
+    - "*"
+  # API密钥 (为空则不启用认证)
+  api_key: ""
+  # 请求超时 (秒)
+  request_timeout: 120
+  # 最大请求体大小 (MB)
+  max_request_size: 50
+
+# 服务注册
+registry:
+  # 注册文件位置 (用于前端自动发现后端)
+  # 使用系统TEMP目录
+  auto_register: true
+
+# WebSocket 配置
+websocket:
+  # 心跳间隔 (秒)
+  heartbeat_interval: 30
+  # 最大连接数
+  max_connections: 10
+  # 消息大小限制 (MB)
+  max_message_size: 10
+
+# 日志
+logging:
+  # API访问日志
+  access_log: true
+  # 请求/响应详细日志
+  detailed_log: false

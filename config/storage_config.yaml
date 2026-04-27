@@ -1,0 +1,249 @@
+# Somn 统一存储配置 v1.0
+# ============================================================
+# Somn 智能助手 - 存储架构配置
+# 功能：运行数据库、日志库、核心数据、藏书阁备份
+# ============================================================
+
+# -------------------- 基础路径配置 --------------------
+paths:
+  # 项目根目录（自动检测，无需手动配置）
+  # 系统通过 src.core.paths.PROJECT_ROOT 动态获取，此处留空
+  project_root: ""
+  
+  # 运行数据目录 - 任务状态、运行时数据、会话记录
+  run_dir: "data/run"
+  
+  # 日志数据目录 - 结构化日志存储
+  log_dir: "data/logs"
+  
+  # 核心数据目录 - 系统关键配置、状态快照
+  core_dir: "data/core"
+  
+  # 备份数据目录 - 临时备份存储
+  backup_dir: "data/backups"
+  
+  # 藏书阁目录 - Imperial Library 主存储
+  imperial_library: "data/imperial_library"
+
+# -------------------- 数据库配置 --------------------
+databases:
+  # 运行数据库 - SQLite
+  run_db:
+    enabled: true
+    path: "data/run/run.db"
+    auto_vacuum: true
+    journal_mode: "WAL"
+    cache_size: -64000  # 64MB
+    tables:
+      - sessions          # 会话记录
+      - task_states       # 任务状态
+      - runtime_data      # 运行时数据
+      - execution_history # 执行历史
+
+  # 日志数据库 - SQLite
+  log_db:
+    enabled: true
+    path: "data/logs/logs.db"
+    auto_vacuum: true
+    journal_mode: "WAL"
+    cache_size: -32000   # 32MB
+    retention_days: 30   # 日志保留天数
+    auto_cleanup: true   # 自动清理过期日志
+    tables:
+      - operation_logs    # 操作日志
+      - error_logs        # 错误日志
+      - performance_logs  # 性能日志
+      - audit_logs        # 审计日志
+
+  # 知识数据库 - 已有
+  knowledge_db:
+    enabled: true
+    path: "data/knowledge.db"
+    auto_backup: true
+    backup_interval_hours: 24
+
+  # 记忆数据库 - 已有
+  memory_db:
+    enabled: true
+    path: "data/memory.db"
+    auto_backup: true
+    backup_interval_hours: 24
+
+# -------------------- 藏书阁备份配置 --------------------
+imperial_library_backup:
+  enabled: true
+  
+  # 备份级别定义
+  backup_tiers:
+    # 永久备份 - 永不删除
+    JIA:
+      priority: 1
+      retention: null
+      categories:
+        - system_config       # 系统配置
+        - wisdom_encodings    # 智慧编码
+        - learned_patterns    # 学习模式
+        - critical_states     # 关键状态快照
+        - roi_reports         # ROI报告
+
+    # 年度备份 - 1年周期
+    YI:
+      priority: 2
+      retention_days: 365
+      categories:
+        - session_summaries   # 会话摘要
+        - task_histories       # 任务历史
+        - learning_results     # 学习成果
+        - research_outputs     # 研究成果
+
+    # 月度备份 - 30天
+    BING:
+      priority: 3
+      retention_days: 30
+      categories:
+        - operation_logs      # 操作日志
+        - performance_summaries # 性能摘要
+        - error_reports       # 错误报告
+
+    # 周备份 - 7天
+    DING:
+      priority: 4
+      retention_days: 7
+      categories:
+        - raw_logs            # 原始日志
+        - temp_data           # 临时数据
+
+  # 自动备份设置
+  auto_backup:
+    enabled: true
+    interval_minutes: 60      # 每小时检查一次
+    max_backup_size_mb: 500   # 单次最大备份大小
+    compression: true         # 压缩备份
+
+  # 藏书阁连接
+  library_connection:
+    wing_mapping:
+      SAGE: wisdom_encodings, learned_patterns
+      ARCH: system_config, critical_states
+      EXEC: task_histories, execution_history
+      LEARN: learning_results, roi_reports
+      RESEARCH: research_outputs, session_summaries
+      EMOTION: emotion_logs, interaction_patterns
+      EXTERNAL: external_data, api_logs
+      USER: user_preferences, user_feedback
+
+# -------------------- 日志配置 --------------------
+logging:
+  # 日志数据库配置
+  database_logging:
+    enabled: true
+    log_to_db: true
+    log_to_file: true
+    log_levels:
+      - DEBUG
+      - INFO
+      - WARNING
+      - ERROR
+      - CRITICAL
+
+  # 日志文件配置
+  file_logging:
+    enabled: true
+    max_file_size_mb: 10
+    backup_count: 5
+    format: "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
+    date_format: "%Y-%m-%d %H:%M:%S"
+
+  # 日志分类
+  log_categories:
+    operation:
+      table: operation_logs
+      file: "logs/operations.log"
+    error:
+      table: error_logs
+      file: "logs/errors.log"
+    performance:
+      table: performance_logs
+      file: "logs/performance.log"
+    audit:
+      table: audit_logs
+      file: "logs/audit.log"
+
+# -------------------- 数据保留策略 --------------------
+retention:
+  # 运行数据保留
+  run_data:
+    sessions: 90       # 会话保留90天
+    task_states: 30    # 任务状态保留30天
+    runtime_data: 7    # 运行时数据保留7天
+
+  # 日志保留
+  logs:
+    operation: 30
+    error: 90
+    performance: 14
+    audit: 180
+
+  # 核心数据保留
+  core_data:
+    system_config: null     # 永不删除
+    state_snapshots: 365   # 状态快照保留1年
+
+# -------------------- 安全设置 --------------------
+security:
+  # 数据加密
+  encryption:
+    enabled: false
+    key_path: "config/storage_key.pem"
+
+  # 访问控制
+  access_control:
+    run_db_read: ["system", "admin"]
+    run_db_write: ["system"]
+    log_db_read: ["system", "admin", "audit"]
+    log_db_write: ["system"]
+
+  # 审计
+  audit:
+    enabled: true
+    log_all_access: true
+    alert_on_anomaly: true
+
+# -------------------- 性能优化 --------------------
+performance:
+  # 连接池
+  connection_pool:
+    min_connections: 2
+    max_connections: 10
+    timeout_seconds: 30
+
+  # 缓存策略
+  cache:
+    enabled: true
+    max_size_mb: 128
+    ttl_seconds: 300
+
+  # 批量操作
+  batch:
+    enabled: true
+    batch_size: 100
+    flush_interval_seconds: 5
+
+# -------------------- 监控与报告 --------------------
+monitoring:
+  # 存储健康检查
+  health_check:
+    enabled: true
+    interval_minutes: 15
+    check_items:
+      - disk_space
+      - db_integrity
+      - backup_status
+      - log_size
+
+  # 存储报告
+  reports:
+    enabled: true
+    daily_report: true
+    weekly_summary: true
+    report_path: "data/core/storage_reports"

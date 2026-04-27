@@ -1,0 +1,182 @@
+# ============================================================
+# Somn Project - .gitignore
+# 排除不需要版本控制的文件和目录
+# ============================================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyc
+*$py.class
+*.pyo
+*.pyd
+
+# Distribution / packaging
+.Python
+build/
+dist/
+develop-eggs/
+*.egg-info/
+*.egg
+MANIFEST
+*.whl
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+virtualenv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.AppleDouble
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+logs/
+log/
+*.log
+*.logs
+
+# Data & Cache
+*.db
+*.sqlite
+*.sqlite3
+*.pkl
+*.pickle
+*.parquet
+cache_data/
+data/*.db
+data/*.sqlite
+data/*.log
+
+# Models (下载大型权重请参考 README)
+models/
+*.safetensors
+*.bin
+*.gguf
+*.pt
+*.ckpt
+*.h5
+*.model
+*.onnx
+huggingface/
+hf_home/
+
+# Coverage reports
+htmlcov/
+coverage_report.json
+coverage/
+.coverage
+.coverage.*
+*.cover
+.pytest_cache/
+.tox/
+
+# Private / Dev scripts (临时脚本)
+start_*.py
+start_*.bat
+main_entry.py
+quick_launcher.py
+somn_manager.py
+add_*.py
+fix_*.py
+patch_*.py
+v*_upgrade.py
+apply_*.py
+insert_*.py
+debug*.py
+diagnose*.py
+fix_timeout*
+fix_web_search*
+verify_model.py
+restart_backend.py
+web_dashboard.py
+*_debug.py
+*_test_temp.py
+
+# Node
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Security
+.env
+.env.local
+.env.development
+.env.production
+.env.*.local
+*.pem
+*.key
+credentials.json
+secrets.json
+secrets/
+private/
+temp/
+tmp/
+*.bak
+*.backup
+
+# WorkBuddy internal (local only)
+.workbuddy/
+IDENTITY.md
+SOUL.md
+USER.md
+
+# Docker
+.docker/
+docker-data/
+
+# Research & Development notes (开发笔记)
+CONTROL_CENTER_SUMMARY.md
+METHODOLOGY.md
+PROJECT_STATUS.md
+TESTING_RULES.md
+somn_统一研究体系核心框架.md
+开源包主线说明.md
+开源打包分析报告.md
+核心内容同步报告.md
+v*.md
+模块注册清单.md
+research_plan*.md
+
+# Jupyter notebooks
+*.ipynb
+.ipynb_checkpoints/
+.datalab/
+
+# Benchmark results
+.benchmarks/
+benchmark*.json
+*.benchmark
+.profiles/
+
+# Profiling
+*.prof
+*.mprof
+
+# Mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Ruff linter / uv
+.ruff_cache/
+.uv/
+
+# Editor specific
+*.sublime-workspace
+*.sublime-project
+*.code-workspace
+
+# Temporary data files
+_court_*.json
+_temp_*

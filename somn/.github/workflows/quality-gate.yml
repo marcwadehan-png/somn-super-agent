@@ -1,0 +1,86 @@
+# Quality Gate Configuration for Somn Project
+
+# Quality Thresholds
+quality_thresholds:
+  test_pass_rate:
+    minimum: 100
+    unit: percent
+    action: block  # Block merge if below
+
+  coverage:
+    minimum: 65
+    unit: percent
+    action: warn  # Warn but allow merge
+
+  complexity:
+    maximum: 15
+    unit: cyclomatic_complexity
+    action: warn
+
+  lint_errors:
+    maximum: 0
+    unit: count
+    action: block
+
+  type_errors:
+    maximum: 0
+    unit: count
+    action: block
+
+# Gate Stages (must pass in order)
+gate_stages:
+  1_lint:
+    tools: [flake8, pylint, pydocstyle]
+    timeout: 5m
+
+  2_types:
+    tools: [mypy]
+    timeout: 10m
+
+  3_tests:
+    tools: [pytest]
+    timeout: 30m
+    coverage_check: true
+
+  4_security:
+    tools: [bandit, safety]
+    timeout: 10m
+
+# Quality Metrics Collection
+metrics:
+  collect_on:
+    - push
+    - pull_request
+    - schedule
+
+  storage:
+    path: data/test_tracking/quality_metrics.json
+
+  retention_days: 90
+
+# Notification Settings
+notifications:
+  on_failure:
+    channels:
+      - github_actions
+    mention:
+      - code_owner
+
+  on_regression:
+    channels:
+      - github_actions
+      - email
+    mention:
+      - team
+
+# Trend Analysis
+trends:
+  check_weekly: true
+  metrics:
+    - test_pass_rate
+    - coverage_percent
+    - complexity_average
+    - response_time_p95
+
+  alert_threshold:
+    regression_percent: 10

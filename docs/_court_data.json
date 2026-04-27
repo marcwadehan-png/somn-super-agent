@@ -1,0 +1,237 @@
+{
+  "positions": {
+    "HJ_WJ_01": {
+      "name": "太师·王爵",
+      "department": "皇家"
+    },
+    "HJ_GJ_01": {
+      "name": "太傅·公爵",
+      "department": "皇家"
+    },
+    "HJ_HJ_01": {
+      "name": "太保·侯爵",
+      "department": "皇家"
+    },
+    "HJ_BJ_01": {
+      "name": "伯爵·皇家侍读",
+      "department": "皇家"
+    },
+    "WZ_NG_Z1": {
+      "name": "内阁首辅（正一品）",
+      "department": "内阁"
+    },
+    "WZ_NG_C1A": {
+      "name": "内阁次辅甲（从一品）",
+      "department": "内阁"
+    },
+    "WZ_NG_C1B": {
+      "name": "内阁次辅乙（从一品）",
+      "department": "内阁"
+    },
+    "WZ_NG_HJ": {
+      "name": "内阁学士·侯爵",
+      "department": "内阁"
+    },
+    "WZ_NG_BJ": {
+      "name": "中书舍人·伯爵",
+      "department": "内阁"
+    },
+    "WZ_LB_BJ": {
+      "name": "吏部尚书·伯爵",
+      "department": "吏部"
+    },
+    "WZ_LL_BJ": {
+      "name": "礼部尚书·伯爵",
+      "department": "礼部"
+    },
+    "JJ_HB_Z1": {
+      "name": "户部尚书（正一品）",
+      "department": "户部"
+    },
+    "JJ_HB_C1A": {
+      "name": "户部侍郎甲（从一品）",
+      "department": "户部"
+    },
+    "JJ_HB_C1B": {
+      "name": "户部侍郎乙（从一品）",
+      "department": "户部"
+    },
+    "JJ_HB_BJ": {
+      "name": "户部尚书·伯爵",
+      "department": "户部"
+    },
+    "JJ_SY_BJ": {
+      "name": "数字市易司·伯爵",
+      "department": "户部"
+    },
+    "JJ_HB_BJ2": {
+      "name": "货币与金融·伯爵",
+      "department": "户部"
+    },
+    "JU_BB_GJ": {
+      "name": "兵部尚书·公爵",
+      "department": "兵部"
+    },
+    "JU_BB_HJ": {
+      "name": "兵部侍郎·侯爵",
+      "department": "兵部"
+    },
+    "JU_BB_BJ": {
+      "name": "兵部郎中·伯爵",
+      "department": "兵部"
+    },
+    "JU_WJ_BJ": {
+      "name": "大都督·伯爵",
+      "department": "五军都督府"
+    },
+    "JU_CW_BJ": {
+      "name": "锦衣卫指挥使·伯爵",
+      "department": "厂卫"
+    },
+    "JU_CW_TZ": {
+      "name": "锦衣卫同知",
+      "department": "厂卫"
+    },
+    "TD_XB_BJ": {
+      "name": "刑部侍郎·伯爵",
+      "department": "刑部"
+    },
+    "TD_GB_BJ": {
+      "name": "工部侍郎·伯爵",
+      "department": "工部"
+    },
+    "TD_DC_BJ": {
+      "name": "都察院·伯爵",
+      "department": "三法司"
+    },
+    "TD_ZZ_BJ": {
+      "name": "增长引擎·伯爵",
+      "department": "工部"
+    },
+    "CX_2_01_Z": {
+      "name": "皇家科学院·掌院（正二品）",
+      "department": "内阁"
+    },
+    "CX_2_01_C": {
+      "name": "皇家科学院·掌院（从二品）",
+      "department": "内阁"
+    },
+    "CX_KX_BJ": {
+      "name": "皇家科学院·伯爵",
+      "department": "内阁"
+    },
+    "CX_HB_BJ": {
+      "name": "经济战略司·伯爵",
+      "department": "内阁"
+    },
+    "CX_WH_BJ": {
+      "name": "文化输出局·伯爵",
+      "department": "内阁"
+    },
+    "CX_NG_BJ": {
+      "name": "农学与工程·伯爵",
+      "department": "内阁"
+    },
+    "HL_ZY": {
+      "name": "翰林院掌院",
+      "department": "翰林院"
+    },
+    "HL_XS_A": {
+      "name": "翰林院学士甲",
+      "department": "翰林院"
+    },
+    "HL_XS_B": {
+      "name": "翰林院学士乙",
+      "department": "翰林院"
+    },
+    "HL_XS_C": {
+      "name": "翰林院学士丙",
+      "department": "翰林院"
+    },
+    "HL_XS_D": {
+      "name": "翰林院学士丁",
+      "department": "翰林院"
+    },
+    "HL_SD_A": {
+      "name": "翰林院侍读甲",
+      "department": "翰林院"
+    },
+    "HL_SD_B": {
+      "name": "翰林院侍读乙",
+      "department": "翰林院"
+    },
+    "LIB_DXS": {
+      "name": "藏书阁大学士",
+      "department": "皇家藏书阁"
+    },
+    "LIB_SL": {
+      "name": "藏书阁侍郎",
+      "department": "皇家藏书阁"
+    },
+    "LIB_BX": {
+      "name": "藏书阁编修",
+      "department": "皇家藏书阁"
+    },
+    "LIB_XL": {
+      "name": "藏书阁校理",
+      "department": "皇家藏书阁"
+    },
+    "LIB_LB": {
+      "name": "藏书阁专员领班",
+      "department": "皇家藏书阁"
+    },
+    "DH_ZX": {
+      "name": "代表大会首席代表",
+      "department": "七人代表大会"
+    },
+    "DH_JJ": {
+      "name": "代表大会经济代表",
+      "department": "七人代表大会"
+    },
+    "DH_SH": {
+      "name": "代表大会社会学代表",
+      "department": "七人代表大会"
+    },
+    "DH_GL": {
+      "name": "代表大会管理学代表",
+      "department": "七人代表大会"
+    },
+    "DH_BL": {
+      "name": "代表大会辩论质疑代表",
+      "department": "七人代表大会"
+    },
+    "DH_KJ": {
+      "name": "代表大会科学技术代表",
+      "department": "七人代表大会"
+    },
+    "DH_BY": {
+      "name": "代表大会白衣代表",
+      "department": "七人代表大会"
+    },
+    "HJ_LB_01": {
+      "name": "皇家专员团队领班",
+      "department": "皇家"
+    },
+    "WZ_LB_01": {
+      "name": "文治专员团队领班",
+      "department": "内阁"
+    },
+    "JJ_LB_01": {
+      "name": "户部专员团队领班",
+      "department": "户部"
+    },
+    "JU_LB_01": {
+      "name": "军政专员团队领班",
+      "department": "兵部"
+    },
+    "TD_LB_01": {
+      "name": "标准专员团队领班",
+      "department": "标准系统"
+    },
+    "CX_LB_01": {
+      "name": "创新专员团队领班",
+      "department": "内阁"
+    }
+  },
+  "assignments": {}
+}

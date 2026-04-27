@@ -1,0 +1,171 @@
+# Somn - 汇千古之智，向未知而生
+
+app:
+  name: "Somn"
+  version: "1.0.0"
+  description: "汇千古之智，向未知而生。能持续学习、成长"
+  author: "Somn Team"
+  
+# UI 配置
+ui:
+  theme: "light"  # light, dark, auto
+  language: "zh-CN"
+  window:
+    width: 1400
+    height: 900
+    min_width: 800
+    min_height: 600
+  tray_icon: true  # 启用系统托盘图标
+  minimize_to_tray: true  # 最小化到托盘
+  
+# AI 配置
+ai:
+  model: "gpt-4"
+  temperature: 0.7
+  max_tokens: 2000
+  embedding_model: "sentence-transformers/all-MiniLM-L6-v2"
+  
+# 记忆系统配置
+memory:
+  short_term_limit: 50  # 短期记忆条数限制
+  long_term_storage: "chroma"  # chroma, sqlite
+  vector_db_path: "data/vector_db"
+  auto_consolidate: true  # 自动整合记忆
+  consolidation_interval_hours: 24
+  
+# 知识库配置
+knowledge:
+  auto_index: true
+  index_path: "data/knowledge_index"
+  supported_formats:
+    - ".pdf"
+    - ".docx"
+    - ".doc"
+    - ".txt"
+    - ".md"
+    - ".pptx"
+    - ".xlsx"
+    - ".csv"
+  max_entries: 10000
+  
+# 神经记忆系统配置 (Neural Memory System)
+neural_memory:
+  enabled: true
+  data_path: "data/learning"
+  auto_save_interval_minutes: 30
+  memory_retention_days: 365
+  
+  # 记忆引擎配置
+  memory_engine:
+    sensory_capacity: 1000
+    working_capacity: 100
+    long_term_capacity: 10000
+    decay_rate: 0.01
+    
+  # 知识库引擎配置
+  knowledge_engine:
+    auto_extract_concepts: true
+    relation_depth: 3
+    
+  # 推理引擎配置
+  reasoning_engine:
+    max_inference_depth: 5
+    min_confidence_threshold: 0.6
+    
+  # 验证引擎配置
+  validation_engine:
+    default_sample_size: 100
+    significance_level: 0.05
+    
+  # 学习引擎配置
+  learning_engine:
+    learning_rate: 0.1
+    pattern_min_support: 3
+    pattern_min_confidence: 0.7
+
+# 文档生成配置
+documents:
+  templates_path: "templates"
+  output_path: "outputs"
+  default_font: "Microsoft YaHei"
+  default_font_size: 12
+  
+# 文件系统配置
+filesystem:
+  allowed_extensions:
+    - ".pdf"
+    - ".docx"
+    - ".doc"
+    - ".pptx"
+    - ".ppt"
+    - ".xlsx"
+    - ".xls"
+    - ".txt"
+    - ".md"
+    - ".csv"
+    - ".json"
+    - ".yaml"
+    - ".yml"
+    - ".xml"
+    - ".png"
+    - ".jpg"
+    - ".jpeg"
+  max_file_size_mb: 50
+  scan_depth_limit: 10  # 文件扫描深度限制
+
+# 文件扫描配置
+file_scanner:
+  large_file_threshold_mb: 100
+  old_file_threshold_days: 365
+  skip_hidden_files: true
+  skip_system_dirs:
+    - "node_modules"
+    - ".git"
+    - "__pycache__"
+    - ".venv"
+    - "venv"
+
+# 学习配置
+learning:
+  auto_learn_from_interactions: true
+  feedback_threshold: 0.8
+  knowledge_update_interval_hours: 24
+  
+  # 每日学习配置
+  daily_learning:
+    enabled: true
+    schedule_time: "02:00"  # 每天凌晨2点执行
+    source_directories: []
+    file_patterns:
+      - "*.txt"
+      - "*.md"
+      - "*.docx"
+      - "*.pdf"
+    max_files_per_session: 100
+
+# 日志配置
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  max_file_size_mb: 10
+  retention_days: 30
+  console_output: true
+
+# 更新配置
+updates:
+  auto_check: true
+  check_interval_days: 7
+  channel: "stable"  # stable, beta, dev
+
+# ══════════════════════════════════════════════════════════════
+# 神之架构配置（动态可迭代）
+# ══════════════════════════════════════════════════════════════
+# 详细配置见 config/court_config.yaml
+# 此处仅做顶层引用，所有架构岗位、约束条件均可随系统发展智能迭代
+
+court_architecture:
+  # 主配置文件路径（相对于项目根）
+  config_file: "config/court_config.yaml"
+  # 运行时覆盖存储（藏书阁持久化，优先级高于基准配置）
+  runtime_override: "data/imperial_library/congress_runtime.yaml"
+  # 是否启用动态配置（false则回退到内置默认值）
+  dynamic_config: true

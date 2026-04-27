@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Somn Neural Network Layout</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        h1 { color: #333; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; }
+        h2 { color: #555; margin-top: 30px; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
+        .stat-card { background: #f9f9f9; padding: 15px; border-radius: 6px; border-left: 4px solid #4CAF50; }
+        .stat-value { font-size: 24px; font-weight: bold; color: #4CAF50; }
+        .stat-label { color: #666; font-size: 14px; }
+        .neuron-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+        .neuron-card { background: #fff; border: 1px solid #ddd; padding: 10px; border-radius: 4px; }
+        .neuron-type { font-size: 12px; color: #999; text-transform: uppercase; }
+        .neuron-name { font-weight: bold; color: #333; }
+        .connection-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .connection-table th, .connection-table td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+        .connection-table th { background: #f5f5f5; font-weight: bold; }
+        .mermaid { background: #f9f9f9; padding: 20px; border-radius: 6px; overflow-x: auto; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 Somn 神经网络布局可视化</h1>
+        
+        <h2>网络统计</h2>
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value">57</div>
+                <div class="stat-label">神经元总数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">74</div>
+                <div class="stat-label">突触连接数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">7</div>
+                <div class="stat-label">神经元类型</div>
+            </div>
+        </div>
+        
+        <h2>神经元类型分布</h2>
+        <div class="stats">
+
+            <div class="stat-card">
+                <div class="stat-value">4</div>
+                <div class="stat-label">INPUT</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-value">17</div>
+                <div class="stat-label">HIDDEN</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-value">4</div>
+                <div class="stat-label">OUTPUT</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-value">24</div>
+                <div class="stat-label">WISDOM</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-value">8</div>
+                <div class="stat-label">MEMORY</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-value">0</div>
+                <div class="stat-label">CONTROL</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-value">0</div>
+                <div class="stat-label">FEEDBACK</div>
+            </div>
+
+        </div>
+        
+        <h2>网络拓扑图</h2>
+        <div class="mermaid">
+graph TD
+    input_user((用户输入))
+    input_context((上下文输入))
+    input_feedback((反馈输入))
+    input_external((外部输入))
+    neuron_agent_core(AgentCore)
+    neuron_somn_core(SomnCore)
+    neuron_super_wisdom(SuperWisdomCoordinator)
+    neuron_unified_intel(UnifiedIntelligenceCoordinator)
+    neuron_global_scheduler(GlobalWisdomScheduler)
+    neuron_wisdom_dispatcher{WisdomDispatcher}
+    neuron_thinking_fusion(ThinkingMethodFusionEngine)
+    neuron_deep_reasoning(DeepReasoningEngine)
+    neuron_tier3_scheduler(Tier3NeuralScheduler)
+    neuron_narrative_intel(NarrativeIntelligenceEngine)
+    neuron_learning_coord(LearningCoordinator)
+    neuron_autonomous_agent(AutonomousAgent)
+    neuron_neural_memory[NeuralMemorySystem]
+    neuron_semantic_memory[SemanticMemoryEngine]
+    neuron_reinforcement(ReinforcementTrigger)
+    neuron_roi_tracker(ROITracker)
+    wisdom_confucian{儒家}
+    wisdom_taoist{道家}
+    wisdom_buddhist{佛家}
+    wisdom_sunzi{孙子兵法}
+    wisdom_sufu{素书}
+    wisdom_lushi{吕氏春秋}
+    wisdom_hongming{辜鸿铭}
+    wisdom_yangming{王阳明}
+    wisdom_dewey{杜威}
+    wisdom_top_methods{顶级思维}
+    wisdom_psychology{心理营销}
+    wisdom_science{自然科学}
+    wisdom_neuroscience{计算神经}
+    wisdom_math{数学}
+    wisdom_thinking{思维融合}
+    wisdom_consumer{消费文化}
+    wisdom_history{历史思想}
+    wisdom_social{社会科学}
+    wisdom_sanguo{三国演义}
+    wisdom_shuihu{水浒传}
+    wisdom_xiyou{西游记}
+    wisdom_honglou{红楼梦}
+    wisdom_chinese_consumer{中国消费}
+    memory_episodic[情景记忆]
+    memory_semantic[语义记忆]
+    memory_procedural[程序记忆]
+    memory_working[工作记忆]
+    memory_user_profile[用户画像]
+    memory_conversation[对话历史]
+    autonomy_goal(目标管理)
+    autonomy_plan(规划执行)
+    autonomy_reflection(反思学习)
+    autonomy_adaptation(适应调整)
+    output_response([响应输出])
+    output_action([行动输出])
+    output_learning([学习输出])
+    output_feedback([反馈输出])
+    input_user -->|1.00| neuron_agent_core
+    input_context -->|0.80| neuron_somn_core
+    neuron_agent_core -->|1.00| neuron_super_wisdom
+    neuron_somn_core -->|1.00| neuron_unified_intel
+    neuron_super_wisdom -->|1.00| neuron_global_scheduler
+    neuron_unified_intel -->|0.90| neuron_global_scheduler
+    neuron_global_scheduler -->|1.00| neuron_wisdom_dispatcher
+    neuron_wisdom_dispatcher -->|0.70| wisdom_confucian
+    neuron_wisdom_dispatcher -->|0.70| wisdom_taoist
+    neuron_wisdom_dispatcher -->|0.70| wisdom_buddhist
+    neuron_wisdom_dispatcher -->|0.70| wisdom_sunzi
+    neuron_wisdom_dispatcher -->|0.70| wisdom_sufu
+    neuron_wisdom_dispatcher -->|0.70| wisdom_lushi
+    neuron_wisdom_dispatcher -->|0.70| wisdom_hongming
+    neuron_wisdom_dispatcher -->|0.70| wisdom_yangming
+    neuron_wisdom_dispatcher -->|0.70| wisdom_dewey
+    neuron_wisdom_dispatcher -->|0.70| wisdom_top_methods
+    neuron_wisdom_dispatcher -->|0.70| wisdom_psychology
+    neuron_wisdom_dispatcher -->|0.70| wisdom_science
+    neuron_wisdom_dispatcher -->|0.70| wisdom_neuroscience
+    neuron_wisdom_dispatcher -->|0.70| wisdom_math
+    neuron_wisdom_dispatcher -->|0.70| wisdom_thinking
+    neuron_wisdom_dispatcher -->|0.70| wisdom_consumer
+    neuron_wisdom_dispatcher -->|0.70| wisdom_history
+    neuron_wisdom_dispatcher -->|0.70| wisdom_social
+    neuron_wisdom_dispatcher -->|0.70| wisdom_sanguo
+    neuron_wisdom_dispatcher -->|0.70| wisdom_shuihu
+    neuron_wisdom_dispatcher -->|0.70| wisdom_xiyou
+    neuron_wisdom_dispatcher -->|0.70| wisdom_honglou
+    neuron_wisdom_dispatcher -->|0.70| wisdom_chinese_consumer
+    wisdom_confucian -->|0.60| neuron_thinking_fusion
+    wisdom_taoist -->|0.60| neuron_thinking_fusion
+    wisdom_buddhist -->|0.60| neuron_thinking_fusion
+    wisdom_sunzi -->|0.60| neuron_thinking_fusion
+    wisdom_sufu -->|0.60| neuron_thinking_fusion
+    wisdom_lushi -->|0.60| neuron_thinking_fusion
+    wisdom_hongming -->|0.60| neuron_thinking_fusion
+    wisdom_yangming -->|0.60| neuron_thinking_fusion
+    wisdom_dewey -->|0.60| neuron_thinking_fusion
+    wisdom_top_methods -->|0.60| neuron_thinking_fusion
+    wisdom_psychology -->|0.60| neuron_thinking_fusion
+    wisdom_science -->|0.60| neuron_thinking_fusion
+    wisdom_neuroscience -->|0.60| neuron_thinking_fusion
+    wisdom_math -->|0.60| neuron_thinking_fusion
+    wisdom_thinking -->|0.60| neuron_thinking_fusion
+    wisdom_consumer -->|0.60| neuron_thinking_fusion
+    wisdom_history -->|0.60| neuron_thinking_fusion
+    wisdom_social -->|0.60| neuron_thinking_fusion
+    wisdom_sanguo -->|0.60| neuron_thinking_fusion
+    wisdom_shuihu -->|0.60| neuron_thinking_fusion
+    wisdom_xiyou -->|0.60| neuron_thinking_fusion
+    wisdom_honglou -->|0.60| neuron_thinking_fusion
+    wisdom_chinese_consumer -->|0.60| neuron_thinking_fusion
+    neuron_thinking_fusion -->|1.00| neuron_deep_reasoning
+    neuron_deep_reasoning -->|0.90| neuron_narrative_intel
+    neuron_narrative_intel -->|0.80| neuron_learning_coord
+    neuron_learning_coord -->|0.80| neuron_autonomous_agent
+    neuron_neural_memory -->|0.70| neuron_deep_reasoning
+    neuron_semantic_memory -->|0.60| neuron_thinking_fusion
+    memory_episodic -->|0.50| neuron_neural_memory
+    memory_semantic -->|0.50| neuron_neural_memory
+    memory_procedural -->|0.50| neuron_neural_memory
+    memory_working -->|0.50| neuron_neural_memory
+    memory_user_profile -->|0.50| neuron_neural_memory
+    memory_conversation -->|0.50| neuron_neural_memory
+    neuron_autonomous_agent -->|0.70| neuron_reinforcement
+    neuron_reinforcement -->|0.60| neuron_learning_coord
+    neuron_autonomous_agent -->|0.50| neuron_roi_tracker
+    neuron_narrative_intel -->|1.00| output_response
+    neuron_autonomous_agent -->|0.90| output_action
+    neuron_learning_coord -->|0.80| output_learning
+    neuron_reinforcement -->|0.70| output_feedback
+    output_feedback -->|0.50| input_feedback
+    input_feedback -->|0.60| neuron_learning_coord
+
+    classDef input fill:#e1f5fe
+    classDef output fill:#f3e5f5
+    classDef wisdom fill:#fff3e0
+    classDef memory fill:#e8f5e9
+    classDef hidden fill:#f5f5f5
+    class input_user input
+    class input_context input
+    class input_feedback input
+    class input_external input
+    class neuron_agent_core hidden
+    class neuron_somn_core hidden
+    class neuron_super_wisdom hidden
+    class neuron_unified_intel hidden
+    class neuron_global_scheduler hidden
+    class neuron_wisdom_dispatcher wisdom
+    class neuron_thinking_fusion hidden
+    class neuron_deep_reasoning hidden
+    class neuron_tier3_scheduler hidden
+    class neuron_narrative_intel hidden
+    class neuron_learning_coord hidden
+    class neuron_autonomous_agent hidden
+    class neuron_neural_memory memory
+    class neuron_semantic_memory memory
+    class neuron_reinforcement hidden
+    class neuron_roi_tracker hidden
+    class wisdom_confucian wisdom
+    class wisdom_taoist wisdom
+    class wisdom_buddhist wisdom
+    class wisdom_sunzi wisdom
+    class wisdom_sufu wisdom
+    class wisdom_lushi wisdom
+    class wisdom_hongming wisdom
+    class wisdom_yangming wisdom
+    class wisdom_dewey wisdom
+    class wisdom_top_methods wisdom
+    class wisdom_psychology wisdom
+    class wisdom_science wisdom
+    class wisdom_neuroscience wisdom
+    class wisdom_math wisdom
+    class wisdom_thinking wisdom
+    class wisdom_consumer wisdom
+    class wisdom_history wisdom
+    class wisdom_social wisdom
+    class wisdom_sanguo wisdom
+    class wisdom_shuihu wisdom
+    class wisdom_xiyou wisdom
+    class wisdom_honglou wisdom
+    class wisdom_chinese_consumer wisdom
+    class memory_episodic memory
+    class memory_semantic memory
+    class memory_procedural memory
+    class memory_working memory
+    class memory_user_profile memory
+    class memory_conversation memory
+    class autonomy_goal hidden
+    class autonomy_plan hidden
+    class autonomy_reflection hidden
+    class autonomy_adaptation hidden
+    class output_response output
+    class output_action output
+    class output_learning output
+    class output_feedback output
+        </div>
+    </div>
+    <script>
+        mermaid.initialize({ startOnLoad: true });
+    </script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# Top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+trim_trailing_whitespace = true
+
+# Python files
+[*.py]
+indent_style = space
+indent_size = 4
+max_line_length = 120
+
+# YAML files
+[*.{yaml,yml}]
+indent_style = space
+indent_size = 2
+
+# Markdown files
+[*.md]
+trim_trailing_whitespace = false
+indent_style = space
+indent_size = 2
+
+# JSON files
+[*.json]
+indent_style = space
+indent_size = 2
+
+# TOML files
+[*.toml]
+indent_style = space
+indent_size = 4
+
+# RST files
+[*.rst]
+indent_style = space
+indent_size = 3
+
+# Shell scripts
+[*.{sh,bash}]
+indent_style = space
+indent_size = 2
+
+# Batch files (Windows)
+[*.bat]
+end_of_line = crlf
+
+# Batch files (Windows)
+[*.cmd]
+end_of_line = crlf
+
+# Makefiles
+[Makefile]
+indent_style = tab
+
+# Dockerfiles
+[Dockerfile*]
+indent_style = space
+indent_size = 4
+
+# INI files
+[*.ini]
+indent_style = space
+indent_size = 4
+
+# HTML/CSS/JS
+[*.{html,css,js}]
+indent_style = space
+indent_size = 2
+max_line_length = 120
+
+# QSS files (Qt Style Sheets)
+[*.qss]
+indent_style = space
+indent_size = 4

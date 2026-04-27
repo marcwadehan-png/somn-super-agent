@@ -1,0 +1,54 @@
+name: Neural Memory Tests
+
+on:
+  push:
+    paths:
+      - 'smart_office_assistant/src/neural_memory/**'
+      - 'smart_office_assistant/tests/neural_memory/**'
+      - 'smart_office_assistant/src/logic/**'
+      - 'smart_office_assistant/pytest.ini'
+  pull_request:
+    paths:
+      - 'smart_office_assistant/src/neural_memory/**'
+      - 'smart_office_assistant/tests/neural_memory/**'
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * *'  # 每天凌晨2点（UTC）
+
+jobs:
+  test-neural-memory:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: smart_office_assistant
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov pytest-html numpy pyyaml
+
+      - name: Run tests with coverage
+        run: |
+          python -m pytest tests/neural_memory/ -v --tb=short --cov=src/neural_memory --cov-report=term-missing --cov-report=html:htmlcov/neural_memory --junitxml=test-results.xml
+
+      - name: Upload coverage HTML
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: smart_office_assistant/htmlcov/neural_memory/
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: smart_office_assistant/test-results.xml

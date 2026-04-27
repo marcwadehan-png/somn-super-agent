@@ -1,0 +1,23 @@
+date: '2026-04-11'
+execution_time: 09:02:00
+recommendations:
+- 本地数据不足 5 条，建议录入更多实例
+report_id: ULR_20260411_090200
+strategy_results:
+  daily:
+    duration: 0.02
+    events: 0
+    phases:
+    - 实例学习
+    - 验证学习
+    - 错误学习
+    - 关联学习
+    - 反馈整合
+    - 迁移学习
+    success: true
+    summary: 今日网络+本地合计获取 95 条研究发现(edGA网络学习优先).
+    updates: 0
+summary: '数据: 本地 0 + 网络 95。 [daily] 今日网络+本地合计获取 95 条研究发现(edGA网络学习优先).'
+total_duration_seconds: 0.02
+total_knowledge_updates: 0
+total_learning_events: 0

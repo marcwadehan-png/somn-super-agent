@@ -1,0 +1,184 @@
+# 主线架构配置文件
+# Main Chain Configuration
+# 版本：v1.5.0
+# 日期：2026-04-05
+
+# ══════════════════════════════════════════════════════════════
+# 基础配置
+# ══════════════════════════════════════════════════════════════
+
+# 全局启用/禁用主线架构
+main_chain_enabled: true
+
+# 默认运行模式
+# 可选值: serial | parallel | cross | auto
+default_mode: auto
+
+# 日志级别
+log_level: INFO
+
+# ══════════════════════════════════════════════════════════════
+# 并形路由器配置 (ParallelRouter)
+# ══════════════════════════════════════════════════════════════
+
+parallel_router:
+  # 最大并发数
+  max_concurrent: 5
+
+  # 单任务超时时间（秒）
+  timeout: 30.0
+
+  # 路由策略
+  # all: 所有可用模块
+  # best_k: 前K个最佳模块
+  # balanced: 均衡选择
+  # domain_match: 领域匹配优先
+  strategy: best_k
+
+  # 并行执行模式
+  # thread: 线程池模式
+  # async: 异步模式
+  # auto: 自动选择
+  mode: auto
+
+  # 容错配置
+  enable_fallback: true
+  fallback_on_error: true
+
+  # 主线节点配置
+  main_chain_nodes:
+    - wisdom_dispatcher
+    - deep_reasoning
+    - narrative_engine
+    - neural_scheduler
+    - learning_coordinator
+    - autonomous_agent
+
+# ══════════════════════════════════════════════════════════════
+# 交叉织网器配置 (CrossWeaver)
+# ══════════════════════════════════════════════════════════════
+
+cross_weaver:
+  # 最大迭代次数
+  max_iterations: 3
+
+  # 信号传播最大跳数
+  max_hops: 3
+
+  # 反馈权重配置
+  feedback_weights:
+    positive: 1.0
+    negative: -0.8
+    neutral: 0.5
+    adaptive: 0.7
+
+  # 主线节点
+  main_nodes:
+    - wisdom_dispatcher
+    - deep_reasoning
+    - narrative_engine
+    - neural_scheduler
+    - learning_coordinator
+    - autonomous_agent
+    - neural_memory
+    - semantic_memory
+    - reinforcement_trigger
+    - roi_tracker
+    - reflection_engine
+    - goal_system
+
+# ══════════════════════════════════════════════════════════════
+# 主线调度器配置 (MainChainScheduler)
+# ══════════════════════════════════════════════════════════════
+
+main_chain_scheduler:
+  # 调度器模式
+  mode: auto
+
+  # 执行历史记录数
+  history_size: 100
+
+  # 启用组件
+  enable_parallel: true
+  enable_cross: true
+
+# ══════════════════════════════════════════════════════════════
+# 主线监控器配置 (MainChainMonitor)
+# ══════════════════════════════════════════════════════════════
+
+main_chain_monitor:
+  # 最大历史记录数
+  max_history: 100
+
+  # 性能采样间隔（秒）
+  sampling_interval: 60
+
+  # 健康度阈值
+  health_thresholds:
+    healthy: 0.9
+    warning: 0.7
+    critical: 0.5
+
+  # 监控节点
+  monitor_nodes:
+    - wisdom_dispatcher
+    - global_scheduler
+    - thinking_engine
+    - deep_reasoning
+    - neural_scheduler
+    - learning_coordinator
+    - autonomous_agent
+
+# ══════════════════════════════════════════════════════════════
+# 模式决策规则
+# ══════════════════════════════════════════════════════════════
+
+mode_decision:
+  # 复杂度阈值
+  complexity:
+    # >= 此值时使用并行模式
+    parallel_threshold: 0.7
+    # >= 此值时使用串行模式
+    serial_threshold: 0.5
+
+  # 并行模式关键词
+  parallel_keywords:
+    - 多维度
+    - 多方面
+    - 同时
+    - 并行
+    - 并发
+    - 全面
+    - 综合
+
+  # 交叉模式关键词
+  cross_keywords:
+    - 反思
+    - 复盘
+    - 反馈
+    - 回顾
+    - 改进
+    - 优化
+    - 评估
+    - 分析
+
+  # 快速模式关键词（串行）
+  serial_keywords:
+    - 简单
+    - 快速
+    - 单个
+    - 基础
+
+# ══════════════════════════════════════════════════════════════
+# 路由决策
+# ══════════════════════════════════════════════════════════════
+
+routing:
+  # orchestrator 快速模式阈值
+  orchestrator_quick_threshold: 0.3
+
+  # 多维度阈值
+  multi_dimensional_threshold: 0.6
+
+  # 反思需求阈值
+  reflection_needed_threshold: 0.4

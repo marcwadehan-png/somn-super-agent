@@ -1,0 +1,21 @@
+# Code Owners for Somn Project
+# 默认所有代码由项目维护者审核
+
+*       @marcwadehan
+
+# 后端核心模块
+/somn/smart_office_assistant/src/core/    @marcwadehan
+/somn/smart_office_assistant/src/intelligence/  @marcwadehan
+/somn/smart_office_assistant/src/neural_memory/ @marcwadehan
+
+# API 层
+/somn/api/     @marcwadehan
+
+# 知识系统
+/somn/knowledge_cells/   @marcwadehan
+
+# 前端 GUI
+/Somn-GUI/somngui/  @marcwadehan
+
+# CI/CD 配置
+/.github/workflows/   @marcwadehan

@@ -1,0 +1,24 @@
+category: !!python/object/apply:src.neural_memory.roi_tracker.MetricCategory
+- quality
+confidence: 0.5
+efficiency_score: 0.955
+input_metrics:
+  actual_minutes: 1.8333333333333333e-07
+  cost_estimate: 2.000000611111111
+  estimated_minutes: 30
+  interaction_count: 1
+notes: ''
+output_metrics:
+  adopted: 1.0
+  error_count: 0
+  feedback_score: 0.5
+  output_value: 7.749999981666666
+  quality_score: 0.85
+  time_saved_minutes: 29.999999816666666
+record_id: ROI_20260403233535
+roi_ratio: 2.875
+source: !!python/object/apply:src.neural_memory.roi_tracker.FeedbackSource
+- user_implicit
+strategy_used: 私域运营
+task_type: 增长分析
+timestamp: '2026-04-03T23:35:35.014723'

@@ -1,0 +1,147 @@
+# ============================================================
+# Somn Project - Git Attributes
+# 统一行尾处理，防止跨平台问题
+# ============================================================
+
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Python files - always use LF
+*.py text eol=lf
+*.pyi text eol=lf
+
+# YAML files - always use LF
+*.yaml text eol=lf
+*.yml text eol=lf
+
+# Markdown files - always use LF
+*.md text eol=lf
+*.mdx text eol=lf
+
+# JSON files - always use LF
+*.json text eol=lf
+
+# TOML files - always use LF
+*.toml text eol=lf
+
+# RST files - always use LF
+*.rst text eol=lf
+
+# Shell scripts - always use LF
+*.sh text eol=lf
+*.bash text eol=lf
+
+# PowerShell scripts
+*.ps1 text eol=lf
+*.psm1 text eol=lf
+
+# Batch files - use CRLF on Windows
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Cython files
+*.pyx text eol=lf
+*.pxd text eol=lf
+
+# C/C++ files
+*.c text eol=lf
+*.cpp text eol=lf
+*.h text eol=lf
+*.hpp text eol=lf
+
+# Makefile
+Makefile text eol=lf
+makefile text eol=lf
+
+# Qt files
+*.qss text eol=lf
+*.ui text eol=lf
+
+# Dockerfiles
+Dockerfile* text eol=lf
+docker-compose*.yml text eol=lf
+
+# Git-related
+.gitattributes text eol=lf
+.gitignore text eol=lf
+.gitmodules text eol=lf
+
+# Binary files - do not normalize
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.bmp binary
+*.tiff binary
+
+# Document files
+*.pdf binary
+*.doc binary
+*.docx binary
+*.xls binary
+*.xlsx binary
+*.ppt binary
+*.pptx binary
+
+# Archive files
+*.zip binary
+*.gz binary
+*.tar binary
+*.tgz binary
+*.rar binary
+*.7z binary
+
+# Wheel files
+*.whl binary
+*.egg binary
+
+# Model files - do not normalize
+*.safetensors binary
+*.bin binary
+*.gguf binary
+*.pt binary
+*.ckpt binary
+*.h5 binary
+*.model binary
+*.onnx binary
+
+# Database files
+*.db binary
+*.sqlite binary
+*.sqlite3 binary
+
+# Cache files
+*.cache binary
+*.pyc binary
+
+# Log files
+*.log text eol=lf
+
+# Certificate files
+*.pem binary
+*.key binary
+*.crt binary
+*.cer binary
+*.p12 binary
+*.pfx binary
+
+# Image assets (SVG should be text)
+*.svg text eol=lf
+*.svgz binary
+
+# Font files
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.eot binary
+
+# Audio/Video files
+*.mp3 binary
+*.mp4 binary
+*.wav binary
+*.flac binary
+*.avi binary
+*.mkv binary

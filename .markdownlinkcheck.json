@@ -1,0 +1,15 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": ".*\\.(png|jpg|jpeg|gif|svg)$"
+    },
+    {
+      "pattern": "^https://img\\.shields\\.io"
+    },
+    {
+      "pattern": "^https://github\\.com"
+    }
+  ],
+  "replacementPatterns": [],
+  "deadLinkThreshold": 0.1
+}

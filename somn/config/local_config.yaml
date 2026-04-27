@@ -1,0 +1,160 @@
+# ============================================================
+# Somn AI 独立运行配置 v1.0
+# ============================================================
+# 此文件为配置模板，首次运行时会自动复制为 config.yaml
+# 如需重置配置，可删除 config.yaml，此文件将重新复制
+
+# ─────────────────────────────────────────────────────────────
+# 系统基础配置
+# ─────────────────────────────────────────────────────────────
+system:
+  # 项目版本
+  version: "2.0.0"
+
+  # 运行环境
+  # 可选值: standalone (独立运行), workbuddy (WorkBuddy集成)
+  environment: standalone
+
+  # 调试模式
+  debug: false
+
+  # 日志级别
+  # 可选值: DEBUG, INFO, WARNING, ERROR
+  log_level: INFO
+
+  # 日志文件保留天数
+  log_retention_days: 30
+
+# ─────────────────────────────────────────────────────────────
+# LLM模型配置 v1.0
+# ─────────────────────────────────────────────────────────────
+llm:
+  # 默认模型模式
+  # 可选值: local (本地优先), cloud (云端优先), auto (自动选择)
+  default_mode: local
+
+  # 默认模型名称
+  # [v1.0] B模型 Gemma4 多模态成为默认（主脑）
+  default_model: gemma4-local-b
+
+  # 本地模型配置
+  local:
+    # API基础地址（Ollama等）- safetensors直接加载无需API地址
+    api_base: ""
+    # API密钥（如果有）
+    api_key: ""
+    # 主模型名称 [v1.0] B模型 Gemma4
+    model_name: "gemma4-local-b"
+    # 副脑模型 [v1.0] A模型 Llama
+    fallback_model: "llama-3.2-1b-a"
+    # 温度参数
+    temperature: 0.7
+    # 最大token数
+    max_tokens: 2000
+    # 超时时间（秒）
+    timeout: 60
+
+  # 云端模型配置（可选）
+  cloud:
+    # OpenAI
+    openai:
+      api_key: ""
+      model: "gpt-3.5-turbo"
+
+    # DeepSeek
+    deepseek:
+      api_key: ""
+      model: "deepseek-chat"
+
+    # 百度文心
+    baidu:
+      api_key: ""
+      secret_key: ""
+      model: "ernie-bot"
+
+    # MiniMax M2.7 (OpenAI兼容格式)
+    # ⚠️ 请将您的 API Key 填入下方，或通过环境变量 SOMN_MINIMAX_API_KEY 配置
+    minimax:
+      api_key: ""
+      api_base: "https://api.minimax.chat/v1"
+      model: "minimax-m2.7"
+      temperature: 0.7
+      max_tokens: 4000
+
+# ─────────────────────────────────────────────────────────────
+# 数据存储配置
+# ─────────────────────────────────────────────────────────────
+storage:
+  # 记忆系统模式
+  # 可选值: sqlite (默认，轻量), chromadb (向量检索，需要安装chromadb)
+  memory_mode: sqlite
+
+  # ChromaDB配置（仅memory_mode为chromadb时生效）
+  chromadb:
+    persist_directory: "./data/chromadb"
+    collection_name: "somn_memory"
+
+  # 知识库目录
+  knowledge_dir: "./data/knowledge"
+
+  # 记忆日志目录
+  memory_log_dir: "./data/daily_memory"
+
+# ─────────────────────────────────────────────────────────────
+# 功能开关
+# ─────────────────────────────────────────────────────────────
+features:
+  # 启用GUI界面
+  enable_gui: true
+
+  # 启用网络搜索
+  enable_web_search: false
+
+  # 启用ML引擎
+  enable_ml_engine: false
+
+  # 启用情绪波动
+  enable_emotion_wave: true
+
+  # 启用人设系统
+  enable_persona: true
+
+  # 启用RAG引擎
+  enable_rag: false
+
+  # 启用每日学习
+  enable_daily_learning: true
+
+# ─────────────────────────────────────────────────────────────
+# 性能配置
+# ─────────────────────────────────────────────────────────────
+performance:
+  # 懒加载模式（延迟加载非必要组件，加速启动）
+  lazy_loading: true
+
+  # 并行任务数
+  max_parallel_tasks: 4
+
+  # 缓存大小（MB）
+  cache_size: 100
+
+  # 会话超时（秒）
+  session_timeout: 3600
+
+# ─────────────────────────────────────────────────────────────
+# 界面配置
+# ─────────────────────────────────────────────────────────────
+ui:
+  # 界面主题
+  # 可选值: light, dark, auto
+  theme: auto
+
+  # 语言
+  # 可选值: zh-CN, en-US
+  language: zh-CN
+
+  # 字体大小
+  font_size: 10
+
+  # 高DPI缩放
+  high_dpi: true

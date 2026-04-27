@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Somn 索姆 — 神之架构 · 万维智能</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet" />
+  <style>
+    * { font-family: 'Noto Sans SC', sans-serif; }
+    .font-serif { font-family: 'Noto Serif SC', serif; }
+    body { background: #0a0a0f; color: #e0e0e8; }
+    .gradient-text {
+      background: linear-gradient(135deg, #a78bfa, #818cf8, #6366f1, #4f46e5);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .glow-purple { box-shadow: 0 0 40px rgba(139,92,246,0.15); }
+    .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(10px); }
+    .card:hover { background: rgba(255,255,255,0.06); border-color: rgba(139,92,246,0.4); }
+    .orb {
+      position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3;
+      animation: float 8s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-30px); }
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.8); opacity: 0.8; }
+      100% { transform: scale(1.4); opacity: 0; }
+    }
+    .pulse-ring { animation: pulse-ring 3s ease-out infinite; }
+    @keyframes scan {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(100vh); }
+    }
+    .scan-line {
+      position: fixed; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, #6366f1, transparent);
+      animation: scan 6s linear infinite; opacity: 0.3;
+    }
+    .grid-bg {
+      background-image:
+        linear-gradient(rgba(139,92,246,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(139,92,246,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    .badge { background: rgba(139,92,246,0.15); border: 1px solid rgba(139,92,246,0.3); color: #a78bfa; }
+  </style>
+</head>
+<body class="grid-bg min-h-screen overflow-x-hidden relative">
+
+  <!-- Scan line effect -->
+  <div class="scan-line"></div>
+
+  <!-- Background orbs -->
+  <div class="orb w-96 h-96 bg-purple-600 top-20 -left-48" style="animation-delay:0s"></div>
+  <div class="orb w-80 h-80 bg-indigo-700 bottom-20 right-0" style="animation-delay:3s"></div>
+  <div class="orb w-64 h-64 bg-violet-800 top-1/2 left-1/3" style="animation-delay:5s"></div>
+
+  <!-- Header -->
+  <header class="relative z-10 px-6 py-6 flex items-center justify-between max-w-7xl mx-auto">
+    <div class="flex items-center gap-3">
+      <div class="relative">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-xl font-bold shadow-lg">神</div>
+        <div class="absolute inset-0 rounded-xl bg-indigo-400 pulse-ring"></div>
+      </div>
+      <div>
+        <div class="text-xl font-bold tracking-widest">SOMN <span class="text-xs text-gray-500">索姆</span></div>
+        <div class="text-xs text-gray-500 tracking-wider">神之架构 · 万维智能</div>
+      </div>
+    </div>
+    <div class="flex gap-3">
+      <a href="https://github.com/marcwadehan-png/somn-super-agent" class="px-4 py-2 rounded-lg card text-sm hover:text-white transition">📂 GitHub</a>
+      <a href="https://github.com/marcwadehan-png/somn-super-agent/releases" class="px-4 py-2 rounded-lg card text-sm hover:text-white transition">⬇️ 下载</a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="relative z-10 text-center px-6 pt-16 pb-24 max-w-5xl mx-auto">
+    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full badge text-sm mb-8">
+      <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+      MVP v1.0 · AGPL v3 开源 · 欢迎参与贡献
+    </div>
+
+    <h1 class="font-serif text-6xl md:text-8xl font-black mb-6 leading-tight">
+      <span class="gradient-text">Somn</span><br />
+      <span class="text-3xl md:text-5xl font-light text-gray-300">神之架构 · 万维智能</span>
+    </h1>
+
+    <p class="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto mb-10 leading-relaxed">
+      基于大语言模型探索自主进化，采用多层级架构设计，<br />
+      集成 <strong class="text-violet-400">35 个智慧学派</strong> · <strong class="text-violet-400">142 个推理引擎</strong> · <strong class="text-violet-400">21 格知识系统</strong> · <strong class="text-violet-400">776+ 贤者子代理</strong>
+    </p>
+
+    <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+      <a href="https://github.com/marcwadehan-png/somn-super-agent/fork" class="px-8 py-4 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 font-bold text-white hover:from-violet-500 hover:to-indigo-500 transition shadow-lg shadow-violet-900/40">
+        ⭐ Star on GitHub
+      </a>
+      <a href="https://github.com/marcwadehan-png/somn-super-agent/discussions" class="px-8 py-4 rounded-xl card font-medium hover:text-white transition">
+        💬 加入讨论
+      </a>
+    </div>
+
+    <div class="flex flex-wrap gap-3 justify-center text-xs text-gray-500">
+      <span class="px-3 py-1 rounded-full border border-gray-700">Python 3.11+</span>
+      <span class="px-3 py-1 rounded-full border border-gray-700">PyQt6 / Web</span>
+      <span class="px-3 py-1 rounded-full border border-gray-700">FastAPI</span>
+      <span class="px-3 py-1 rounded-full border border-gray-700">AGPL v3</span>
+      <span class="px-3 py-1 rounded-full border border-gray-700">多语言文档</span>
+    </div>
+  </section>
+
+  <!-- Stats bar -->
+  <section class="relative z-10 px-6 max-w-5xl mx-auto pb-16">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="text-center p-6 rounded-2xl card glow-purple">
+        <div class="text-4xl font-black gradient-text">776+</div>
+        <div class="text-sm text-gray-500 mt-1">贤者子代理</div>
+      </div>
+      <div class="text-center p-6 rounded-2xl card">
+        <div class="text-4xl font-black gradient-text">35</div>
+        <div class="text-sm text-gray-500 mt-1">智慧学派</div>
+      </div>
+      <div class="text-center p-6 rounded-2xl card">
+        <div class="text-4xl font-black gradient-text">142</div>
+        <div class="text-sm text-gray-500 mt-1">推理引擎</div>
+      </div>
+      <div class="text-center p-6 rounded-2xl card">
+        <div class="text-4xl font-black gradient-text">21</div>
+        <div class="text-sm text-gray-500 mt-1">知识格子</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Architecture -->
+  <section class="relative z-10 px-6 max-w-5xl mx-auto pb-20">
+    <h2 class="text-3xl font-bold text-center mb-4">🏛️ 神之架构 V6.2</h2>
+    <p class="text-gray-500 text-center mb-10">多层级智能体架构，从感知到行动的全链路设计</p>
+
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="rounded-2xl card p-6">
+        <div class="text-3xl mb-4">🧠</div>
+        <h3 class="text-lg font-bold mb-2">神经记忆网络</h3>
+        <p class="text-sm text-gray-500 leading-relaxed">长期记忆 · 短期记忆 · 工作记忆 · 情景记忆四层结构，支持上下文持久化和跨会话学习。</p>
+      </div>
+      <div class="rounded-2xl card p-6">
+        <div class="text-3xl mb-4">⚡</div>
+        <h3 class="text-lg font-bold mb-2">推理引擎集群</h3>
+        <p class="text-sm text-gray-500 leading-relaxed">142 个推理引擎涵盖演绎/归纳/类比/溯因等逻辑范式，支持多引擎协同推理与动态调度。</p>
+      </div>
+      <div class="rounded-2xl card p-6">
+        <div class="text-3xl mb-4">📚</div>
+        <h3 class="text-lg font-bold mb-2">600 贤者系统</h3>
+        <p class="text-sm text-gray-500 leading-relaxed">776+ 专家级子代理，覆盖哲学/科学/艺术等 35 个智慧学派，每个贤者可独立蒸馏训练。</p>
+      </div>
+      <div class="rounded-2xl card p-6">
+        <div class="text-3xl mb-4">🔮</div>
+        <h3 class="text-lg font-bold mb-2">21 格知识系统</h3>
+        <p class="text-sm text-gray-500 leading-relaxed">结构化知识网格，支持多维知识关联检索，构建全局知识感知能力。</p>
+      </div>
+      <div class="rounded-2xl card p-6">
+        <div class="text-3xl mb-4">🧬</div>
+        <h3 class="text-lg font-bold mb-2">自主进化引擎</h3>
+        <p class="text-sm text-gray-500 leading-relaxed">元认知闭环 · 自适应学习 · 目标漂移检测 · 价值观对齐，持续自我优化。</p>
+      </div>
+      <div class="rounded-2xl card p-6">
+        <div class="text-3xl mb-4">🎨</div>
+        <h3 class="text-lg font-bold mb-2">双前端支持</h3>
+        <p class="text-sm text-gray-500 leading-relaxed">PyQt6 桌面 GUI + Web 前端，前后端分离架构，支持本地部署与云端调用。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Join Us -->
+  <section class="relative z-10 px-6 max-w-5xl mx-auto pb-20">
+    <div class="rounded-3xl bg-gradient-to-br from-violet-900/40 to-indigo-900/40 border border-violet-800/40 p-10 text-center">
+      <h2 class="text-3xl font-bold mb-4">🤝 一起来构建 Somn</h2>
+      <p class="text-gray-400 mb-8 max-w-2xl mx-auto">
+        *「一个人的梦想只是梦想，一群人的梦想就能成为现实。」*<br />
+        无论你是开发者、设计师、内容创作者还是产品经理，Somn 都需要你的参与。
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="https://github.com/marcwadehan-png/somn-super-agent/issues/new/choose" class="px-6 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 font-medium transition">
+          🐛 报告 Bug / 提案功能
+        </a>
+        <a href="https://github.com/marcwadehan-png/somn-super-agent/fork" class="px-6 py-3 rounded-xl card hover:text-white transition">
+          🍴 Fork 项目
+        </a>
+        <a href="https://github.com/marcwadehan-png/somn-super-agent/discussions" class="px-6 py-3 rounded-xl card hover:text-white transition">
+          💬 参与讨论
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="relative z-10 px-6 py-10 border-t border-gray-800 max-w-7xl mx-auto">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-600">
+      <div>
+        <span class="font-serif">Somn</span> · 神之架构 · 万维智能 · AGPL v3
+      </div>
+      <div class="flex gap-4">
+        <a href="https://github.com/marcwadehan-png/somn-super-agent" class="hover:text-violet-400 transition">GitHub</a>
+        <a href="https://github.com/marcwadehan-png/somn-super-agent/releases" class="hover:text-violet-400 transition">Releases</a>
+        <a href="https://github.com/marcwadehan-png/somn-super-agent/blob/main/CONTRIBUTING.md" class="hover:text-violet-400 transition">Contributing</a>
+        <a href="https://github.com/marcwadehan-png/somn-super-agent/blob/main/CHANGELOG.md" class="hover:text-violet-400 transition">Changelog</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

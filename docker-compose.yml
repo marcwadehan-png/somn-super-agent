@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # ============================================================
+  # Somn API Server (Backend)
+  # ============================================================
+  somn-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: somn-api
+    ports:
+      - "8964:8964"
+    environment:
+      - SOMN_ENV=production
+      - SOMN_LOG_LEVEL=INFO
+      - SOMN_HOST=0.0.0.0
+      - SOMN_PORT=8964
+    env_file:
+      - .env.example
+    volumes:
+      # 持久化数据目录
+      - somn-data:/app/data
+      # 可选：挂载本地模型权重
+      # - ./models:/app/models:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8964/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ============================================================
+  # Somn GUI (Desktop) - 需要显示器的场景下使用
+  # 注意：GUI 需要 X11/Wayland 显示，Docker 中需特殊配置
+  # ============================================================
+  somn-gui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: somn-gui
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - QT_QPA_PLATFORM=xcb
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - somn-data:/app/data
+    # GUI 默认不启动，需手动启动
+    profiles: ["gui"]
+    command: ["python", "-m", "somngui"]
+    depends_on:
+      - somn-api
+
+volumes:
+  somn-data:
+    driver: local

@@ -1,0 +1,47 @@
+{
+  "traces": [
+    {
+      "trace_id": "te",
+      "problem": "导入导出测试",
+      "reasoning_mode": "chain_of_thought",
+      "steps": [
+        {
+          "step_number": 1,
+          "description": "x",
+          "reasoning": "y",
+          "conclusion": "z",
+          "confidence": 0.9
+        }
+      ],
+      "final_answer": "ok",
+      "confidence": 0.9,
+      "created_at": "2026-04-26T21:49:33.748950",
+      "metadata": null
+    }
+  ],
+  "patterns": [
+    {
+      "pattern_id": "chain_of_thought_analysis",
+      "pattern_type": "chain_of_thought",
+      "problem_templates": [
+        "导入导出测试"
+      ],
+      "typical_steps": [
+        {
+          "step_type": "analysis",
+          "reasoning_type": "y"
+        }
+      ],
+      "success_rate": 0.9,
+      "usage_count": 1
+    }
+  ],
+  "statistics": {
+    "total_traces": 1,
+    "total_patterns": 1,
+    "cache_hits": 0,
+    "cache_misses": 0,
+    "similar_retrievals": 0
+  },
+  "exported_at": "2026-04-26T21:49:33.749000"
+}

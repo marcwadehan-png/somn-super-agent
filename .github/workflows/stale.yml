@@ -1,0 +1,64 @@
+# Stale Issue Workflow
+# 自动关闭长时间无响应的 Issue/PR，保持仓库整洁
+
+name: Stale Issues & PRs
+
+on:
+  schedule:
+    # 每天 UTC 4:00 运行 (北京时间中午12:00)
+    - cron: '0 4 * * *'
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for stale issues and PRs
+        uses: actions/stale@v9
+        with:
+          # Issue 设置
+          days-before-issue-stale: 60      # 60 天无响应标记为 stale
+          days-before-issue-close: 14       # 再过 14 天关闭
+          stale-issue-label: "stale"        # 标签名
+          stale-issue-message: |
+            👋 这个 Issue 已经 60 天没有活动了，标记为 **stale**（过期）。
+
+            如果这仍然是一个有效的问题：
+            - 请回复任何内容即可重新激活
+            - 或提供更多信息和复现步骤
+
+            如果问题已解决或不再相关，我们将在 14 天后自动关闭。
+            
+            感谢你的贡献！ 🙏
+
+          close-issue-message: |
+            ❗ 这个 Issue 由于长时间未获得更新，已被自动关闭。
+
+            如果你觉得这个问题仍然存在，请随时开一个新 Issue！
+
+          # PR 设置
+          days-before-pr-stale: 45           # PR 45 天无响应标记
+          days-before-pr-close: 14           # 再过 14 天关闭
+          stale-pr-label: "stale"
+          stale-pr-message: |
+            👋 这个 PR 已经 45 天没有活动了，标记为 **stale**（过期）。
+
+            如果你仍在积极开发中：
+            - 请回复任何内容或推送新的 commit 即可重新激活
+            - 如果需要帮助，可以在 [Discussions](../../discussions) 中寻求建议
+
+            我们将在 14 天后关闭此 PR。
+
+          close-pr-message: |
+            ❗ 这个 PR 由于长时间未获得更新，已被自动关闭。
+
+            随时欢迎重新提交！💪
+
+          # 排除项
+          exempt-issue-labels: "bug,security,enhancement,pinned,good first issue"
+          exempt-pr-labels: "work-in-progress,wip,under-review"
+          operations-per-run: 100
+          remove-stale-when-updated: true     # 更新后移除 stale 标签

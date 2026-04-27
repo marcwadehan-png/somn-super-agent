@@ -1,0 +1,190 @@
+/*
+ * Somn GUI - Ocean Blue Theme
+ * 深蓝海洋风格，专业沉稳
+ */
+
+/* ── 全局 ── */
+QMainWindow {
+    background-color: #e8f0f8;
+}
+QWidget {
+    font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+    color: #1a3a5c;
+}
+
+/* ── 菜单栏 ── */
+QMenuBar {
+    background-color: #ffffff;
+    border-bottom: 1px solid #b8d4e8;
+    padding: 2px;
+}
+QMenuBar::item {
+    padding: 6px 12px;
+    background: transparent;
+}
+QMenuBar::item:selected {
+    background-color: #d0e4f4;
+    border-radius: 4px;
+}
+QMenu {
+    background-color: #ffffff;
+    border: 1px solid #b8d4e8;
+    border-radius: 8px;
+    padding: 6px;
+}
+QMenu::item {
+    padding: 6px 24px;
+    border-radius: 4px;
+}
+QMenu::item:selected {
+    background-color: #1976D2;
+    color: white;
+}
+QMenu::separator {
+    height: 1px;
+    background: #b8d4e8;
+    margin: 4px 8px;
+}
+
+/* ── 标签页 ── */
+QTabWidget::pane {
+    border: 1px solid #b8d4e8;
+    border-radius: 8px;
+    background-color: #ffffff;
+    padding: 8px;
+}
+QTabBar::tab {
+    background-color: #d0e4f4;
+    color: #2c5f8a;
+    padding: 8px 20px;
+    margin-right: 2px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    font-weight: bold;
+}
+QTabBar::tab:selected {
+    background-color: #ffffff;
+    color: #1976D2;
+    border-bottom: 2px solid #1976D2;
+}
+
+/* ── 按钮通用 ── */
+QPushButton {
+    background-color: #d0e4f4;
+    border: 1px solid #b8d4e8;
+    border-radius: 6px;
+    padding: 6px 16px;
+    color: #1a3a5c;
+    font-weight: bold;
+}
+QPushButton:hover {
+    background-color: #b8d4e8;
+    border-color: #7bafd4;
+}
+QPushButton:pressed {
+    background-color: #7bafd4;
+    color: white;
+}
+QPushButton:disabled {
+    background-color: #e8f0f8;
+    color: #a0c0d8;
+}
+
+/* ── 输入框 ── */
+QLineEdit, QTextEdit {
+    background-color: #ffffff;
+    border: 1px solid #b8d4e8;
+    border-radius: 6px;
+    padding: 8px;
+    selection-background-color: #1976D2;
+    selection-color: white;
+}
+QLineEdit:focus, QTextEdit:focus {
+    border-color: #1976D2;
+}
+
+/* ── 文本浏览（聊天显示区） ── */
+QTextBrowser {
+    background-color: #f0f6fc;
+    border: 1px solid #b8d4e8;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 13px;
+}
+
+/* ── 列表 ── */
+QListWidget, QTreeWidget {
+    background-color: #ffffff;
+    border: 1px solid #b8d4e8;
+    border-radius: 6px;
+    padding: 4px;
+    alternate-background-color: #f0f6fc;
+}
+QListWidget::item, QTreeWidget::item {
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+QListWidget::item:hover, QTreeWidget::item:hover {
+    background-color: #d0e4f4;
+}
+QListWidget::item:selected, QTreeWidget::item:selected {
+    background-color: #1976D2;
+    color: white;
+}
+
+/* ── 状态栏 ── */
+QStatusBar {
+    background-color: #ffffff;
+    border-top: 1px solid #b8d4e8;
+    color: #5a8ab5;
+    font-size: 12px;
+    padding: 2px 8px;
+}
+QProgressBar {
+    border: 1px solid #b8d4e8;
+    border-radius: 4px;
+    text-align: center;
+    background-color: #d0e4f4;
+    height: 16px;
+}
+QProgressBar::chunk {
+    background-color: #1976D2;
+    border-radius: 3px;
+}
+
+/* ── 分隔器 ── */
+QSplitter::handle {
+    background-color: #b8d4e8;
+    width: 2px;
+}
+QSplitter::handle:hover {
+    background-color: #1976D2;
+}
+
+/* ── 对话框 ── */
+QDialog {
+    background-color: #ffffff;
+}
+QLabel {
+    background: transparent;
+}
+
+/* ── 滚动条 ── */
+QScrollBar:vertical {
+    border: none;
+    background: #f0f6fc;
+    width: 10px;
+    border-radius: 5px;
+}
+QScrollBar::handle:vertical {
+    background: #b8d4e8;
+    min-height: 30px;
+    border-radius: 5px;
+}
+QScrollBar::handle:vertical:hover {
+    background: #7bafd4;
+}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0;
+}

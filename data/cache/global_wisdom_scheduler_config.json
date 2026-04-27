@@ -1,0 +1,9 @@
+{
+  "mode": "auto",
+  "output_format": "standard",
+  "max_activated_schools": 5,
+  "activation_threshold": 0.25,
+  "enable_propagation": true,
+  "enable_learning": true,
+  "max_wait_time": 12.0
+}

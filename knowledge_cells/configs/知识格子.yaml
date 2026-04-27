@@ -1,0 +1,155 @@
+# 知识格子系统配置 v1.0
+# 用于系统配置和默认值管理
+
+# 系统基础配置
+system:
+  name: "知识格子系统"
+  version: "1.5.0"
+  description: "Somn运营方法论知识库"
+
+# 知识格子配置
+knowledge_cells:
+  # 格子目录
+  cells_directory: "knowledge_cells"
+  
+  # 支持的分类
+  categories:
+    A: "智慧核心方法论"
+    B: "运营策略"
+    C: "执行战术"
+  
+  # 关联关系定义
+  associations:
+    # A系列内部关联
+    A1_逻辑判断:
+      - A2_智慧模块
+      - A3_论证审核
+    A2_智慧模块:
+      - A1_逻辑判断
+      - A5_五层架构
+    A3_论证审核:
+      - A1_逻辑判断
+      - A4_判断决策
+    A4_判断决策:
+      - A3_论证审核
+      - B9_策略运营
+    A5_五层架构:
+      - A6_核心执行链
+      - A7_感知记忆
+    A6_核心执行链:
+      - A8_反思进化
+      - B9_策略运营
+    A7_感知记忆:
+      - A8_反思进化
+    A8_反思进化:
+      - A7_感知记忆
+      - B9_策略运营
+    
+    # B系列内部关联
+    B1_互联网用户增长:
+      - B2_直播运营
+      - B3_私域运营
+      - C3_内容营销
+    B2_直播运营:
+      - B1_互联网用户增长
+      - B5_会员运营
+      - C4_广告投放
+    B3_私域运营:
+      - B4_活动策划
+      - B5_会员运营
+    B4_活动策划:
+      - B3_私域运营
+      - C1_电商运营
+    B5_会员运营:
+      - B2_直播运营
+      - B3_私域运营
+    B6_广告策划:
+      - B7_地产策划
+      - C4_广告投放
+    B7_地产策划:
+      - B6_广告策划
+      - B8_招商策划
+    B8_招商策划:
+      - B7_地产策划
+      - B4_活动策划
+    B9_策略运营:
+      - B1_互联网用户增长
+      - C2_数据运营
+      - A4_判断决策
+    
+    # C系列内部关联
+    C1_电商运营:
+      - C2_数据运营
+      - C3_内容营销
+    C2_数据运营:
+      - C1_电商运营
+      - B9_策略运营
+    C3_内容营销:
+      - C1_电商运营
+      - C4_广告投放
+    C4_广告投放:
+      - C3_内容营销
+      - B2_直播运营
+
+# API配置
+api:
+  prefix: "/api/v1/cells"
+  library_prefix: "/api/v1/cells/library"
+  
+  endpoints:
+    - GET  /cells           # 获取所有格子
+    - GET  /cells/status    # 系统状态
+    - GET  /cells/search    # 搜索格子
+    - GET  /cells/hot       # 最热格子
+    - GET  /cells/graph     # 知识图谱
+    - GET  /cells/{id}      # 指定格子
+    - GET  /cells/{id}/related # 关联格子
+    - POST /cells/query     # 知识查询
+    - POST /cells/check     # 方法论检查
+    - POST /cells/library/query  # 藏书阁查询
+    - GET  /cells/library/stats  # 藏书阁统计
+    - POST /cells/library/sync  # 藏书阁同步
+
+# Claw集成配置
+claw:
+  enabled: true
+  claw_name: "知识格子"
+  
+  skills:
+    - knowledge_cells_query
+    - methodology_check
+    - reasoning_enhance
+    - library_sync
+    - knowledge_stats
+  
+  triggers:
+    - "知识格子"
+    - "方法论"
+    - "框架"
+    - "逻辑"
+    - "分析结构"
+    - "诊断"
+
+# 藏书阁集成配置
+library:
+  enabled: true
+  sync_on_startup: false
+  
+  # 书架映射
+  shelf_mapping:
+    A: "methodology_core"
+    B: "strategy_operations"
+    C: "execution_tactics"
+  
+  # 记忆分级
+  memory_grade: "YI"  # 乙级记忆
+
+# 缓存配置
+cache:
+  enabled: true
+  ttl_seconds: 300
+  
+# 日志配置
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

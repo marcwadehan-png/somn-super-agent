@@ -1,0 +1,74 @@
+{
+  "report_id": "DLR_20260404_091943",
+  "date": "2026-04-04",
+  "execution_time": "09:19:43",
+  "new_findings_count": 13,
+  "new_validations_count": 0,
+  "error_cases_count": 0,
+  "instance_learning_events": [],
+  "validation_learning_events": [],
+  "error_learning_events": [],
+  "association_learning_events": [],
+  "new_patterns": [],
+  "confidence_updates": [],
+  "new_associations": [],
+  "rl_updates": [],
+  "q_table_snapshot": {},
+  "transfer_hypotheses": [],
+  "registered_knowledge": [],
+  "transfer_report": {
+    "total_knowledge": 0,
+    "total_scenarios": 0,
+    "total_hypotheses": 0,
+    "validated": 0,
+    "falsified": 0,
+    "pending": 0,
+    "top_knowledge": []
+  },
+  "system_health": {
+    "总体评分": 0.1,
+    "记忆完整性": 0,
+    "知识覆盖率": 0,
+    "推理能力": 0.4,
+    "学习活跃度": 0.0
+  },
+  "memory_stats": {
+    "总记忆数": 0,
+    "按类型统计": {},
+    "按状态统计": {},
+    "高置信度记忆数": 0,
+    "平均置信度": 0
+  },
+  "knowledge_stats": {
+    "概念统计": {
+      "价值概念": 0,
+      "场景概念": 0,
+      "工具概念": 0,
+      "情绪概念": 0,
+      "方法概念": 0,
+      "策略概念": 0
+    },
+    "规则统计": {
+      "启发规则": 0,
+      "因果规则": 0,
+      "归纳规则": 0,
+      "演绎规则": 0
+    },
+    "关系统计": {
+      "因果关系": 0,
+      "层次关系": 0,
+      "时序关系": 0,
+      "相关关系": 0
+    },
+    "总体统计": {
+      "概念总数": 0,
+      "规则总数": 0,
+      "关系总数": 0,
+      "知识密度": 0.0
+    }
+  },
+  "summary": "今日网络+本地合计获取 13 条研究发现（edGA网络学习优先）。",
+  "recommendations": [
+    "数据量充足但未提取到模式，建议检查数据质量"
+  ]
+}

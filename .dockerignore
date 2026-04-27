@@ -1,0 +1,119 @@
+# ============================================================
+# Docker Ignore Patterns for Somn Project
+# ============================================================
+
+# Version Control
+.git
+.gitattributes
+.gitignore
+.github
+
+# Python
+__pycache__
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info
+dist
+build
+.eggs
+
+# Virtual Environments
+.venv
+venv
+ENV
+env
+.uv
+
+# Data & Models (should be mounted as volume)
+models
+*.safetensors
+*.bin
+*.gguf
+*.pt
+*.ckpt
+*.h5
+*.onnx
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+data/chromadb
+data/imperial_library
+.cache_data
+
+# IDE & OS
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+
+# Logs & Coverage
+logs
+*.log
+htmlcov
+.coverage
+coverage_report.json
+.pytest_cache
+
+# Secrets & Private
+.env
+.env.*
+.env.example
+*.pem
+*.key
+credentials.json
+secrets.json
+private
+secrets
+
+# Test & Benchmark
+.benchmarks
+.profiles
+.mypy_cache
+.dmypy.json
+.ruff_cache
+
+# Node
+node_modules
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Documentation
+docs/_build
+somn/docs/_build
+
+# Development files (should not be in image)
+*.md
+!README.md
+research_plan*
+*_debug.py
+*_test_temp.py
+~$
+
+# Temporary
+_court_*.json
+_temp_*
+*.tmp
+*.temp
+*.backup
+
+# WorkBuddy internal
+.workbuddy
+
+# Specific development files
+CONTROL_CENTER_SUMMARY.md
+METHODOLOGY.md
+PROJECT_STATUS.md
+TESTING_RULES.md
+somn_统一研究体系核心框架.md
+开源包主线说明.md
+开源打包分析报告.md
+核心内容同步报告.md
+v*.md
+模块注册清单.md
+research_plan*.md

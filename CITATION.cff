@@ -1,0 +1,42 @@
+# CITATION.cff for Somn
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-citation-files
+
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+
+type: software
+license: AGPL-3.0-or-later
+
+title: "Somn"
+abstract: "An intelligent office assistant with multi-level architecture integrating ancient Chinese wisdom and modern AI."
+version: "6.2.0"
+date-released: "2026-04-27"
+
+repository-code: "https://github.com/marcwadehan-png/somn-agent"
+url: "https://github.com/marcwadehan-png/somn-agent"
+
+authors:
+  - name: "Somn Project"
+    email: "marcwadehan@gmail.com"
+
+keywords:
+  - artificial-intelligence
+  - llm
+  - reasoning-engine
+  - knowledge-graph
+  - multi-agent
+  - chinese-wisdom
+
+preferred-citation:
+  type: software
+  title: "Somn: An Intelligent Office Assistant with Ancient Wisdom Integration"
+  authors:
+    - name: "Somn Project"
+      email: "marcwadehan@gmail.com"
+
+# Reference for AGPL License
+references:
+  - type: software
+    title: "GNU Affero General Public License v3.0"
+    license: AGPL-3.0-or-later
+    url: "https://www.gnu.org/licenses/agpl-3.0.en.html"

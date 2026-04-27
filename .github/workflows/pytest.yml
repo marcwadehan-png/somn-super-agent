@@ -1,0 +1,304 @@
+# CI/CD Pipeline for Somn Project
+# This workflow runs on every push and pull request
+
+name: Somn CI Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Daily integration tests at 2 AM UTC
+    - cron: '0 2 * * *'
+    # Weekly performance tests on Sunday at 3 AM UTC
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+
+# Cancel redundant runs on the same branch
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: '3.13'
+
+jobs:
+  # ============================================================
+  # Stage 1: Lint & Code Quality
+  # ============================================================
+  lint:
+    name: Lint & Code Quality
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\pip\Cache
+          key: ${{ runner.os }}-pip-lint-${{ hashFiles('pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-lint-
+
+      - name: Install linting tools
+        run: pip install flake8 pylint pydocstyle mypy
+
+      - name: Run flake8
+        run: flake8 somn/smart_office_assistant/src/ --max-line-length=100 --extend-ignore=E203,W503
+        continue-on-error: true
+
+      - name: Run pylint
+        run: pylint somn/smart_office_assistant/src/ --max-line-length=100 --disable=C0114,C0115,C0116 || true
+
+      - name: Run pydocstyle
+        run: pydocstyle somn/smart_office_assistant/src/ || true
+
+  # ============================================================
+  # Stage 2: Type Checking
+  # ============================================================
+  type-check:
+    name: Type Checking
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install mypy
+        run: pip install mypy
+
+      - name: Run mypy
+        run: mypy somn/smart_office_assistant/src/ --ignore-missing-imports --warn-unused-configs
+        continue-on-error: true
+
+  # ============================================================
+  # Stage 3: Unit Tests
+  # ============================================================
+  test:
+    name: Unit Tests (${{ matrix.test-group }})
+    runs-on: windows-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        test-group:
+          - core
+          - intelligence
+          - memory
+          - claw
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\pip\Cache
+          key: ${{ runner.os }}-pip-test-${{ hashFiles('requirements.txt', 'somn/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-test-
+
+      - name: Install dependencies
+        run: |
+          pip install -r somn/requirements.txt
+          pip install pytest pytest-cov pytest-asyncio
+
+      - name: Run tests
+        run: pytest somn/smart_office_assistant/tests/ -v --tb=short -k "${{ matrix.test-group }}"
+        continue-on-error: true
+
+  # ============================================================
+  # Stage 4: Coverage Check
+  # ============================================================
+  coverage:
+    name: Coverage Check
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install -r somn/requirements.txt
+          pip install pytest pytest-cov
+
+      - name: Run coverage
+        run: pytest somn/smart_office_assistant/tests/ --cov=smart_office_assistant --cov-report=xml --cov-report=term-missing
+        continue-on-error: true
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
+
+  # ============================================================
+  # Stage 5: Security Scan
+  # ============================================================
+  security:
+    name: Security Scan
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install security tools
+        run: pip install bandit safety
+
+      - name: Run bandit
+        run: bandit -r somn/smart_office_assistant/src/ -f json -o bandit-report.json || true
+
+      - name: Run safety
+        run: pip install pip-audit && pip-audit --desc --progress-spinner off || true
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-reports
+          path: |
+            bandit-report.json
+
+  # ============================================================
+  # Stage 6: Integration Tests (Daily / Manual)
+  # ============================================================
+  integration:
+    name: Integration Tests
+    runs-on: windows-latest
+    timeout-minutes: 30
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install -r somn/requirements.txt
+          pip install pytest pytest-asyncio pytest-cov
+
+      - name: Run integration tests
+        run: pytest somn/smart_office_assistant/tests/integration/ -v || true
+        continue-on-error: true
+
+      - name: Run boundary tests
+        run: pytest somn/smart_office_assistant/tests/ -v -k "boundary" || true
+        continue-on-error: true
+
+  # ============================================================
+  # Stage 7: Performance Tests (Weekly)
+  # ============================================================
+  performance:
+    name: Performance Tests
+    runs-on: windows-latest
+    timeout-minutes: 30
+    if: github.event_name == 'schedule'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install -r somn/requirements.txt
+          pip install pytest pytest-benchmark
+
+      - name: Run performance tests
+        run: pytest somn/smart_office_assistant/tests/ -v -k "performance" --benchmark-only
+        continue-on-error: true
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: benchmark-results
+          path: .benchmarks/
+
+  # ============================================================
+  # Stage 8: Neural Memory Tests (path-triggered)
+  # ============================================================
+  neural-memory:
+    name: Neural Memory Tests
+    runs-on: windows-latest
+    timeout-minutes: 15
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install -r somn/requirements.txt
+          pip install pytest pytest-cov pytest-html numpy pyyaml
+
+      - name: Run neural memory tests
+        run: pytest somn/smart_office_assistant/tests/neural_memory/ -v --tb=short --cov=smart_office_assistant.src.neural_memory --cov-report=term-missing
+        continue-on-error: true

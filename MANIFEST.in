@@ -1,0 +1,22 @@
+# MANIFEST.in for Somn distribution
+# This file lists non-Python files to include in the package
+
+include LICENSE
+include README.md
+include CONTRIBUTING.md
+include CODE_OF_CONDUCT.md
+include CHANGELOG.md
+include ROADMAP.md
+
+recursive-include somn/smart_office_assistant/data *
+recursive-include somn/smart_office_assistant/config *
+recursive-include docs *
+
+recursive-exclude somn/smart_office_assistant/data/cache *
+recursive-exclude somn/smart_office_assistant/data/logs *
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude .DS_Store
