@@ -1,5 +1,6 @@
-# Somn v6.2.0
-# Development dependencies
+# Somn v6.2.0 开发依赖
+# AGPL v3 Licensed - https://github.com/marcwadehan-png/somn-agent
+# 安装: pip install -r requirements-dev.txt
 
 # Core development tools
 pytest>=7.4.0

@@ -1,5 +1,6 @@
 # Somn v6.2.0 核心依赖
 # AGPL v3 Licensed - https://github.com/marcwadehan-png/somn-agent
+# 安装: pip install -r requirements.txt
 
 # 核心框架
 torch>=2.0.0

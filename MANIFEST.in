@@ -7,11 +7,14 @@ include CONTRIBUTING.md
 include CODE_OF_CONDUCT.md
 include CHANGELOG.md
 include ROADMAP.md
+include SECURITY.md
 
-recursive-include somn/smart_office_assistant/data *
-recursive-include somn/smart_office_assistant/config *
+recursive-include smart_office_assistant/data *
+recursive-include config *
 recursive-include docs *
 
+recursive-exclude smart_office_assistant/data/cache *
+recursive-exclude smart_office_assistant/data/logs *
 recursive-exclude somn/smart_office_assistant/data/cache *
 recursive-exclude somn/smart_office_assistant/data/logs *
 recursive-exclude * __pycache__

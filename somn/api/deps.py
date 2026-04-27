@@ -89,8 +89,8 @@ class AppState:
                 """内部创建函数"""
                 import sys
                 
-                # 直接使用固定路径设置 sys.path（确保新线程也能访问）
-                src_path = str(Path(__file__).resolve().parents[1] / 'src')
+                # 使用动态路径设置 sys.path（确保新线程也能访问）
+                src_path = str(self._project_root / "smart_office_assistant" / "src")
                 if src_path not in sys.path:
                     sys.path.insert(0, src_path)
                 

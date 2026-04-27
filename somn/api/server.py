@@ -82,7 +82,7 @@ def create_app(project_root: Path = None, config: dict = None) -> "FastAPI":
     app = FastAPI(
         title="Somn API Server",
         description="Somn 智能助手 - 后端API服务",
-        version="v1.0",
+        version="v6.2.0",
         docs_url="/api/docs",
         redoc_url="/api/redoc",
         openapi_url="/api/openapi.json",
@@ -276,7 +276,7 @@ def _register_service(project_root: Path, config: dict):
         url = f"http://{host}:{port}"
 
     registry = {
-        "version": "1.0",
+        "version": "6.2.0",
         "server_url": url,
         "api_prefix": "/api/v1",
         "ws_url": f"ws://127.0.0.1:{port}/api/v1/ws",

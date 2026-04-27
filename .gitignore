@@ -127,9 +127,6 @@ tmp/
 
 # WorkBuddy internal (local only)
 .workbuddy/
-IDENTITY.md
-SOUL.md
-USER.md
 
 # Docker
 .docker/

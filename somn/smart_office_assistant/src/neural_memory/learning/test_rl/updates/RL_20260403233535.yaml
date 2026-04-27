@@ -1,9 +1,0 @@
-action: 小红书运营
-learning_rate: 0.1
-n_samples: 2
-q_value_after: 0.495
-q_value_before: 0.5
-reward: 0.45
-source: reinforcement_trigger
-timestamp: '2026-04-03T23:35:35.048539'
-update_id: RL_20260403233535

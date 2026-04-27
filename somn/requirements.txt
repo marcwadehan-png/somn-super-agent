@@ -1,5 +1,5 @@
 # Somn v6.2.0 核心依赖
-# 运行时必需的依赖包
+# AGPL v3 Licensed - https://github.com/marcwadehan-png/somn-agent
 
 # 核心框架
 torch>=2.0.0
@@ -23,12 +23,3 @@ requests>=2.31.0
 # 日志和配置
 loguru>=0.7.0
 pydantic>=2.0.0
-
-# 可选: 本地模型
-# ollama>=0.1.0
-
-# 测试框架（开发时使用）
-pytest>=7.4.0
-pytest-cov>=4.1.0
-pytest-asyncio>=0.21.0
-pytest-xdist>=3.5.0
