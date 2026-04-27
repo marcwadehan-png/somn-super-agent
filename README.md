@@ -56,6 +56,8 @@ docs/                          # 文档 (ADR 架构决策)
 ```
 
 ---
+## 联系
+邮箱：marcwadehan@gmail.com
 
 ## 协议 | License
 
