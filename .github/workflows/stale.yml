@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check for stale issues and PRs
-        uses: actions/stale@v9
+        uses: actions/stale@v10
         with:
           # Issue 设置
           days-before-issue-stale: 60      # 60 天无响应标记为 stale
