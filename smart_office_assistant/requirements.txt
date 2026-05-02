@@ -53,7 +53,7 @@ seaborn>=0.12.0
 plotly>=5.15.0
 
 # File Management
-send2trash>=1.8.0
+send2trash>=2.1.0
 
 # Markdown Processing
 markdown>=3.5.0
