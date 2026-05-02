@@ -21,8 +21,8 @@ if requirements_path.exists():
         ]
 
 setup(
-    name="smartoffice-ai",
-    version="1.0.0",
+    name="somn",
+    version="6.2.0",
     author="Your Name",
     author_email="your.email@example.com",
     description="汇千古之智，向未知而生。能持续学习成长的超级智能体",
@@ -35,7 +35,7 @@ setup(
         "Development Status :: 4 - Beta",
         "Intended Audience :: End Users/Desktop",
         "Topic :: Office/Business",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: GNU Affero General Public License v3",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",

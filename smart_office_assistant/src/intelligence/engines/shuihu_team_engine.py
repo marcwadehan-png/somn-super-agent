@@ -38,7 +38,7 @@ class ShuihuTeamEngine:
     
     def __init__(self):
         """init水浒团队引擎"""
-        self.version = "v1.0.0"
+        self.version="6.2.0"
         
         # 团队发展阶段模型
         self.team_stages = {

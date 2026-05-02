@@ -441,4 +441,4 @@ class MemoryEngineV2:
             logger.info("MemoryEngineV2 optimized")
 
 
-__version__ = "2.0.0"
+__version__ = "6.2.0"

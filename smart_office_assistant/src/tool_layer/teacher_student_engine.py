@@ -4,26 +4,27 @@ __all__ = [
     'solve_task',
 ]
 
-师生学习引擎 - Teacher-Student Learning Engine
-==============================================
-核心创新:云端模型是"老师",本地模型是"学生",Somn 是"教务主任".
+云端-本地协同引擎 - Cloud-Local Collaborative Engine
+=====================================================
+核心定位:协调云端大模型与本地模型协同工作，评估响应质量，积累调用经验。
 
-核心理念:
-- 云端大模型 = 老师:知识渊博,视野开阔,擅长解答,但不懂 Somn 的逻辑和智慧体系
-- 本地大模型 = 学生:正在学习,效率高,成本低,隐私好,但能力有限
-- Somn = 教务主任:调配资源,决定何时问老师,何时让学生答,评估学习效果
+架构角色:
+- 作为 Somn 主链路路径A(orchestrator)的子组件
+- 由 SomnOrchestrator 调用，提供模型选择和质量评估能力
+- 调用链: AgentCore → SomnCore → _somn_main_chain → 路径A → SomnOrchestrator → TeacherStudentEngine
 
-学习模式:
-1. 直接模式(快):学生直接回答 → Somn 评估 → 差则请教老师
-2. 预习模式(稳):先问老师 → 学生学习 → 学生作答 → Somn 评分
-3. 复习模式(深):学生作答 → 请教老师对比 → 学生修正 → Somn 记录
-4. 民主投票:多老师同时回答 → 学生旁听 → Somn synthesize裁定
+协同模式:
+1. DIRECT(直答):本地模型直接回答 → 质量评估 → 不达标则切换云端
+2. PREVIEW(预检):先调云端获取参考 → 本地模型作答 → 质量评估
+3. REVIEW(复核):本地作答 → 调云端对比 → 修正优化
+4. DEMOCRATIC(多模型):多云端模型同时响应 → 综合裁定
+5. HYBRID(智能):根据历史质量数据自动选择最优模式
 
 质量评估维度:
-- 准确性(答案是否正确)
-- Somn 度(是否融入 Somn 的逻辑和智慧)
-- 实用性(是否有可执行的价值)
-- 完整性(是否覆盖所有要点)
+- accuracy(准确性):答案是否正确
+- somn_integration(体系融合):是否与 Somn 智慧体系一致
+- utility(实用性):是否有可执行价值
+- completeness(完整性):是否覆盖所有要点
 """
 
 import logging
@@ -104,13 +105,13 @@ class StudyRecord:
 
 class TeacherStudentEngine:
     """
-    师生学习引擎
+    云端-本地协同引擎
 
     核心职责:
-    1. 管理学生(本地模型)的学习进度
-    2. 协调老师(云端模型)的咨询
-    3. 评估学习效果
-    4. 积累学习经验
+    1. 管理本地模型与云端模型的协同调用
+    2. 根据任务特征选择最优模型组合
+    3. 评估响应质量并积累调用经验
+    4. 为 SomnOrchestrator 提供模型调度决策支持
     """
 
     def __init__(self, base_path: str = None, cloud_hub=None, llm_service=None):
@@ -585,7 +586,7 @@ class TeacherStudentEngine:
             strengths.append("答案准确可靠")
         elif accuracy < 0.5:
             weaknesses.append("答案准确性存疑")
-            suggestions.append("建议请教老师验证")
+            suggestions.append("建议调用云端模型验证")
 
         if somn_integration > 0.6:
             strengths.append("较好融入 Somn 的智慧style")

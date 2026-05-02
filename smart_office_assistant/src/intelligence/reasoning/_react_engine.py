@@ -778,7 +778,7 @@ class ReActEngine:
     实现推理与行动的协同框架，支持TAO闭环机制。
     """
     
-    VERSION = "V1.0.0"
+    VERSION = "6.2.0"
     
     def __init__(
         self,

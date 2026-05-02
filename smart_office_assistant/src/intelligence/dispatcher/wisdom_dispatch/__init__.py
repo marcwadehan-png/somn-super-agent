@@ -13,6 +13,11 @@
 - _decision_congress.py      : v2.0 七人决策代表大会（圣旨/紧急/Cloning投票）
 - _daqin_metrics.py    : v3.3 大秦指标考核引擎
 - _whip_engine.py      : v3.3 行政之鞭引擎
+
+[NeuralMemory v2.0] 神经记忆系统架构迭代 — G1~G8 核心变更:
+- _library_staff_registry.py   : G-3 Claw贤者动态任职注册表（替代硬编码）
+- _semantic_encoder.py         : G-5 独立语义向量编码器（TF-IDF + Hashing）
+- _library_review_scheduler.py : G-7 定时审查调度器（周期性记忆审查与维护）
 """
 
 from ._dispatch_enums import (
@@ -101,6 +106,39 @@ from ._library_upgrade_center import (
     UpgradeRecord,
     SageUpgradeSuggestion,
 )
+
+# ── [NeuralMemory v2.0] G-3/G-5/G-7 核心变更模块 ───────────────
+try:
+    from ._library_staff_registry import (
+        StaffRole,
+        StaffType,
+        LibraryStaffRecord,
+        LibraryStaffRegistry,
+        get_staff_registry,
+        role_names_cn,
+        register_claw_as_staff,
+    )
+    from ._semantic_encoder import (
+        SemanticEncoder,
+        EncoderConfig,
+        EncodingResult,
+        get_semantic_encoder,
+        encode_text,
+        batch_encode_texts,
+    )
+    from ._library_review_scheduler import (
+        ReviewAction,
+        ReviewTask,
+        ReviewResult,
+        LibraryReviewScheduler,
+        get_review_scheduler,
+        run_once as run_review_once,
+    )
+    _HAS_MEMORY_V2 = True
+except ImportError as e:
+    _HAS_MEMORY_V2 = False
+    import logging
+    logging.getLogger(__name__).warning(f"[wisdom_dispatch] NeuralMemory v2.0模块导入失败: {e}")
 
 from ._decision_congress import (
     DecisionCongress,
@@ -333,4 +371,26 @@ __all__ = [
     'get_somn_agent',
     'process_query',
     'process_queries',
+    # ── [NeuralMemory v2.0] G-3: Claw贤者动态注册表 ──
+    'StaffRole',
+    'StaffType',
+    'LibraryStaffRecord',
+    'LibraryStaffRegistry',
+    'get_staff_registry',
+    'role_names_cn',
+    'register_claw_as_staff',
+    # ── [NeuralMemory v2.0] G-5: 语义向量编码器 ──
+    'SemanticEncoder',
+    'EncoderConfig',
+    'EncodingResult',
+    'get_semantic_encoder',
+    'encode_text',
+    'batch_encode_texts',
+    # ── [NeuralMemory v2.0] G-7: 定时审查调度器 ──
+    'ReviewAction',
+    'ReviewTask',
+    'ReviewResult',
+    'LibraryReviewScheduler',
+    'get_review_scheduler',
+    'run_review_once',
 ]

@@ -37,7 +37,7 @@ class 孟浩然代表作品(Enum):
 class 孟浩然深化引擎:
     """孟浩然诗词深化分析引擎 v8.2.0"""
 
-    VERSION = "v8.2.0"
+    VERSION = "6.2.0"
 
     def __init__(self):
         self.诗歌characteristics = self._init_characteristics()

@@ -75,7 +75,7 @@ class BehaviorShapingEngine:
     核心理念:不要对抗人性,而是设计让好行为更容易,坏行为更困难的环境
     """
 
-    VERSION = "v1.0.0"
+    VERSION = "6.2.0"
     
     def __init__(self):
         # === 富有的习惯核心清单 ===

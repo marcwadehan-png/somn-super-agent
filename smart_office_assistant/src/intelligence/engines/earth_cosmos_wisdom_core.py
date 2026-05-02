@@ -14,7 +14,7 @@ __all__ = [
 class EarthCosmosWisdomEngine:
     """面向地质学,大气科学,海洋学,宇宙学与天体物理的轻量知识核心."""
 
-    VERSION = "1.0.0"
+    VERSION = "6.2.0"
 
     def __init__(self) -> None:
         self._knowledge_base: Dict[str, Dict[str, Any]] = {

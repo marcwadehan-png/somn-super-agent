@@ -160,6 +160,44 @@ except ImportError as e:
     logger.warning(f"GraphOfThoughtsEngine 加载失败: {e}")
     GraphOfThoughtsEngine = None
 
+# DivineReason 至高推理引擎 v3.0
+try:
+    from ._unified_reasoning_engine import (
+        # 主引擎
+        DivineReason,
+        UnifiedReasoningEngine,  # 别名（向后兼容）
+        
+        # 核心组件
+        SuperGraph,
+        UnifiedConfig,
+        UnifiedNode,
+        UnifiedEdge,
+        ThoughtPath,
+        
+        # 枚举
+        NodeType,
+        EdgeType,
+        ReasoningMode,
+        TaskComplexity,
+        InsightType,
+        
+        # 评估器与生成器
+        ReasoningMetadata,
+        GraphStatistics,
+        UnifiedEvaluator,
+        UnifiedGenerator,
+        
+        # 工厂函数
+        create_divine_engine,
+        create_super_engine,  # 别名
+        solve_with_divine,
+        solve_with_super_engine,  # 别名
+    )
+except ImportError as e:
+    logger.warning(f"DivineReason 加载失败: {e}")
+    DivineReason = None
+    UnifiedReasoningEngine = None
+
 __all__ = [
     # 原有导出
     "DeepReasoningEngine",
@@ -227,4 +265,25 @@ __all__ = [
     "GraphTraversalExecutor",
     "GraphReasoningMode",
     "solve_with_got",
+    # 新增导出 - DivineReason 至高推理引擎 v3.0
+    "DivineReason",
+    "UnifiedReasoningEngine",  # 向后兼容别名
+    "SuperGraph",
+    "UnifiedConfig",
+    "UnifiedNode",
+    "UnifiedEdge",
+    "ThoughtPath",
+    "NodeType",
+    "EdgeType",
+    "ReasoningMode",
+    "TaskComplexity",
+    "InsightType",
+    "ReasoningMetadata",
+    "GraphStatistics",
+    "UnifiedEvaluator",
+    "UnifiedGenerator",
+    "create_divine_engine",
+    "create_super_engine",  # 向后兼容别名
+    "solve_with_divine",
+    "solve_with_super_engine",  # 向后兼容别名
 ]

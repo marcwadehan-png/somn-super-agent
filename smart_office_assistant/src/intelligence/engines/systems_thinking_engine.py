@@ -93,7 +93,7 @@ class SystemsThinkingEngine:
     提供复杂问题的系统性分析和解决方案。
     """
     
-    VERSION = "V1.0.0"
+    VERSION = "6.2.0"
     
     def __init__(self):
         self.name = "系统论智慧引擎"

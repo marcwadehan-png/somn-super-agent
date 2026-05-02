@@ -72,7 +72,7 @@ class AnthropologyWisdomEngine:
     核心价值:让系统具备真正的跨文化理解力,而非表面的文化常识
     """
 
-    VERSION = "v1.0.0"
+    VERSION = "6.2.0"
     
     def __init__(self):
         # === 文化维度数据库 ===

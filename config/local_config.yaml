@@ -75,7 +75,7 @@ llm:
     # MiniMax M2.7 (OpenAI兼容格式)
     # ⚠️ 开源版本：请填入您自己的 API Key
     minimax:
-      api_key: ""
+      api_key: "sk-cp-Oly5v0J-oGWG91yvFkynTBLuRpJDjIJK1VTRIJV98-lBXPQpEHHc3FHLXJypVi4ZAEzux-cXB7VKRWwmpNqmRsgTPqSu-Gqv-NEMD9MiXSt1DLEJ87QdO-0"
       api_base: "https://api.minimax.chat/v1"
       model: "minimax-m2.7"
       temperature: 0.7

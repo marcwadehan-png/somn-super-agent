@@ -37,7 +37,7 @@ class HongMingWisdomCore:
     def __init__(self):
         """init鸿铭智慧核心"""
         self.name = "HongMingWisdomCore"
-        self.version = "v1.0.0"
+        self.version="6.2.0"
 
         # init子系统
         self.mingfen_system = MingFenSystem()

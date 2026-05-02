@@ -660,6 +660,33 @@ class GlobalClawScheduler:
         primary = claw_names[0]
         collaborators = claw_names[1:]
         
+        # ── 贤者协作规则检查（角色约束 + 自动调整主Claw）──
+        if collaborators:
+            try:
+                from ..dual_track.sage_collaboration_rules import get_sage_collaboration_rules
+                rules = get_sage_collaboration_rules()
+                check = rules.check_collaboration_eligibility(primary, collaborators, query)
+                if check.warnings:
+                    logger.info(f"[协作调度] 角色检查: {check.warnings}")
+                    # 自动调整：如果建议了更合适的主Claw，自动提升
+                    for warning in check.warnings:
+                        if "建议调换" in warning or "建议" in warning:
+                            suggested, _ = rules.suggest_primary(
+                                [primary] + collaborators, query
+                            )
+                            if suggested and suggested != primary:
+                                # 将suggested提升为主Claw
+                                all_claws = [primary] + list(collaborators)
+                                all_claws.remove(suggested)
+                                primary = suggested
+                                collaborators = all_claws
+                                logger.info(
+                                    f"[协作调度] 主Claw自动调整为: {primary}"
+                                )
+                                break
+            except Exception as e:
+                logger.debug(f"[协作调度] 角色检查跳过: {e}")
+        
         ticket = TaskTicket.create(
             query=query,
             target_claw=primary,

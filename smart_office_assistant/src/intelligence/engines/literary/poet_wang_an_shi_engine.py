@@ -44,7 +44,7 @@ class 王安石诗歌characteristics:
 class 王安石深化引擎:
     """王安石诗文深化分析引擎 v8.2.0"""
 
-    VERSION = "v8.2.0"
+    VERSION = "6.2.0"
 
     def __init__(self):
         self.诗歌characteristics = self._init_characteristics()

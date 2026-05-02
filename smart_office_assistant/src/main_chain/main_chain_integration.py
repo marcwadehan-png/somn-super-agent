@@ -177,7 +177,7 @@ class MainChainIntegration:
 
         # 路由决策影响
         if route in ["orchestrator"] and complexity < 0.3:
-            return ChainRunMode.SERIAL  # 快手菜模式用串联
+            return ChainRunMode.SERIAL  # FAST模式用串联
 
         # 复杂度决策
         if complexity >= 0.7 or has_parallel:

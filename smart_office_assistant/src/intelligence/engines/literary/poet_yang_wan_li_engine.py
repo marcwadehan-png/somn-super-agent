@@ -36,7 +36,7 @@ class 杨万里代表作品(Enum):
 class 杨万里深化引擎:
     """杨万里诗词深化分析引擎 v8.2.0"""
 
-    VERSION = "v8.2.0"
+    VERSION = "6.2.0"
 
     def __init__(self):
         self.诗歌characteristics = self._init_characteristics()

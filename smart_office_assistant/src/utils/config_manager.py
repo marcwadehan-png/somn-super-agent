@@ -25,7 +25,7 @@ from functools import lru_cache
 @dataclass
 class SystemConfig:
     """系统配置"""
-    version: str = "2.0.0"
+    version: str = "6.2.0"
     environment: str = "standalone"
     debug: bool = False
     log_level: str = "INFO"

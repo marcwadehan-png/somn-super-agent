@@ -307,7 +307,7 @@ class TopThinkingMethodsEngine:
     def __init__(self):
         """init顶级思维法引擎"""
         self.name = "顶级思维法集成模块"
-        self.version = "v7.0.0"
+        self.version="6.2.0"
         logger.info(f"{self.name} {self.version} init完成")
     
     def recommend_methods(self,

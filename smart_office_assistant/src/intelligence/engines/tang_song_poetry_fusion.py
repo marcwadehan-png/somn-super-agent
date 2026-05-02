@@ -82,7 +82,7 @@ class 唐宋ci派(Enum):
 class 唐诗宋词fusion模块:
     """唐诗宋词fusion模块 v9.1.0 - 50大家全覆盖"""
     
-    VERSION = "v9.1.0"
+    VERSION = "6.2.0"
     
     def __init__(self):
         self._init_all_engines()
@@ -594,6 +594,3 @@ class 唐诗宋词fusion模块:
 唐宋诗词fusion = 唐诗宋词fusion模块()
 
 # 测试函数
-# if __name__ == "__main__":
-# #     raise RuntimeError("此入口已禁用 - 请使用 tests/ 目录")
-__all__ = ['poet对比类型', '唐宋ci派']

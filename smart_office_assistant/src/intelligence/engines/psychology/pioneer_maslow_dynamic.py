@@ -65,7 +65,7 @@ class 马斯洛需求引擎:
     
     def __init__(self):
         self.name = "马斯洛需求动态引擎"
-        self.version = "8.2.0"
+        self.version="6.2.0"
         
         # 需求层次定义
         self.需求层次定义 = {

@@ -121,7 +121,7 @@ class PoliticalReformWisdomCore:
     提供: 改革策略、干部管理、财政改革、危机应对、外交博弈等智慧
     """
     
-    VERSION = "1.0.0"
+    VERSION = "6.2.0"
     
     def __init__(self):
         self._reformers = self._init_reformers()

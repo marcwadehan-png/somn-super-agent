@@ -45,7 +45,7 @@ class 白居易诗歌类型(Enum):
 class 白居易深化引擎:
     """白居易诗歌深化分析引擎 v9.0.0"""
     
-    VERSION = "v9.0.0"
+    VERSION = "6.2.0"
     
     def __init__(self):
         self.诗歌characteristics = self._init_characteristics()

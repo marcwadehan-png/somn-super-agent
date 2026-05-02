@@ -64,7 +64,7 @@ class 奥格威品牌叙事引擎:
     
     def __init__(self):
         self.name = "奥格威品牌叙事引擎"
-        self.version = "8.2.0"
+        self.version="6.2.0"
         
         # 品牌形象要素
         self.品牌形象要素 = {

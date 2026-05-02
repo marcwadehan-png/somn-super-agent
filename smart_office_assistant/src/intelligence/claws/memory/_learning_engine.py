@@ -364,14 +364,14 @@ class LearningEngine:
         
         Args:
             query: 学习内容
-            context: 上下文
+            context: 上下文（仅用于日志，不作为格子名称）
             auto_connect: 是否自动建立连接
             
         Returns:
             Dict: 学习结果
         """
-        # 1. 按需创建或查找格子
-        cell_id = self.creator.find_or_create(query, context)
+        # 1. 按需创建或查找格子（只用query作为名称，避免文件名过长）
+        cell_id = self.creator.find_or_create(query)
         
         # 2. 激活格子
         self.memory.activate(cell_id, reason=f"学习: {query[:50]}")

@@ -40,7 +40,7 @@ class 神经科xueshuxue深hua系tong:
 
     def __init__(self):
         self.系统名称 = "神经科学数学深化系统"
-        self.版本 = "v8.2.0 P2级"
+        self.版本 = "v6.2.0 P2级"
 
         # 核心概念库
         self.神经科学概念 = {

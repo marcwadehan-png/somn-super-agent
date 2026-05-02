@@ -160,7 +160,7 @@ class ChineseConsumerCultureEngine:
 
     def __init__(self):
         self.name = "ChineseConsumerCultureEngine"
-        self.version = "v1.0.0"
+        self.version="6.2.0"
         
         # 面子投资阈值(超过则触发风险提示)
         self.face_investment_threshold = 0.7

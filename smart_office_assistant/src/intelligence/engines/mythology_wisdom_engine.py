@@ -145,7 +145,7 @@ class MythologyWisdomEngine:
     """
 
     def __init__(self):
-        self.version = "v1.0.0"
+        self.version="6.2.0"
         self._init_cosmogony_models()
         self._init_binary_oppositions()
         self._init_hero_journeys()

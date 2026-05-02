@@ -37,7 +37,7 @@ class 李清照代表作品(Enum):
 class 李清照深化引擎:
     """李清照诗词深化分析引擎 v8.2.0"""
 
-    VERSION = "v8.2.0"
+    VERSION = "6.2.0"
 
     def __init__(self):
         self.诗歌characteristics = self._init_characteristics()

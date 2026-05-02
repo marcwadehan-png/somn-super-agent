@@ -50,7 +50,7 @@ class SkillStatus(Enum):
 class SkillMetadata:
     """技能元数据"""
     name: str
-    version: str = "1.0.0"
+    version: str = "6.2.0"
     description: str = ""
     author: str = ""
     tags: List[str] = field(default_factory=list)

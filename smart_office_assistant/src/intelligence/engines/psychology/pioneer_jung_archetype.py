@@ -81,7 +81,7 @@ class 荣格原型引擎:
     
     def __init__(self):
         self.name = "荣格原型引擎"
-        self.version = "8.2.0"
+        self.version="6.2.0"
         
         # 原型数据库
         self.原型库 = {

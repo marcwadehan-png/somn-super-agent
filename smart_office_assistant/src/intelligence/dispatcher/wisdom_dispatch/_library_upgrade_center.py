@@ -38,9 +38,9 @@ from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeou
 
 # 获取项目根目录
 try:
-    from smart_office_assistant.src.core.paths import PROJECT_ROOT
+    from src.core.paths import PROJECT_ROOT
 except ImportError:
-    PROJECT_ROOT = Path(__file__).parent.parent.parent.parent.parent
+    PROJECT_ROOT = Path(__file__).resolve().parents[4]
 
 # 惰性目录属性（首次访问时才创建）
 _libraries_upgrade_dir: Optional[Path] = None
@@ -203,8 +203,8 @@ def _get_default_llm_caller() -> Callable:
     """
     def _call(prompt: str, system: str = "") -> Dict:
         try:
-            from smart_office_assistant.src.core._somn_context_api import _module_call_llm_for_json  # noqa: F401,F811
-            from smart_office_assistant.src.core.somn_core import get_somn_core
+            from src.core._somn_context_api import _module_call_llm_for_json  # noqa: F401,F811
+            from src.core.somn_core import get_somn_core
             somn = get_somn_core()
             return somn._call_llm_for_json(
                 prompt=prompt,
@@ -303,7 +303,7 @@ class LibraryDataReader:
         """延迟获取藏书阁实例"""
         if self._library is None:
             try:
-                from smart_office_assistant.src.intelligence.dispatcher.wisdom_dispatch._imperial_library import get_imperial_library
+                from src.intelligence.dispatcher.wisdom_dispatch._imperial_library import get_imperial_library
                 self._library = get_imperial_library()
             except ImportError as e:
                 logger.error(f"无法导入藏书阁模块: {e}")
@@ -381,7 +381,7 @@ class LibraryDataReader:
         
         try:
             # 从贤者分馆查询
-            from smart_office_assistant.src.intelligence.dispatcher.wisdom_dispatch._imperial_library import LibraryWing
+            from src.intelligence.dispatcher.wisdom_dispatch._imperial_library import LibraryWing
             
             cells = self.library.query_cells(
                 wing=LibraryWing.SAGE,
@@ -420,7 +420,7 @@ class LibraryDataReader:
             return []
         
         try:
-            from smart_office_assistant.src.intelligence.dispatcher.wisdom_dispatch._imperial_library import LibraryWing
+            from src.intelligence.dispatcher.wisdom_dispatch._imperial_library import LibraryWing
             
             # 查询架构分馆的历史记录
             cells = self.library.query_cells(
@@ -469,7 +469,7 @@ class LibraryDataReader:
             return []
         
         try:
-            from smart_office_assistant.src.intelligence.dispatcher.wisdom_dispatch._imperial_library import LibraryWing
+            from src.intelligence.dispatcher.wisdom_dispatch._imperial_library import LibraryWing
             
             cells = self.library.query_cells(
                 wing=LibraryWing.ARCH,
@@ -1080,7 +1080,7 @@ class UpgradeRecorder:
         """延迟获取藏书阁实例"""
         if self._library is None:
             try:
-                from smart_office_assistant.src.intelligence.dispatcher.wisdom_dispatch._imperial_library import get_imperial_library
+                from src.intelligence.dispatcher.wisdom_dispatch._imperial_library import get_imperial_library
                 self._library = get_imperial_library()
             except ImportError as e:
                 logger.error(f"无法导入藏书阁模块: {e}")
@@ -1102,7 +1102,7 @@ class UpgradeRecorder:
             return False
         
         try:
-            from smart_office_assistant.src.intelligence.dispatcher.wisdom_dispatch._imperial_library import (
+            from src.intelligence.dispatcher.wisdom_dispatch._imperial_library import (
                 LibraryWing, MemorySource, MemoryCategory
             )
             
@@ -1223,7 +1223,7 @@ class LibraryUpgradeCenter:
         """注册到藏书阁"""
         if self._reader.library:
             try:
-                from smart_office_assistant.src.intelligence.dispatcher.wisdom_dispatch._imperial_library import LibraryWing
+                from src.intelligence.dispatcher.wisdom_dispatch._imperial_library import LibraryWing
                 
                 self._reader.library.register_bridge("LibraryUpgradeCenter", {
                     'wing': LibraryWing.ARCH,

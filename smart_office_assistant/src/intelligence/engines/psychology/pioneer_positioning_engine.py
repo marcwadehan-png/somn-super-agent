@@ -62,7 +62,7 @@ class 特劳特定位引擎:
     
     def __init__(self):
         self.name = "特劳特定位引擎"
-        self.version = "8.2.0"
+        self.version="6.2.0"
         
         # 定位类型定义
         self.定位类型定义 = {

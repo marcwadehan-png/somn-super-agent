@@ -83,7 +83,7 @@ class LiteraryNarrativeEngine:
     核心价值:让系统具备深度叙事分析能力和人文洞察力
     """
 
-    VERSION = "v1.0.0"
+    VERSION = "6.2.0"
     
     def __init__(self):
         # === 莫言叙事系统 ===

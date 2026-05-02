@@ -11,8 +11,8 @@ __all__ = [
     'save_all',
 ]
 
-神经记忆系统 v3.0 - 集成版本
-Neural Memory System V3.0 - Integrated Version
+神经记忆系统 v6.2.0 - 集成版本
+Neural Memory System v6.2.0 - Integrated Version
 
 核心集成:
 1. 记忆编码系统 - 多模态,细粒度,上下文感知
@@ -27,7 +27,6 @@ Neural Memory System V3.0 - Integrated Version
 
 import json
 from pathlib import Path
-from src.core.paths import DATA_DIR
 from datetime import datetime
 from typing import Dict, List, Any, Optional, Tuple, Union
 from dataclasses import dataclass, field
@@ -35,92 +34,203 @@ from enum import Enum
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import threading
-from loguru import logger
-import numpy as np
 
-# 导入v3.0组件
+# v7.1: 延迟导入重模块 — 避免import时加载50-100ms
 try:
-    from src.neural_memory.memory_encoding_system_v3 import (
-        MemoryEncoderV3,
-        MemoryEncoding,
-        EncodingContext,
-        EncodingGranularity,
-        EncodingModality,
-        EncodingType
-    )
+    from loguru import logger
 except ImportError:
-    # 后备定义
-    from dataclasses import dataclass
-    @dataclass
-    class EncodingContext:
-        user_id: str = "default"
-        session_id: str = "default"
-        timestamp: str = ""
-        metadata: dict = None
-        def __post_init__(self):
-            if self.metadata is None:
-                self.metadata = {}
-    EncodingGranularity = None
-    EncodingModality = None
-    EncodingType = None
-    MemoryEncoderV3 = None
-    MemoryEncoding = None
+    import logging
+    logger = logging.getLogger(__name__)
 
-try:
-    from src.neural_memory.reinforcement_learning_v3 import (
-        ReinforcementLearningSystemV3,
-        LearningState,
-        LearningAction,
-        LearningExperience,
-        LearningType
-    )
-except ImportError:
-    pass
+# v7.1: numpy 延迟导入 — 仅在真正需要向量计算时加载
+_np = None
+def _get_numpy():
+    """延迟导入 numpy（仅首次调用时加载）"""
+    global _np
+    if _np is None:
+        try:
+            import numpy as _np_mod
+            _np = _np_mod
+        except ImportError:
+            _np = None
+    return _np
 
-try:
-    from src.neural_memory.memory_richness_v3 import (
-        MemoryRichnessSystemV3,
-        MemoryRichnessMetrics,
-        MemoryGap
-    )
-except ImportError:
-    # 占位符类型
-    from dataclasses import dataclass
-    @dataclass
-    class MemoryRichnessMetrics:
-        completeness: float = 0.0
-        depth: float = 0.0
-        relevance: float = 0.0
-    @dataclass
-    class MemoryGap:
-        gap_type: str = ""
-        severity: float = 0.0
-    MemoryRichnessSystemV3 = None
+# v7.1: 延迟导入路径模块 — 避免模块级依赖
+_DATA_DIR = None
+def _get_data_dir():
+    """延迟获取 DATA_DIR"""
+    global _DATA_DIR
+    if _DATA_DIR is None:
+        try:
+            from src.core.paths import DATA_DIR
+            _DATA_DIR = DATA_DIR
+        except ImportError:
+            _DATA_DIR = Path(__file__).parent.parent.parent / "data"
+    return _DATA_DIR
 
-try:
-    from src.neural_memory.memory_granularity_v3 import (
-        MemoryGranularitySystemV3,
-        GranularMemory,
-        GranularityLevel
-    )
-except ImportError:
-    # 占位符类型
-    class GranularityLevel(Enum):
-        SENTENCE = "sentence"
-        PARAGRAPH = "paragraph"
-        DOCUMENT = "document"
-    class GranularMemory:
-        content: str = ""
-        level: GranularityLevel = GranularityLevel.SENTENCE
-    MemoryGranularitySystemV3 = None
+# v7.1 FastBoot: 子系统延迟导入 — 避免模块加载时50-200ms开销
+# 所有子模块在首次使用时才真正导入，import 本身只需 <1ms
 
-# 导入v2.0核心(保留兼容性)
-try:
-    from .memory_engine_v2 import MemoryEngineV2, Memory, MemoryType, MemoryTier
-    MEMORY_V2_AVAILABLE = True
-except ImportError as e:
-    logger.warning(f"memory_engine_v2 导入失败: {e}")
-    MEMORY_V2_AVAILABLE = False
+# 延迟导入缓存
+_lazy_imports = {}
+
+def _lazy_import_encoding():
+    """延迟导入编码子系统（首次使用时加载，含 sentence-transformers 约500-2000ms）"""
+    key = 'encoding'
+    if key not in _lazy_imports:
+        try:
+            from src.neural_memory.memory_encoding_system_v3 import (
+                MemoryEncoderV3, MemoryEncoding, EncodingContext,
+                EncodingGranularity, EncodingModality, EncodingType
+            )
+            _lazy_imports[key] = {
+                'MemoryEncoderV3': MemoryEncoderV3, 'MemoryEncoding': MemoryEncoding,
+                'EncodingContext': EncodingContext, 'EncodingGranularity': EncodingGranularity,
+                'EncodingModality': EncodingModality, 'EncodingType': EncodingType,
+            }
+        except ImportError:
+            # 后备定义
+            from dataclasses import dataclass as _dc_dataclass
+            @_dc_dataclass
+            class EncodingContext:
+                user_id: str = "default"
+                session_id: str = "default"
+                timestamp: str = ""
+                metadata: dict = None
+                def __post_init__(self):
+                    if self.metadata is None:
+                        self.metadata = {}
+            _lazy_imports[key] = {
+                'MemoryEncoderV3': None, 'MemoryEncoding': None,
+                'EncodingContext': EncodingContext, 'EncodingGranularity': None,
+                'EncodingModality': None, 'EncodingType': None,
+            }
+    return _lazy_imports[key]
+
+def _lazy_import_rl():
+    """延迟导入强化学习子系统"""
+    key = 'rl'
+    if key not in _lazy_imports:
+        try:
+            from src.neural_memory.reinforcement_learning_v3 import (
+                ReinforcementLearningSystemV3, LearningState,
+                LearningAction, LearningExperience, LearningType
+            )
+            _lazy_imports[key] = {
+                'ReinforcementLearningSystemV3': ReinforcementLearningSystemV3,
+                'LearningState': LearningState, 'LearningAction': LearningAction,
+                'LearningExperience': LearningExperience, 'LearningType': LearningType,
+            }
+        except ImportError:
+            _lazy_imports[key] = {
+                'ReinforcementLearningSystemV3': None,
+                'LearningState': None, 'LearningAction': None,
+                'LearningExperience': None, 'LearningType': None,
+            }
+    return _lazy_imports[key]
+
+def _lazy_import_richness():
+    """延迟导入丰满度子系统"""
+    key = 'richness'
+    if key not in _lazy_imports:
+        try:
+            from src.neural_memory.memory_richness_v3 import (
+                MemoryRichnessSystemV3, MemoryRichnessMetrics, MemoryGap
+            )
+            _lazy_imports[key] = {
+                'MemoryRichnessSystemV3': MemoryRichnessSystemV3,
+                'MemoryRichnessMetrics': MemoryRichnessMetrics,
+                'MemoryGap': MemoryGap,
+            }
+        except ImportError:
+            from dataclasses import dataclass as _dc_dataclass
+            @_dc_dataclass
+            class MemoryRichnessMetrics:
+                completeness: float = 0.0
+                depth: float = 0.0
+                relevance: float = 0.0
+            @_dc_dataclass
+            class MemoryGap:
+                gap_type: str = ""
+                severity: float = 0.0
+            _lazy_imports[key] = {
+                'MemoryRichnessSystemV3': None,
+                'MemoryRichnessMetrics': MemoryRichnessMetrics,
+                'MemoryGap': MemoryGap,
+            }
+    return _lazy_imports[key]
+
+def _lazy_import_granularity():
+    """延迟导入颗粒度子系统"""
+    key = 'granularity'
+    if key not in _lazy_imports:
+        try:
+            from src.neural_memory.memory_granularity_v3 import (
+                MemoryGranularitySystemV3, GranularMemory, GranularityLevel
+            )
+            _lazy_imports[key] = {
+                'MemoryGranularitySystemV3': MemoryGranularitySystemV3,
+                'GranularMemory': GranularMemory, 'GranularityLevel': GranularityLevel,
+            }
+        except ImportError:
+            class GranularityLevel(Enum):
+                SENTENCE = "sentence"
+                PARAGRAPH = "paragraph"
+                DOCUMENT = "document"
+            class GranularMemory:
+                content: str = ""
+                level: GranularityLevel = GranularityLevel.SENTENCE
+            _lazy_imports[key] = {
+                'MemoryGranularitySystemV3': None,
+                'GranularMemory': GranularMemory, 'GranularityLevel': GranularityLevel,
+            }
+    return _lazy_imports[key]
+
+def _lazy_import_v2():
+    """延迟导入v2.0核心（保留兼容性）"""
+    key = 'v2'
+    if key not in _lazy_imports:
+        try:
+            from .memory_engine_v2 import MemoryEngineV2, Memory, MemoryType, MemoryTier
+            _lazy_imports[key] = {
+                'MemoryEngineV2': MemoryEngineV2, 'Memory': Memory,
+                'MemoryType': MemoryType, 'MemoryTier': MemoryTier,
+                'available': True,
+            }
+        except ImportError as e:
+            logger.warning(f"memory_engine_v2 导入失败: {e}")
+            _lazy_imports[key] = {'available': False}
+    return _lazy_imports[key]
+
+# 模块级兼容变量 — 从延迟导入中提取，首次访问时触发加载
+# 注意：这些只在 NeuralMemoryConfig 默认值等场景使用，不影响运行时性能
+
+# GranularityLevel 需要用于 NeuralMemoryConfig 默认值，提前轻量加载
+_gl = _lazy_import_granularity()
+GranularityLevel = _gl.get('GranularityLevel')
+
+# LearningType 需要用于 NeuralMemoryConfig 默认值，提前轻量加载
+_rl = _lazy_import_rl()
+LearningType = _rl.get('LearningType')
+
+# 以下变量延迟到首次使用时通过 _lazy_import_*() 获取
+MemoryEncoderV3 = None  # 通过 _lazy_import_encoding()['MemoryEncoderV3'] 获取
+MemoryEncoding = None
+EncodingContext = None
+EncodingGranularity = None
+EncodingModality = None
+EncodingType = None
+ReinforcementLearningSystemV3 = None
+MemoryRichnessSystemV3 = None
+MemoryRichnessMetrics = None
+MemoryGap = None
+MemoryGranularitySystemV3 = None
+GranularMemory = None
+MemoryEngineV2 = None
+Memory = None
+MemoryType = None
+MemoryTier = None
+MEMORY_V2_AVAILABLE = False  # 运行时通过 _lazy_import_v2()['available'] 获取
 
 class MemoryOperation(Enum):
     """记忆操作类型"""
@@ -147,7 +257,7 @@ class NeuralMemoryConfig:
     
     # 强化学习配置
     enable_rl: bool = True
-    rl_learning_type: LearningType = LearningType.DEEP_Q_NETWORK
+    rl_learning_type: Optional[Any] = None  # 运行时解析，避免模块级导入失败
     rl_learning_rate: float = 0.001
     rl_epsilon: float = 1.0
     
@@ -157,7 +267,7 @@ class NeuralMemoryConfig:
     
     # 颗粒度配置
     enable_granularity: bool = True
-    default_granularity: GranularityLevel = GranularityLevel.SENTENCE
+    default_granularity: Optional[Any] = None  # 运行时解析，避免模块级导入失败
     
     # 性能配置
     max_workers: int = 4
@@ -170,6 +280,21 @@ class NeuralMemoryConfig:
     
     # v2.0兼容性
     enable_v2_compatibility: bool = True
+    
+    def __post_init__(self):
+        """运行时解析枚举默认值，避免模块级导入失败"""
+        # 解析 rl_learning_type
+        if self.rl_learning_type is None:
+            _rl = _lazy_import_rl()
+            lt = _rl.get('LearningType')
+            self.rl_learning_type = lt.DEEP_Q_NETWORK if lt else None
+        
+        # 解析 default_granularity
+        if self.default_granularity is None:
+            _gl = _lazy_import_granularity()
+            gl = _gl.get('GranularityLevel')
+            self.default_granularity = gl.SENTENCE if gl else None
+
 
 @dataclass
 class MemoryOperationResult:
@@ -211,17 +336,22 @@ class NeuralMemorySystemV3:
     
     def __init__(self, config: Optional[NeuralMemoryConfig] = None):
         self.config = config or NeuralMemoryConfig()
-        from src.core.paths import MEMORY_DIR
-        self.base_path = Path(self.config.base_path) if self.config.base_path else MEMORY_DIR
+        self.base_path = Path(self.config.base_path) if self.config.base_path else _get_data_dir() / "memory"
         self.base_path.mkdir(parents=True, exist_ok=True)
         
-        # initv3.0组件
-        self._init_v3_components()
+        # v7.1 FastBoot: 延迟初始化 — 子系统在首次使用时才创建
+        self._v3_initialized = False
+        self._v2_initialized = False
+        self._init_lock = threading.RLock()
         
-        # initv2.0兼容层
-        self._init_v2_compatibility()
+        # 占位：子系统实例（延迟到 _ensure_initialized 时创建）
+        self.encoder = None
+        self.rl_system = None
+        self.richness_system = None
+        self.granularity_system = None
+        self.memory_v2 = None
         
-        # 线程池
+        # 线程池（轻量，即时创建）
         self.executor = ThreadPoolExecutor(max_workers=self.config.max_workers)
         
         # 锁
@@ -242,69 +372,102 @@ class NeuralMemorySystemV3:
         # 操作历史
         self.operation_history: List[MemoryOperationResult] = []
         
-        logger.info("神经记忆系统v3.0init完成")
-        logger.info(f"  编码系统: {'启用' if self.config.enable_encoding else '禁用'}")
-        logger.info(f"  强化学习: {'启用' if self.config.enable_rl else '禁用'}")
-        logger.info(f"  丰满度系统: {'启用' if self.config.enable_richness else '禁用'}")
-        logger.info(f"  颗粒度系统: {'启用' if self.config.enable_granularity else '禁用'}")
-        logger.info(f"  v2.0兼容: {'启用' if self.config.enable_v2_compatibility else '禁用'}")
+        logger.info("神经记忆系统v3.0 FastBoot init完成（子系统延迟加载）")
+    
+    def _ensure_initialized(self):
+        """确保子系统已初始化（线程安全，双重检查锁）"""
+        if self._v3_initialized:
+            return
+        with self._init_lock:
+            if self._v3_initialized:
+                return
+            self._init_v3_components()
+            self._init_v2_compatibility()
+            self._v3_initialized = True
+            self._v2_initialized = True
+            logger.info("神经记忆系统v3.0子系统延迟加载完成")
     
     def _init_v3_components(self):
-        """initv3.0组件"""
-        # 编码系统
+        """initv3.0组件（延迟调用，从 _lazy_imports 获取类）"""
+        # 编码系统 — 含 sentence-transformers，最重（500-2000ms）
         if self.config.enable_encoding:
-            self.encoder = MemoryEncoderV3(
-                model_name=self.config.encoding_model,
-                embedding_dim=self.config.embedding_dim,
-                base_path=str(self.base_path / "encodings")
-            )
+            enc_mod = _lazy_import_encoding()
+            EncoderCls = enc_mod.get('MemoryEncoderV3')
+            if EncoderCls is not None:
+                self.encoder = EncoderCls(
+                    model_name=self.config.encoding_model,
+                    embedding_dim=self.config.embedding_dim,
+                    base_path=str(self.base_path / "encodings")
+                )
+            else:
+                self.encoder = None
         else:
             self.encoder = None
         
         # 强化学习系统
         if self.config.enable_rl:
-            self.rl_system = ReinforcementLearningSystemV3(
-                learning_type=self.config.rl_learning_type,
-                learning_rate=self.config.rl_learning_rate,
-                epsilon=self.config.rl_epsilon,
-                base_path=str(self.base_path / "reinforcement_learning")
-            )
+            rl_mod = _lazy_import_rl()
+            RLCls = rl_mod.get('ReinforcementLearningSystemV3')
+            if RLCls is not None:
+                self.rl_system = RLCls(
+                    learning_type=self.config.rl_learning_type,
+                    learning_rate=self.config.rl_learning_rate,
+                    epsilon=self.config.rl_epsilon,
+                    base_path=str(self.base_path / "reinforcement_learning")
+                )
+            else:
+                self.rl_system = None
         else:
             self.rl_system = None
         
         # 丰满度系统
-        if self.config.enable_richness and MemoryRichnessSystemV3 is not None:
-            self.richness_system = MemoryRichnessSystemV3(
-                base_path=str(self.base_path / "richness")
-            )
+        if self.config.enable_richness:
+            rich_mod = _lazy_import_richness()
+            RichCls = rich_mod.get('MemoryRichnessSystemV3')
+            if RichCls is not None:
+                self.richness_system = RichCls(
+                    base_path=str(self.base_path / "richness")
+                )
+            else:
+                self.richness_system = None
         else:
             self.richness_system = None
         
         # 颗粒度系统
-        if self.config.enable_granularity and MemoryGranularitySystemV3 is not None:
-            self.granularity_system = MemoryGranularitySystemV3(
-                base_path=str(self.base_path / "granularity")
-            )
+        if self.config.enable_granularity:
+            gran_mod = _lazy_import_granularity()
+            GranCls = gran_mod.get('MemoryGranularitySystemV3')
+            if GranCls is not None:
+                self.granularity_system = GranCls(
+                    base_path=str(self.base_path / "granularity")
+                )
+            else:
+                self.granularity_system = None
         else:
             self.granularity_system = None
     
     def _init_v2_compatibility(self):
-        """initv2.0兼容层"""
-        if self.config.enable_v2_compatibility and MEMORY_V2_AVAILABLE:
-            try:
-                self.memory_v2 = MemoryEngineV2(
-                    base_path=str(self.base_path / "memory_v2")
-                )
-                logger.info("v2.0兼容层init成功")
-            except Exception as e:
-                logger.warning(f"v2.0兼容层init失败: {e}")
+        """initv2.0兼容层（延迟调用）"""
+        if self.config.enable_v2_compatibility:
+            v2_mod = _lazy_import_v2()
+            if v2_mod.get('available', False):
+                try:
+                    MemoryEngineV2Cls = v2_mod['MemoryEngineV2']
+                    self.memory_v2 = MemoryEngineV2Cls(
+                        base_path=str(self.base_path / "memory_v2")
+                    )
+                    logger.info("v2.0兼容层init成功")
+                except Exception as e:
+                    logger.warning(f"v2.0兼容层init失败: {e}")
+                    self.memory_v2 = None
+            else:
                 self.memory_v2 = None
         else:
             self.memory_v2 = None
     
     async def add_memory(self,
                         content: str,
-                        context: EncodingContext,
+                        context=None,
                         encode: bool = True,
                         granularize: bool = True) -> MemoryOperationResult:
         """
@@ -319,6 +482,14 @@ class NeuralMemorySystemV3:
         Returns:
             MemoryOperationResult: 操作结果
         """
+        self._ensure_initialized()
+        # 延迟获取 EncodingContext 默认值
+        if context is None:
+            enc_mod = _lazy_import_encoding()
+            ContextCls = enc_mod.get('EncodingContext')
+            if ContextCls is not None:
+                context = ContextCls()
+        
         start_time = datetime.now()
         
         try:
@@ -328,11 +499,16 @@ class NeuralMemorySystemV3:
             
             if encode and self.encoder:
                 encode_start = datetime.now()
+                # 延迟获取 EncodingGranularity / EncodingModality
+                _eg = _lazy_import_encoding().get('EncodingGranularity')
+                _em = _lazy_import_encoding().get('EncodingModality')
+                gran_arg = _eg.MULTI if (_eg and granularize) else (_eg.DOCUMENT if _eg else None)
+                mod_arg = _em.TEXT if _em else None
                 encoding = self.encoder.encode(
                     content=content,
                     context=context,
-                    granularity=EncodingGranularity.MULTI if granularize else EncodingGranularity.DOCUMENT,
-                    modality=EncodingModality.TEXT
+                    granularity=gran_arg,
+                    modality=mod_arg
                 )
                 encoding_time = (datetime.now() - encode_start).total_seconds()
             
@@ -444,9 +620,9 @@ class NeuralMemorySystemV3:
     
     async def retrieve_memory(self,
                              query: str,
-                             context: EncodingContext,
+                             context=None,
                              top_k: int = 10,
-                             granularity: Optional[GranularityLevel] = None) -> MemoryOperationResult:
+                             granularity=None) -> MemoryOperationResult:
         """
         检索记忆
         
@@ -459,6 +635,7 @@ class NeuralMemorySystemV3:
         Returns:
             MemoryOperationResult: 操作结果
         """
+        self._ensure_initialized()
         start_time = datetime.now()
         
         try:
@@ -476,11 +653,15 @@ class NeuralMemorySystemV3:
             
             if self.encoder:
                 encode_start = datetime.now()
+                _eg = _lazy_import_encoding().get('EncodingGranularity')
+                _em = _lazy_import_encoding().get('EncodingModality')
+                gran_arg = _eg.SENTENCE if _eg else None
+                mod_arg = _em.TEXT if _em else None
                 query_encoding = self.encoder.encode(
                     content=query,
                     context=context,
-                    granularity=EncodingGranularity.SENTENCE,
-                    modality=EncodingModality.TEXT
+                    granularity=gran_arg,
+                    modality=mod_arg
                 )
                 encoding_time = (datetime.now() - encode_start).total_seconds()
             
@@ -571,10 +752,65 @@ class NeuralMemorySystemV3:
                 error_message="处理失败",
                 execution_time=(datetime.now() - start_time).total_seconds()
             )
-    
+
+    async def search_memory(
+        self,
+        query: str,
+        top_k: int = 10,
+        memory_tier: str = "all"
+    ) -> List[Dict[str, Any]]:
+        """
+        简化版记忆搜索（不需要手动创建 context）
+
+        Args:
+            query: 查询内容
+            top_k: 返回结果数
+            memory_tier: 记忆层级 ("all", "eternal", "warm", "working")
+
+        Returns:
+            记忆列表
+        """
+        self._ensure_initialized()
+        # 创建默认上下文（延迟获取 EncodingContext）
+        enc_mod = _lazy_import_encoding()
+        ContextCls = enc_mod.get('EncodingContext')
+        if ContextCls is not None:
+            context = ContextCls(
+                user_id="neural_memory",
+                session_id="search",
+                timestamp=datetime.now().isoformat()
+            )
+        else:
+            context = None
+
+        # 调用原有 retrieve_memory
+        result = await self.retrieve_memory(
+            query=query,
+            context=context,
+            top_k=top_k
+        )
+
+        if result.success:
+            return result.memories or []
+        else:
+            # fallback: 使用 v2 搜索
+            if self.memory_v2:
+                v2_results = self.memory_v2.retrieve(query=query, top_k=top_k)
+                return [
+                    {
+                        "id": r.record.id,
+                        "content": r.record.content,
+                        "title": r.record.title,
+                        "score": r.similarity,
+                        "source": "v2"
+                    }
+                    for r in v2_results
+                ]
+            return []
+
     def evaluate_richness(self,
                            memories: List[Any],
-                           domain: str = "general") -> MemoryRichnessMetrics:
+                           domain: str = "general"):
         """
         评估记忆丰满度
         
@@ -585,6 +821,7 @@ class NeuralMemorySystemV3:
         Returns:
             MemoryRichnessMetrics: 丰满度metrics
         """
+        self._ensure_initialized()
         if not self.richness_system:
             logger.warning("丰满度系统未启用")
             return None
@@ -593,15 +830,17 @@ class NeuralMemorySystemV3:
     
     def get_richness_trend(self, days: int = 30) -> Dict[str, Any]:
         """get丰满度趋势"""
+        self._ensure_initialized()
         if not self.richness_system:
             return {'message': '丰满度系统未启用'}
         
         return self.richness_system.get_trend(days)
     
     def identify_gaps(self,
-                       metrics: MemoryRichnessMetrics,
-                       memories: List[Any]) -> List[MemoryGap]:
+                       metrics=None,
+                       memories: List[Any] = None):
         """recognize记忆缺口"""
+        self._ensure_initialized()
         if not self.richness_system:
             return []
         
@@ -609,7 +848,7 @@ class NeuralMemorySystemV3:
     
     def adjust_granularity(self,
                             memory_id: str,
-                            target_level: GranularityLevel) -> Optional[GranularMemory]:
+                            target_level=None):
         """
         调整记忆颗粒度
         
@@ -620,6 +859,7 @@ class NeuralMemorySystemV3:
         Returns:
             GranularMemory: 调整后的记忆
         """
+        self._ensure_initialized()
         if not self.granularity_system:
             logger.warning("颗粒度系统未启用")
             return None
@@ -671,6 +911,7 @@ class NeuralMemorySystemV3:
     
     def get_stats(self) -> Dict[str, Any]:
         """get统计信息"""
+        self._ensure_initialized()
         stats = {
             'operation_stats': self.operation_stats.copy(),
             'v3_components': {
@@ -704,6 +945,7 @@ class NeuralMemorySystemV3:
     
     def save_all(self):
         """保存所有数据"""
+        self._ensure_initialized()
         if self.rl_system:
             self.rl_system.save_model()
         

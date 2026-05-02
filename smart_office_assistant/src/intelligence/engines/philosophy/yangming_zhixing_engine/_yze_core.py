@@ -33,7 +33,7 @@ class ZhixingEngine(ZhixingKnowledgeBase):
 
     def __init__(self):
         self.name = "王阳明知行合一执行引擎"
-        self.version = "v8.1.0"
+        self.version="6.2.0"
         logger.info(f"{self.name} {self.version} init完成")
 
     # ==================== 核心功能 ====================

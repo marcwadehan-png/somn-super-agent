@@ -69,7 +69,7 @@ class 李贺深化引擎:
     4. 情感分析 - 分析诗歌中的悲愤与浪漫
     """
     
-    VERSION = "v1.0.0"
+    VERSION = "6.2.0"
     
     def __init__(self):
         self.poet信息 = self._initpoet信息()

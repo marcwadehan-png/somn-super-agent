@@ -49,7 +49,7 @@ class 事上磨练引擎:
     
     def __init__(self):
         self.name = "事上磨练引擎"
-        self.version = "8.1.0"
+        self.version="6.2.0"
         
         # 场景-心法mapping
         self.场景心法表 = {

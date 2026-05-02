@@ -40,7 +40,7 @@ class TemplateMetadata:
     variables: List[str] = field(default_factory=list)  # 变量列表
     tags: List[str] = field(default_factory=list)      # 标签
     author: str = ""               # 作者
-    version: str = "1.0"          # 版本
+    version: str = "6.2.0"          # 版本
     created: str = ""             # 创建日期
 
 

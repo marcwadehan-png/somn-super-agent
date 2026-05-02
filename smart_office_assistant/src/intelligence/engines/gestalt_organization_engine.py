@@ -397,7 +397,7 @@ class GestaltOrganizationEngine:
     def __init__(self):
         """init引擎"""
         self.name = "GestaltOrganizationEngine"
-        self.version = "1.0.0"
+        self.version="6.2.0"
         
         # 各分析器
         self.proximity_analyzer = ProximityAnalyzer()

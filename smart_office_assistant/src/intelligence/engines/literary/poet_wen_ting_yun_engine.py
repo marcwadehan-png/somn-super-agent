@@ -46,7 +46,7 @@ class 温庭筠诗歌characteristics:
 class 温庭筠深化引擎:
     """温庭筠诗文深化分析引擎 v8.2.0"""
 
-    VERSION = "v8.2.0"
+    VERSION = "6.2.0"
 
     def __init__(self):
         self.诗歌characteristics = self._init_characteristics()

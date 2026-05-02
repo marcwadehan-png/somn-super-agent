@@ -99,6 +99,26 @@ def register_admin_routes(app, app_state):
             logger.error(f"获取LLM状态失败: {e}")
             return _error(f"获取LLM状态失败: {e}")
 
+    @app.get("/api/v1/admin/llm/configs", tags=["管理-LLM"])
+    async def llm_configs():
+        """获取云端LLM配置列表"""
+        try:
+            from src.core.unified_llm_config import get_unified_llm_config_manager
+            cfg_mgr = get_unified_llm_config_manager()
+            configs = []
+            if cfg_mgr:
+                for name, cfg in cfg_mgr._configs.items():
+                    configs.append({
+                        "name": name,
+                        "provider": cfg.get("provider", "unknown"),
+                        "model": cfg.get("model", ""),
+                        "enabled": cfg.get("enabled", True),
+                    })
+            return _ok("LLM配置列表", data={"configs": configs, "total": len(configs)})
+        except Exception as e:
+            logger.error(f"获取LLM配置失败: {e}")
+            return _ok("LLM配置列表", data={"configs": [], "total": 0, "error": str(e)})
+
     @app.post("/api/v1/admin/llm/start", tags=["管理-LLM"])
     async def llm_start():
         """启动LLM引擎"""

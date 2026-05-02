@@ -113,7 +113,7 @@ class PsychologyWisdomEngine:
     - 埃利斯: 理性情绪疗法
     """
     
-    VERSION = "V1.0.0"
+    VERSION = "6.2.0"
     
     def __init__(self):
         self.name = "心理学智慧引擎"

@@ -96,7 +96,7 @@ class SelfCultivationSystem:
     def __init__(self):
         """init修身系统"""
         self.name = "SelfCultivationSystem"
-        self.version = "v1.0.0"
+        self.version="6.2.0"
 
         # 大学原文
         self.daxue_text = {

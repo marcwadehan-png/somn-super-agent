@@ -19,7 +19,7 @@ def fix_missing_quotes(line):
     
     # 修复模式1: self.xxx = value" -> self.xxx = "value"
     # 匹配 = xxx" 或 : xxx" 等
-    result = re.sub(r'([=:,\(\[\{]\s*)([^\'"][^,;\)]*)"', r'\1"\2"', result)
+    result = re.sub(r"""([=:,\[(\{]\s*)([^'"][^,;\)]*)\"""", r'\1"\2"', result)
     
     # 修复模式2: "xxx"y y" -> "xxx'yyy" (嵌套中文引号)
     
@@ -48,7 +48,7 @@ for line in lines:
     if re.match(r"^\s*[^\"']+\"", line):
         # 行开头有 xxx" 模式
         # 需要在前面加引号
-        new_line = re.sub(r'^(\s*)([^\"']+)(\")$', r'\1"""\2"""', line)
+        new_line = re.sub(r"""^(\s*)([^"']+)(\")$""", r'\1"""\2"""', line)
         if new_line != line:
             fixed_lines.append(new_line)
             continue

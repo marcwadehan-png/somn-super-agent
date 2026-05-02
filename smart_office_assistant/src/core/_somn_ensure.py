@@ -4,6 +4,12 @@ __all__ = [
     'ensure_autonomous_agent',
     'ensure_cloud_learning',
     'ensure_dual_model',  # [v1.0.0] A/B双模型左右大脑调度
+    'ensure_dual_track',  # [v1.1.0] 双轨系统(神政轨+神行轨)
+    'ensure_divine_reason',  # [v1.1.0] DivineReason统一推理引擎
+    'ensure_domain_nexus',  # [v1.1.0] DomainNexus知识库引擎
+    'ensure_ecosystem',  # [v1.2.0] 生态引擎系统
+    'ensure_eight_layer_pipeline',  # [v1.1.0] 天枢八层管道
+    'ensure_neural_layout',  # [v1.3.0] 神经网络布局集成
     'ensure_emotion_research',  # [v1.0.0] 情绪研究体系
     'ensure_global_claw_scheduler',  # [v1.0.0] 全局Claw调度器
     'ensure_layers',
@@ -13,6 +19,7 @@ __all__ = [
     'ensure_openclaw',
     'ensure_research_phase_manager',  # [v1.0.0] 研究阶段管理系统
     'ensure_runtime',
+    'ensure_sage_dispatch',  # [v1.1.0] SageDispatch贤者调度系统
     'ensure_semantic_memory',
     'ensure_wisdom_layers',
     'init_semantic_memory',
@@ -154,6 +161,48 @@ def background_warmup(self):
                 logger.info("[预热-GroupB] 情绪研究体系核心初始化完成")
             except Exception as e:
                 logger.warning(f"[预热-GroupB] 情绪研究体系初始化失败（不影响主流程）: {e}")
+
+            # [v1.1.0] SageDispatch 贤者调度系统（12调度器）
+            try:
+                _init_sage_dispatch(self)
+                logger.info("[预热-GroupB] SageDispatch 贤者调度系统就绪")
+            except Exception as e:
+                logger.warning(f"[预热-GroupB] SageDispatch初始化失败: {e}")
+
+            # [v1.1.0] DivineReason 统一推理引擎
+            try:
+                _init_divine_reason(self)
+                logger.info("[预热-GroupB] DivineReason 统一推理引擎就绪")
+            except Exception as e:
+                logger.warning(f"[预热-GroupB] DivineReason初始化失败: {e}")
+
+            # [v1.1.0] 天枢八层管道
+            try:
+                _init_eight_layer_pipeline(self)
+                logger.info("[预热-GroupB] 天枢八层管道就绪")
+            except Exception as e:
+                logger.warning(f"[预热-GroupB] 八层管道初始化失败: {e}")
+
+            # [v1.1.0] 双轨系统（神政轨+神行轨）
+            try:
+                _init_dual_track(self)
+                logger.info("[预热-GroupB] 双轨系统TrackBridge就绪")
+            except Exception as e:
+                logger.warning(f"[预热-GroupB] 双轨系统初始化失败: {e}")
+
+            # [v1.1.0] DomainNexus 知识库引擎
+            try:
+                _init_domain_nexus(self)
+                logger.info("[预热-GroupB] DomainNexus 知识库引擎就绪")
+            except Exception as e:
+                logger.warning(f"[预热-GroupB] DomainNexus初始化失败: {e}")
+
+            # [v1.3.0] 神经网络布局集成（6桥接绑定真实模块）
+            try:
+                _init_neural_layout(self)
+                logger.info("[预热-GroupB] NeuralLayout 神经网络布局集成就绪")
+            except Exception as e:
+                logger.warning(f"[预热-GroupB] NeuralLayout初始化失败: {e}")
         except Exception as e:
             logger.error(f"[预热-GroupB] 智能层失败: {e}")
 
@@ -166,6 +215,11 @@ def background_warmup(self):
 
     def _group_d_local_llm():
         """Group D: 本地LLM引擎 (A大模型 + B大模型) - 自动启动"""
+        # 如果设置了跳过本地模型（无本地模型环境），直接跳过 Group D
+        if os.getenv("SOMN_SKIP_LOCAL_MODEL", "").strip() in ("1", "true", "yes"):
+            logger.info("[预热-GroupD] 跳过本地模型初始化 (SOMN_SKIP_LOCAL_MODEL=1)")
+            return
+
         # A大模型 (Ollama/GGUF)
         try:
             from src.core.local_llm_manager import get_manager
@@ -213,8 +267,12 @@ def background_warmup(self):
                 logger.warning(f"[预热] 线程 {t.name} 在{remaining:.0f}s内未完成，允许继续后台运行")
 
         logger.info("  ✅ [后台预热 v20.0] 全部组件就绪")
+        # [v22.1 修复] 预热完成后通知等待者
+        _get_warmup_event().set()
     except Exception as e:
         logger.error(f"[后台预热] 失败: {e}\n{traceback.format_exc()}")
+        # 即使失败也要通知，避免等待者永远阻塞
+        _get_warmup_event().set()
 
 def ensure_llm(self):
     """
@@ -239,7 +297,7 @@ def ensure_llm(self):
             self._llm_initialized = True
         except Exception as e:
             logger.error(f"LLM 服务加载失败: {e}")
-            self._llm_initialized = True
+            # [v22.1 修复] 不再标记为True，允许后续重试
 
 
 def ensure_dual_model(self):
@@ -272,8 +330,8 @@ def ensure_dual_model(self):
 
             from src.tool_layer.dual_model_service import DualModelService, DualModelConfig
             config = DualModelConfig(
-                primary_model=os.getenv("SOMN_DUAL_PRIMARY_MODEL", "local-default"),
-                fallback_model=os.getenv("SOMN_DUAL_FALLBACK_MODEL", "deepseek"),
+                primary_model=os.getenv("SOMN_DUAL_PRIMARY_MODEL", os.getenv("SOMN_DEFAULT_MODEL", "local-default")),
+                fallback_model=os.getenv("SOMN_DUAL_FALLBACK_MODEL", "deepseek" if os.getenv("SOMN_DEFAULT_MODEL") == "minimax" else "minimax"),
             )
             self.dual_model_service = DualModelService(self.llm_service, config)
             self._dual_model_initialized = True
@@ -283,7 +341,7 @@ def ensure_dual_model(self):
             )
         except Exception as e:
             logger.error(f"A/B双模型服务初始化失败: {e}")
-            self._dual_model_initialized = True
+            # [v22.1 修复] 不再标记为True，允许后续重试
 
 def ensure_runtime(self):
     """
@@ -368,7 +426,7 @@ def ensure_layers(self):
             logger.info("神经/知识/语义记忆层 Tier2 加载完成")
         except Exception as e:
             logger.error(f"神经/知识/语义记忆层 Tier2 加载失败: {e}")
-            self._layers_initialized = True
+            # [v22.1 修复] 不再标记为True，允许后续重试
 
 def ensure_wisdom_layers(self):
     """
@@ -425,7 +483,7 @@ def ensure_wisdom_layers(self):
             logger.info("  📦 智慧/逻辑协调层懒加载完成")
         except Exception as e:
             logger.error(f"智慧层懒加载失败: {e}")
-            self._wisdom_layers_initialized = True
+            # [v22.1 修复] 不再标记为True，允许后续重试
 
 def ensure_semantic_memory(self):
     """确保语义记忆引擎已初始化 -- 合并到 _ensure_layers 统一管理"""
@@ -557,7 +615,7 @@ def _init_openclaw(self):
         logger.info(f"[OpenClaw] 初始化完成: {loaded_claws} 个Claw已加载, bridge_level={init_result.get('bridge_level', 'unknown')}")
     except Exception as e:
         logger.warning(f"[OpenClaw] 初始化异常: {e}")
-        self._openclaw_initialized = True  # 标记为已尝试，避免反复重试
+        # [v22.1 修复] 不再标记为True，允许后续重试
 
 
 def ensure_openclaw(self):
@@ -621,7 +679,7 @@ def ensure_emotion_research(self):
             logger.info("✅ 情绪研究体系核心已就绪")
         except Exception as e:
             logger.error(f"情绪研究体系初始化失败: {e}")
-            self._emotion_research_initialized = True  # 标记为已尝试，避免重复
+            # [v22.1 修复] 不再标记为True，允许后续重试
 
 
 def ensure_research_phase_manager(self):
@@ -714,3 +772,255 @@ def ensure_global_claw_scheduler(self):
             logger.error(f"全局Claw调度器初始化失败: {e}")
         finally:
             self._global_claw_scheduler_initialized = True
+
+
+# ═══════════════════════════════════════════════════════════════════
+# [v1.1.0] SageDispatch / DivineReason / 八层管道 / 双轨 / DomainNexus
+# ═══════════════════════════════════════════════════════════════════
+
+def _init_sage_dispatch(self):
+    """
+    [v1.1.0 新增] 初始化 SageDispatch 贤者调度系统
+
+    SageDispatch = 12调度器 + 核心引擎
+    入口: DispatchEngine.dispatch(problem, level, dispatcher_id)
+    单例: get_engine() -> DispatchEngine
+    """
+    try:
+        from knowledge_cells.core import get_engine as get_dispatch_engine
+        engine = get_dispatch_engine()
+        self._sage_dispatch_engine = engine
+        self._sage_dispatch_initialized = True
+        logger.info(f"[SageDispatch] 贤者调度系统就绪 (12调度器)")
+    except Exception as e:
+        logger.warning(f"[SageDispatch] 初始化失败（不影响主流程）: {e}")
+
+
+def ensure_sage_dispatch(self):
+    """[v1.1.0] 确保SageDispatch贤者调度系统已初始化"""
+    if getattr(self, '_sage_dispatch_initialized', False):
+        return
+
+    if not _wait_for_warmup(self):
+        if getattr(self, '_sage_dispatch_initialized', False):
+            return
+
+    with self._init_lock:
+        if getattr(self, '_sage_dispatch_initialized', False):
+            return
+        try:
+            _init_sage_dispatch(self)
+        except Exception as e:
+            logger.error(f"SageDispatch 初始化失败: {e}")
+
+
+def _init_divine_reason(self):
+    """
+    [v1.1.0 新增] 初始化 DivineReason 统一推理引擎
+
+    DivineReason = 4合1推理 (GoT + LongCoT + ToT + ReAct)
+    入口: DivineReason.solve(problem, mode, context)
+    模式: LINEAR / DIVINE / SUPER / BRANCHING / REACTIVE / GRAPH
+    """
+    try:
+        from src.intelligence.reasoning._unified_reasoning_engine import DivineReason
+        self._divine_reason = DivineReason()
+        self._divine_reason_initialized = True
+        logger.info(f"[DivineReason] 统一推理引擎就绪 (GoT+LongCoT+ToT+ReAct)")
+    except Exception as e:
+        logger.warning(f"[DivineReason] 初始化失败（不影响主流程）: {e}")
+
+
+def ensure_divine_reason(self):
+    """[v1.1.0] 确保DivineReason统一推理引擎已初始化"""
+    if getattr(self, '_divine_reason_initialized', False):
+        return
+
+    if not _wait_for_warmup(self):
+        if getattr(self, '_divine_reason_initialized', False):
+            return
+
+    with self._init_lock:
+        if getattr(self, '_divine_reason_initialized', False):
+            return
+        try:
+            _init_divine_reason(self)
+        except Exception as e:
+            logger.error(f"DivineReason 初始化失败: {e}")
+
+
+def _init_eight_layer_pipeline(self):
+    """
+    [v1.1.0 新增] 初始化天枢八层管道 (TianShu)
+
+    EightLayerPipeline = L1输入→L2 NLP→L3 分类→L4 分流→L5 推理→L6 论证→L7 输出→L8 优化
+    入口: EightLayerPipeline.get_pipeline().process(input_text, grade)
+    等级: BASIC(快速) / DEEP(智慧+Claw) / SUPER(全Claw+T2)
+    """
+    try:
+        from knowledge_cells.eight_layer_pipeline import EightLayerPipeline
+        pipeline = EightLayerPipeline.get_pipeline(output_dir="")
+        self._eight_layer_pipeline = pipeline
+        self._eight_layer_pipeline_initialized = True
+        logger.info(f"[天枢] 八层管道就绪 (L1→L8)")
+    except Exception as e:
+        logger.warning(f"[天枢] 八层管道初始化失败（不影响主流程）: {e}")
+
+
+def ensure_eight_layer_pipeline(self):
+    """[v1.1.0] 确保天枢八层管道已初始化"""
+    if getattr(self, '_eight_layer_pipeline_initialized', False):
+        return
+
+    if not _wait_for_warmup(self):
+        if getattr(self, '_eight_layer_pipeline_initialized', False):
+            return
+
+    with self._init_lock:
+        if getattr(self, '_eight_layer_pipeline_initialized', False):
+            return
+        try:
+            _init_eight_layer_pipeline(self)
+        except Exception as e:
+            logger.error(f"八层管道初始化失败: {e}")
+
+
+def _init_ecosystem(self):
+    """
+    [v1.2.0 新增] 初始化生态引擎系统
+
+    Note: src/ecology/ 目录已移除，生态能力已整合至
+    knowledge_cells/ecology_ml_bridge.py + neural_memory_v7.py
+    此函数保留为占位，始终不执行任何操作。
+    """
+    logger.info("[生态引擎] src/ecology/ 已移除，跳过初始化")
+    return
+
+
+def ensure_ecosystem(self):
+    """[v1.2.0] 确保生态引擎已初始化"""
+    if getattr(self, '_ecosystem_initialized', False):
+        return
+
+    if not _wait_for_warmup(self):
+        if getattr(self, '_ecosystem_initialized', False):
+            return
+
+    with self._init_lock:
+        if getattr(self, '_ecosystem_initialized', False):
+            return
+        try:
+            _init_ecosystem(self)
+        except Exception as e:
+            logger.error(f"生态引擎初始化失败: {e}")
+
+
+def _init_dual_track(self):
+    """
+    [v1.1.0 新增] 初始化双轨系统 (神政轨 TrackA + 神行轨 TrackB)
+
+    TrackBridge 连接双轨:
+    - create_system() → 构建双轨系统 (初始化 TrackA + TrackB 并连接)
+    - direct_department_call() → 跨轨部门调用
+    - dispatch_to_claw() → Claw调度
+    """
+    try:
+        from src.intelligence.dual_track.bridge import TrackBridge
+        bridge = TrackBridge()
+        # create_system() 会初始化 TrackA + TrackB 并连接，使 dispatch_to_claw 可用
+        bridge.create_system()
+        self._track_bridge = bridge
+        self._dual_track_initialized = True
+        logger.info(f"[双轨系统] TrackBridge就绪 (神政轨+神行轨已连接)")
+    except Exception as e:
+        logger.warning(f"[双轨系统] 初始化失败（不影响主流程）: {e}")
+
+
+def ensure_dual_track(self):
+    """[v1.1.0] 确保双轨系统已初始化"""
+    if getattr(self, '_dual_track_initialized', False):
+        return
+
+    if not _wait_for_warmup(self):
+        if getattr(self, '_dual_track_initialized', False):
+            return
+
+    with self._init_lock:
+        if getattr(self, '_dual_track_initialized', False):
+            return
+        try:
+            _init_dual_track(self)
+        except Exception as e:
+            logger.error(f"双轨系统初始化失败: {e}")
+
+
+def _init_domain_nexus(self):
+    """
+    [v1.1.0 新增] 初始化 DomainNexus 知识库引擎
+
+    DomainNexus = 31知识格子 + 双向标签匹配 + LRU懒加载
+    入口: get_nexus() → DomainNexus单例
+    """
+    try:
+        from knowledge_cells.domain_nexus import get_nexus
+        nexus = get_nexus()
+        self._domain_nexus = nexus
+        self._domain_nexus_initialized = True
+        logger.info(f"[DomainNexus] 知识库引擎就绪")
+    except Exception as e:
+        logger.warning(f"[DomainNexus] 初始化失败（不影响主流程）: {e}")
+
+
+def ensure_domain_nexus(self):
+    """[v1.1.0] 确保DomainNexus知识库引擎已初始化"""
+    if getattr(self, '_domain_nexus_initialized', False):
+        return
+
+    if not _wait_for_warmup(self):
+        if getattr(self, '_domain_nexus_initialized', False):
+            return
+
+    with self._init_lock:
+        if getattr(self, '_domain_nexus_initialized', False):
+            return
+        try:
+            _init_domain_nexus(self)
+        except Exception as e:
+            logger.error(f"DomainNexus 初始化失败: {e}")
+
+
+def _init_neural_layout(self):
+    """
+    [v1.3.0 新增] 初始化神经网络布局集成
+
+    将 SomnCore 绑定到 GlobalNeuralBridge 的 6 个桥接处理器：
+    AgentCore / SomnCore / WisdomDispatcher / MemorySystem / LearningSystem / AutonomySystem
+    入口: neural_layout.integration.initialize_neural_layout()
+    """
+    try:
+        from src.neural_layout.integration import initialize_neural_layout
+        integration = initialize_neural_layout(somn_core=self)
+        self._neural_layout = integration
+        self._neural_layout_initialized = True
+        bridge_count = len(getattr(integration, '_bridge', {})._bridge_handlers) if hasattr(integration, '_bridge') and integration._bridge else 0
+        logger.info(f"[NeuralLayout] 布局集成就绪, {bridge_count} 个桥接处理器已绑定")
+    except Exception as e:
+        logger.warning(f"[NeuralLayout] 初始化失败（不影响主流程）: {e}")
+
+
+def ensure_neural_layout(self):
+    """[v1.3.0] 确保神经网络布局已初始化"""
+    if getattr(self, '_neural_layout_initialized', False):
+        return
+
+    if not _wait_for_warmup(self):
+        if getattr(self, '_neural_layout_initialized', False):
+            return
+
+    with self._init_lock:
+        if getattr(self, '_neural_layout_initialized', False):
+            return
+        try:
+            _init_neural_layout(self)
+        except Exception as e:
+            logger.error(f"NeuralLayout 初始化失败: {e}")

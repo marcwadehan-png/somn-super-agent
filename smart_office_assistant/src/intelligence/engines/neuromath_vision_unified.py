@@ -119,7 +119,7 @@ class NeuromathVisionUnified:
             config: 配置参数
         """
         self.name = "NeuromathVisionUnified"
-        self.version = "1.0.0"
+        self.version="6.2.0"
         
         if config is None:
             config = self._default_config()

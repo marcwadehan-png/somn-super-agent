@@ -49,7 +49,7 @@ from ._three_core_integration import (
     CROSS_SYNC_MATRIX,
 )
 
-__version__ = "v1.0.0"
+__version__ = "6.2.0"
 __all__ = [
     # 核心类
     "ThreeCoreIntegration",

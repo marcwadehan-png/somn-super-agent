@@ -51,7 +51,7 @@ class PsychologyPioneerFusionEngine:
     
     def __init__(self):
         self.name = "心理学先驱fusion引擎"
-        self.version = "8.2.0"
+        self.version="6.2.0"
         
         # init各先驱引擎
         self.弗洛伊德 = 弗洛伊德潜意识引擎()

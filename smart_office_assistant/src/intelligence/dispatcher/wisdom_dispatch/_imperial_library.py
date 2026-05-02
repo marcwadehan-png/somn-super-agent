@@ -198,16 +198,42 @@ WING_SHELVES: Dict[LibraryWing, List[str]] = {
 #  V3.0 数据结构
 # ═══════════════════════════════════════════════════════════════
 
+def _resolve_memory_tier_enum():
+    """延迟解析 MemoryTier 枚举（避免循环导入）"""
+    try:
+        from src.neural_memory.memory_types import MemoryTier
+        return MemoryTier
+    except ImportError:
+        return None
+
+
+_MemoryTier = None  # 延迟缓存
+
+
+def _get_MemoryTier():
+    """获取 MemoryTier 枚举（带缓存）"""
+    global _MemoryTier
+    if _MemoryTier is None:
+        _MemoryTier = _resolve_memory_tier_enum()
+    return _MemoryTier
+
+
 @dataclass
 class CellRecord:
-    """V3.0 格子化记忆条目"""
+    """V3.0 格子化记忆条目
+    
+    [v3.1 新增] tier 字段：绑定神经记忆系统三层记忆架构（书架位置）
+    - MemoryTier 是"书架上的哪一层"
+    - MemoryGrade 是"仓库里的哪一档"
+    - 两者通过 memory_types.py 的映射表双向关联
+    """
     id: str                                        # 格位唯一标识：{WING}_{SHELF}_{SEQ:06d}
     wing: LibraryWing                              # 分馆
     shelf: str                                     # 书架
     cell_index: int                                # 格位编号
     title: str                                     # 记忆标题
     content: str                                   # 记忆内容
-    grade: MemoryGrade                             # 分级（甲乙丙丁）
+    grade: MemoryGrade                             # 分级（甲乙丙丁）— 仓库等级
     source: MemorySource                           # 来源（22种）
     category: MemoryCategory                       # 分类（16种）
     reporting_system: str                          # 汇报子系统
@@ -225,6 +251,8 @@ class CellRecord:
     cross_references: List[str] = field(default_factory=list)  # 跨格子引用ID列表
     access_count: int = 0                          # 访问次数
     last_accessed: float = 0.0                     # 最后访问时间
+    # v3.1 新增：三层记忆架构绑定
+    tier: Optional[Any] = None                     # MemoryTier（书架层位置），延迟类型避免循环导入
 
     @property
     def age_days(self) -> float:
@@ -265,18 +293,19 @@ class CellRecord:
         # 语义向量较大，仅在非空时序列化
         if self.semantic_embedding:
             d["semantic_embedding"] = self.semantic_embedding
+        # v3.1: 序列化 tier（书架层位置）
+        if self.tier is not None:
+            d["tier"] = self.tier.value if hasattr(self.tier, 'value') else str(self.tier)
         return d
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "CellRecord":
         """从字典反序列化"""
-        wing_code = data.get("wing_code", data.get("wing", "ARCH"))
         # 兼容V3.0 wing_code格式（name如"SAGE"）和中文格式（value如"贤者分馆"）
+        wing_code = data.get("wing_code", data.get("wing", "ARCH"))
         try:
-            # 先尝试name匹配（用枚举成员访问语法）
             wing = LibraryWing[wing_code]
         except (KeyError, ValueError):
-            # 再尝试value匹配
             try:
                 wing = next(w for w in LibraryWing if w.value == wing_code)
             except StopIteration:
@@ -325,7 +354,46 @@ class CellRecord:
             cross_references=data.get("cross_references", []),
             access_count=data.get("access_count", 0),
             last_accessed=data.get("last_accessed", 0.0),
+            tier=_resolve_tier_from_dict(data),  # v3.1: 恢复tier
         )
+
+
+def _resolve_tier_from_dict(data: Dict[str, Any]) -> Optional[Any]:
+    """从字典数据恢复 MemoryTier 枚举（v3.1）"""
+    tier_val = data.get("tier")
+    if tier_val is None:
+        return None
+    Mt = _get_MemoryTier()
+    if Mt is None:
+        return None
+    try:
+        return Mt(tier_val)
+    except (ValueError, KeyError):
+        return None
+
+
+def _auto_tier_for_new_record(value_score: float) -> Optional[Any]:
+    """
+    v3.1 自动给新记录分配 MemoryTier（书架位置）。
+
+    逻辑:
+        value_score >= 0.8 → ETERNAL（永恒书架）
+        value_score >= 0.5 → LONG_TERM（长期书架）
+        value_score >= 0.3 → WARM（温书架）
+        value_score < 0.3  → EPISODIC（情景书架，7天清理）
+    """
+    Mt = _get_MemoryTier()
+    if Mt is None:
+        return None
+
+    if value_score >= 0.8:
+        return Mt.ETERNAL
+    elif value_score >= 0.5:
+        return Mt.LONG_TERM
+    elif value_score >= 0.3:
+        return Mt.WARM
+    else:
+        return Mt.EPISODIC
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -424,8 +492,13 @@ class ImperialLibrary:
     CHANCELLOR_TITLE = "藏书阁大学士·王爵"
     CHANCELLOR_NICKNAME = "太史公"
 
-    # 藏书阁内部人员（拥有写入/删除权限）
-    _LIBRARY_STAFF = {"司马迁", "左丘明", "班固", "司马光", "扬雄", "藏书阁专员团队"}
+    # v3.1: 使用动态注册表替代硬编码 _LIBRARY_STAFF
+    # 旧代码 _LIBRARY_STAFF / WING_PERMISSIONS 已迁移至 _library_staff_registry.py
+
+    # 懒加载注册表
+    def _get_registry(self):
+        from ._library_staff_registry import get_staff_registry
+        return get_staff_registry()
 
     # 价值评估关键词（提升评分）
     _VALUE_KEYWORDS = {
@@ -471,6 +544,19 @@ class ImperialLibrary:
         self._init_persistence()
         self._init_wing_shelf_index()
         self._load_from_disk_v3()
+
+        # ── [v2.0 G-7] 自动启动定时审查调度器 ──
+        self._review_scheduler = None
+        try:
+            from ._library_review_scheduler import get_review_scheduler
+            self._review_scheduler = get_review_scheduler()
+            # 绑定到当前藏书阁实例
+            self._review_scheduler.bind_library(self)
+            # 启动后台审查线程（不阻塞主线程）
+            self._review_scheduler.start_background()
+            logger.info("[藏书阁] G-7 定时审查调度器已自动启动")
+        except Exception as e:
+            logger.warning(f"[藏书阁] G-7 定时审查调度器启动失败: {e}")
 
     # ──────────────────────────────────────────────────────────
     #  初始化
@@ -759,32 +845,84 @@ class ImperialLibrary:
         if not operator:
             return True  # 系统内部调用
 
+        registry = self._get_registry()
+
         # ADMIN: 只有大学士
         if required == LibraryPermission.ADMIN:
-            return operator == self.CHANCELLOR
+            return registry.has_admin_privilege(operator)
 
-        # DELETE/WRITE: 藏书阁内部人员
+        # DELETE/WRITE: 藏书阁工作人员
         if required in (LibraryPermission.DELETE, LibraryPermission.WRITE):
-            return operator in self._LIBRARY_STAFF
+            return registry.has_write_privilege(operator)
 
         # SUBMIT: 任何人均可提交
         return True
 
     def _check_wing_write_permission(self, operator: str, wing: LibraryWing) -> bool:
-        """检查对特定分馆的写入权限"""
-        if not operator or operator in self._LIBRARY_STAFF:
-            return True
-        wing_config = WING_PERMISSIONS.get(wing.code, {})
-        return operator in wing_config.get("writers", [])
+        """检查对特定分馆的写入权限（使用动态注册表）"""
+        registry = self._get_registry()
+        return registry.can_manage_wing(operator, wing.code)
 
     @staticmethod
     def is_read_only_for(operator: str) -> bool:
-        """判断某人对藏书阁是否只有只读权限"""
-        return operator not in ImperialLibrary._LIBRARY_STAFF
+        """判断某人对藏书阁是否只有只读权限（使用动态注册表）"""
+        try:
+            from ._library_staff_registry import get_staff_registry
+            registry = get_staff_registry()
+            return not registry.has_write_privilege(operator)
+        except ImportError:
+            return True
 
     # ──────────────────────────────────────────────────────────
     #  V3.0 核心记忆收录
     # ──────────────────────────────────────────────────────────
+
+    def _auto_cross_link(self, record: "CellRecord", max_links: int = 5) -> Set[str]:
+        """
+        v2.0 G-6: 自动跨域关联。
+
+        基于标签重叠和语义向量相似度，为新入库记录查找跨分馆关联。
+        返回关联记录 ID 集合。
+        """
+        if not record.tags and not record.semantic_embedding:
+            return set()
+
+        candidates = []
+        for existing in self._cells.values():
+            if existing.id == record.id:
+                continue
+
+            score = 0.0
+            # 1) 标签重叠评分（每重叠1个标签 = 2分）
+            if record.tags and existing.tags:
+                tag_overlap = len(set(record.tags) & set(existing.tags))
+                score += tag_overlap * 2.0
+                if tag_overlap > 0:
+                    # 跨分馆加分
+                    if existing.wing != record.wing:
+                        score += 1.5
+
+            # 2) 语义向量相似度（余弦，TF-IDF Hashing 下值偏低需放大）
+            if (record.semantic_embedding is not None
+                    and existing.semantic_embedding is not None):
+                import math
+                a = record.semantic_embedding
+                b = existing.semantic_embedding
+                dot = sum(x * y for x, y in zip(a, b))
+                norm_a = math.sqrt(sum(x * x for x in a))
+                norm_b = math.sqrt(sum(x * x for x in b))
+                if norm_a > 0 and norm_b > 0:
+                    cosine = dot / (norm_a * norm_b)
+                    # TF-IDF Hashing 对中文短文本 cosine 通常 0.01~0.3
+                    # 放大系数 10 使语义有实际区分力
+                    score += cosine * 10.0
+
+            # 阈值：只要有1个标签重叠(2分) 或 语义足够接近(≥0.15*10=1.5)
+            if score >= 1.5:
+                candidates.append((existing.id, score))
+
+        candidates.sort(key=lambda x: -x[1])
+        return {cid for cid, _ in candidates[:max_links]}
 
     def submit_cell(
         self,
@@ -842,6 +980,20 @@ class ImperialLibrary:
         # 自主决定保留等级
         grade = suggested_grade or self._decide_grade(value_score, category)
 
+        # v3.1: 自动分配三层记忆架构 tier（书架位置）
+        auto_tier = _auto_tier_for_new_record(value_score)
+        
+        # v2.0 G-5: 自动语义编码（填充 semantic_embedding）
+        semantic_embedding = None
+        try:
+            from ._semantic_encoder import get_semantic_encoder
+            encoder = get_semantic_encoder()
+            # 标题+内容联合编码，提升语义准确度
+            combined_text = f"{title} {content}"
+            semantic_embedding = encoder.encode(combined_text)
+        except Exception as e:
+            logger.debug(f"[藏书阁] 语义编码跳过: {e}")
+        
         record = CellRecord(
             id=cell_id,
             wing=wing,
@@ -859,10 +1011,22 @@ class ImperialLibrary:
             associated_sage=associated_sage,
             associated_position=associated_position,
             associated_claw=associated_claw,
+            tier=auto_tier,
+            semantic_embedding=semantic_embedding,  # v2.0 G-5: 自动编码的语义向量
         )
 
         self._cells[cell_id] = record
         self._add_to_indexes(record)
+
+        # v2.0 G-6: 入库后自动触发跨域关联（基于标签/语义相似度）
+        try:
+            cross_refs = self._auto_cross_link(record)
+            if cross_refs:
+                record.cross_references = list(cross_refs)
+                logger.debug(f"[藏书阁] G-6 跨域关联: {cell_id} → {len(cross_refs)} 个关联")
+        except Exception as e:
+            logger.debug(f"[藏书阁] G-6 跨域关联跳过: {e}")
+
         self._stats["total_records"] += 1
         self._dirty = True
 
@@ -908,6 +1072,15 @@ class ImperialLibrary:
         cell_id = f"{wing.code}_{shelf}_{cell_index:06d}"
 
         # 构建CellRecord
+        # v2.0 G-5: 自动语义编码
+        semantic_embedding = None
+        try:
+            from ._semantic_encoder import get_semantic_encoder
+            encoder = get_semantic_encoder()
+            semantic_embedding = encoder.encode(f"{title} {content}")
+        except Exception:
+            pass
+        
         cell = CellRecord(
             id=cell_id,
             wing=wing,
@@ -922,6 +1095,7 @@ class ImperialLibrary:
             value_score=value_score,
             tags=tags or [],
             metadata=metadata or {},
+            semantic_embedding=semantic_embedding,  # v2.0 G-5
         )
 
         self._cells[cell_id] = cell
@@ -1314,9 +1488,11 @@ class ImperialLibrary:
         - 丁级：7天自动清理
         """
         if not self._check_permission(operator, LibraryPermission.DELETE):
+            from ._library_staff_registry import get_staff_registry
+            registry = get_staff_registry()
             return {
                 "error": "权限不足：清理操作仅限藏书阁内部人员",
-                "authorized_staff": list(self._LIBRARY_STAFF),
+                "authorized_staff": [s.name for s in registry.list_all()],
             }
 
         now = time.time()

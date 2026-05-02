@@ -11,7 +11,7 @@ Somn - Smart Office Assistant
     - src.neural_memory: 神经记忆系统
     - src.tool_layer: 工具层
 
-版本: v6.1.0 (神之架构最终完整版)
+版本: v6.2.0 (神之架构最终完整版)
 
 更多信息请参考:
     - file/系统文件/神之架构_V6_COMPLETE.md

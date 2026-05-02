@@ -45,7 +45,7 @@ class 刘禹锡诗歌characteristics:
 class 刘禹锡深化引擎:
     """刘禹锡诗歌深化分析引擎 v8.2.0"""
 
-    VERSION = "v8.2.0"
+    VERSION = "6.2.0"
 
     def __init__(self):
         self.诗歌characteristics = self._init_characteristics()

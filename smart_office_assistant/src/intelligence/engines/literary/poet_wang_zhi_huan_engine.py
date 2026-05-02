@@ -35,7 +35,7 @@ class 王之涣代表作品(Enum):
 class 王之涣深化引擎:
     """王之涣诗词深化分析引擎 v8.2.0"""
 
-    VERSION = "v8.2.0"
+    VERSION = "6.2.0"
 
     def __init__(self):
         self.诗歌characteristics = self._init_characteristics()

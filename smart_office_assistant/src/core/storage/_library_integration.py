@@ -90,7 +90,7 @@ def _get_manager_and_tier():
         from _somn_storage_manager import get_storage_manager, BackupTier
         return get_storage_manager, BackupTier
     except ImportError:
-        from smart_office_assistant.src.core.storage._somn_storage_manager import get_storage_manager, BackupTier
+        from src.core.storage._somn_storage_manager import get_storage_manager, BackupTier
         return get_storage_manager, BackupTier
 
 

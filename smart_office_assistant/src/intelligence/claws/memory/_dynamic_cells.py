@@ -173,6 +173,9 @@ class CellsIndex:
         """创建新格子，返回cell_id"""
         cell_id = self._generate_id()
         
+        # 清理文件名中的非法字符（v3.3.1修复）
+        safe_name = self._sanitize_filename(name)
+        
         meta = CellMeta(
             cell_id=cell_id,
             name=name,
@@ -185,9 +188,9 @@ class CellsIndex:
         self._cells[cell_id] = meta
         self._connections[cell_id] = {}
         
-        # 保存内容文件
+        # 保存内容文件（使用安全的文件名）
         content = CellContent(cell_id=cell_id, name=name)
-        content_file = self.cells_dir / f"{cell_id}_{name}.md"
+        content_file = self.cells_dir / f"{cell_id}_{safe_name}.md"
         self._save_cell_content(content_file, content)
         
         self._next_id = self._generate_next_id()
@@ -199,6 +202,26 @@ class CellsIndex:
     def _generate_id(self) -> str:
         """生成格子ID"""
         return self._next_id
+    
+    def _sanitize_filename(self, name: str) -> str:
+        r"""
+        清理文件名中的非法字符（v3.3.1修复）
+        
+        Windows文件名字符限制：
+        - 非法字符: \ / : * ? " < > |
+        - 长度限制: 255字符
+        """
+        import re
+        # 替换非法字符为下划线
+        safe = re.sub(r'[\\/:*?"<>|]', '_', name)
+        # 限制长度
+        safe = safe[:100] if len(safe) > 100 else safe
+        # 移除首尾空格和点
+        safe = safe.strip(' .')
+        # 如果为空，使用默认名
+        if not safe:
+            safe = "unnamed"
+        return safe
     
     def _generate_next_id(self) -> str:
         """生成下一个ID"""
@@ -389,7 +412,7 @@ class DynamicMemorySystem:
         min_similarity: float = 0.6
     ) -> str:
         """查找或创建格子"""
-        # 先查找相似格子
+        # 先查找相似格子（基于名称匹配）
         for cell in self.index._cells.values():
             if cell.name == name:
                 return cell.cell_id

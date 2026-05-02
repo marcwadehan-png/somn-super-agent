@@ -97,7 +97,7 @@ class ZonghengWisdomEngine:
     提供外交谈判、联盟构建、权力平衡等战略智慧。
     """
     
-    VERSION = "V1.0.0"
+    VERSION = "6.2.0"
     
     def __init__(self):
         self.name = "纵横家智慧引擎"

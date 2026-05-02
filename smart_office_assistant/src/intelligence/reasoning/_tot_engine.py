@@ -548,7 +548,7 @@ class TreeOfThoughtsEngine:
     提供树状多路径推理能力，支持多种搜索策略。
     """
     
-    VERSION = "V1.0.0"
+    VERSION = "6.2.0"
     
     def __init__(
         self,

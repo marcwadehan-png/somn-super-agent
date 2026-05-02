@@ -100,6 +100,9 @@ _LAZY_MODULE_GROUPS: Dict[str, Dict[str, tuple]] = {
         '_module_run_orchestrator_route': ('._somn_routes', '_module_run_orchestrator_route'),
         '_module_run_local_llm_route': ('._somn_routes', '_module_run_local_llm_route'),
         '_module_run_wisdom_route': ('._somn_routes', '_module_run_wisdom_route'),
+        '_module_run_sage_dispatch_route': ('._somn_routes', '_module_run_sage_dispatch_route'),
+        '_module_run_divine_reason_route': ('._somn_routes', '_module_run_divine_reason_route'),
+        '_module_run_tianshu_pipeline_route': ('._somn_routes', '_module_run_tianshu_pipeline_route'),
     },
     'semantic': {
         '_module_run_semantic_analysis': ('._somn_semantic_api', '_module_run_semantic_analysis'),
@@ -314,6 +317,13 @@ from ._somn_ensure import (
     ensure_global_claw_scheduler as _ensure_global_claw_scheduler_fn,
     ensure_emotion_research as _ensure_emotion_research_fn,  # [v1.0.0]
     ensure_research_phase_manager as _ensure_research_phase_manager_fn,  # [v1.0.0]
+    ensure_sage_dispatch as _ensure_sage_dispatch_fn,  # [v1.1.0] SageDispatch贤者调度
+    ensure_divine_reason as _ensure_divine_reason_fn,  # [v1.1.0] DivineReason推理引擎
+    ensure_eight_layer_pipeline as _ensure_eight_layer_pipeline_fn,  # [v1.1.0] 天枢八层管道
+    ensure_dual_track as _ensure_dual_track_fn,  # [v1.1.0] 双轨系统
+    ensure_domain_nexus as _ensure_domain_nexus_fn,  # [v1.1.0] DomainNexus知识库
+    ensure_ecosystem as _ensure_ecosystem_fn,  # [v1.2.0] 生态引擎系统
+    ensure_neural_layout as _ensure_neural_layout_fn,  # [v1.3.0] 神经网络布局
     init_semantic_memory as _init_semantic_memory_fn,
     summarize_understanding as _summarize_understanding_fn,
 )
@@ -405,6 +415,20 @@ class SomnCore:
         self._research_strategy_engine = None
         # 研究阶段管理系统（v1.0.0 四阶段研究管理）
         self._research_phase_manager = None
+        # [v1.1.0] SageDispatch 贤者调度系统
+        self._sage_dispatch_engine = None
+        # [v1.1.0] DivineReason 统一推理引擎
+        self._divine_reason = None
+        # [v1.1.0] 天枢八层管道
+        self._eight_layer_pipeline = None
+        # [v1.1.0] 双轨系统 TrackBridge
+        self._track_bridge = None
+        # [v1.1.0] DomainNexus 知识库引擎
+        self._domain_nexus = None
+        # [v1.2.0] 生态引擎系统
+        self._ecosystem = None
+        # [v1.3.0] 神经网络布局集成
+        self._neural_layout = None
 
         # ── 初始化标志 ───────────────────────────────
         self._init_flags: int = 0  # IntFlag位掩码，运行时使用整数值
@@ -433,7 +457,18 @@ class SomnCore:
         self._emotion_research_initialized = False
         self._autonomy_stores_ready = False
         self._research_strategy_init_failed = False
+        self._research_strategy_initialized = False  # [v22.1 修复] 补充缺失的初始化标志
         self._three_core_init_failed = False
+        # [v1.1.0] SageDispatch / DivineReason / 八层管道 / 双轨 / DomainNexus
+        self._sage_dispatch_initialized = False
+        self._divine_reason_initialized = False
+        self._eight_layer_pipeline_initialized = False
+        self._dual_track_initialized = False
+        self._domain_nexus_initialized = False
+        # [v1.2.0] 生态引擎
+        self._ecosystem_initialized = False
+        # [v1.3.0] 神经网络布局
+        self._neural_layout_initialized = False
 
         # ═══════════════════════════════════════════════════
         # 后台 daemon 预热：顺序预热所有 Tier 1/2 组件
@@ -467,6 +502,16 @@ class SomnCore:
         EMOTION_RESEARCH = 4096
         RESEARCH_STRATEGY = 8192
         RESEARCH_PHASE_MANAGER = 16384
+        # [v1.1.0] SageDispatch / DivineReason / 八层管道 / 双轨 / DomainNexus
+        SAGE_DISPATCH = 32768
+        DIVINE_REASON = 65536
+        EIGHT_LAYER_PIPELINE = 131072
+        DUAL_TRACK = 262144
+        DOMAIN_NEXUS = 524288
+        # [v1.2.0] 生态引擎
+        ECOSYSTEM = 1048576
+        # [v1.3.0] 神经网络布局
+        NEURAL_LAYOUT = 2097152
 
     # ═══════════════════════════════════════════════════════════════
     # [v21.0 核心] __getattr__ 动态代理 —— 消除 50+ 纯委托方法
@@ -607,6 +652,29 @@ class SomnCore:
         """确保全局Claw调度器已初始化 -- 委托自 _somn_ensure."""
         _ensure_global_claw_scheduler_fn(self)
 
+    # ─────────────────────────────────────────────
+    # [v1.1.0] SageDispatch / DivineReason / 八层管道 / 双轨 / DomainNexus
+    # ─────────────────────────────────────────────
+    def _ensure_sage_dispatch(self) -> None:
+        """确保SageDispatch贤者调度系统已初始化 -- 委托自 _somn_ensure."""
+        _ensure_sage_dispatch_fn(self)
+
+    def _ensure_divine_reason(self) -> None:
+        """确保DivineReason统一推理引擎已初始化 -- 委托自 _somn_ensure."""
+        _ensure_divine_reason_fn(self)
+
+    def _ensure_eight_layer_pipeline(self) -> None:
+        """确保天枢八层管道已初始化 -- 委托自 _somn_ensure."""
+        _ensure_eight_layer_pipeline_fn(self)
+
+    def _ensure_dual_track(self) -> None:
+        """确保双轨系统已初始化 -- 委托自 _somn_ensure."""
+        _ensure_dual_track_fn(self)
+
+    def _ensure_domain_nexus(self) -> None:
+        """确保DomainNexus知识库引擎已初始化 -- 委托自 _somn_ensure."""
+        _ensure_domain_nexus_fn(self)
+
     def _init_main_chain_integration(self) -> None:
         """主线集成器初始化 -- 委托自 _somn_wisdom_init."""
         result = init_main_chain_integration(self.base_path)
@@ -622,7 +690,7 @@ class SomnCore:
         self.autonomous_agent = init_autonomous_agent(self.base_path)
 
     def _init_cloud_learning_system(self) -> None:
-        """云端老师-本地学生体系初始化 -- 委托自 _somn_wisdom_init."""
+        """云端模型调度体系初始化 -- 委托自 _somn_wisdom_init."""
         from ._somn_wisdom_init import init_cloud_learning_system
         result = init_cloud_learning_system(self.base_path, self.llm_service, print_fn=print)
         self.cloud_model_hub = result.get("cloud_model_hub")
@@ -677,6 +745,178 @@ class SomnCore:
 
     # ==================== unified主链 ====================
 
+    # ─────────────────────────────────────────────
+    # [v1.1.0] 子系统便捷访问方法
+    # ─────────────────────────────────────────────
+
+    def dispatch_problem(self, problem, level=None, dispatcher_id="SD-F2", **kwargs):
+        """
+        [v1.1.0] SageDispatch 贤者调度入口
+
+        通过12调度器智能分配问题到最合适的处理流程。
+        返回 DispatchResponse。
+        """
+        self._ensure_sage_dispatch()
+        if self._sage_dispatch_engine is None:
+            return {"error": "SageDispatch未初始化", "confidence": 0.0}
+        return self._sage_dispatch_engine.dispatch(problem, level=level, dispatcher_id=dispatcher_id, **kwargs)
+
+    def divine_reason(self, problem: str, mode=None, context: Dict = None, **kwargs):
+        """
+        [v1.1.0] DivineReason 统一推理入口
+
+        4合1推理引擎(GoT+LongCoT+ToT+ReAct)。
+        mode: LINEAR / DIVINE / SUPER / BRANCHING / REACTIVE / GRAPH
+        返回 ReasoningResult。
+        """
+        self._ensure_divine_reason()
+        if self._divine_reason is None:
+            return {"error": "DivineReason未初始化", "confidence": 0.0}
+        return self._divine_reason.solve(problem, mode=mode, context=context, **kwargs)
+
+    def process_through_pipeline(self, input_text: str, grade=None, **kwargs):
+        """
+        [v1.1.0] 天枢八层管道入口
+
+        L1输入→L2 NLP→L3 分类→L4 分流→L5 推理→L6 论证→L7 输出→L8 优化
+        grade: "BASIC"(快速) / "DEEP"(智慧+Claw) / "SUPER"(全Claw+T2)
+               也可以传 ProcessingGrade 枚举值，默认 BASIC。
+        返回 PipelineResult。
+        """
+        self._ensure_eight_layer_pipeline()
+        if self._eight_layer_pipeline is None:
+            return {"error": "八层管道未初始化", "confidence": 0.0}
+        # 处理 grade 参数：支持字符串或枚举
+        if grade is None or isinstance(grade, str):
+            from knowledge_cells.eight_layer_pipeline import ProcessingGrade
+            grade_map = {"BASIC": ProcessingGrade.BASIC, "DEEP": ProcessingGrade.DEEP, "SUPER": ProcessingGrade.SUPER}
+            grade = grade_map.get(grade if isinstance(grade, str) else "BASIC", ProcessingGrade.BASIC)
+        return self._eight_layer_pipeline.process(input_text, grade=grade, **kwargs)
+
+    def generate_ppt(self, content: str, theme: str = "business",
+                     beautify: bool = True, auto_charts: bool = True,
+                     output_path: str = None, **kwargs) -> str:
+        """
+        [v7.0] 开物(Kaiwu)子系统生成入口.
+
+        用户明确指定输出类型为PPT时，调用开物子系统生成高质量PPT。
+        开物：命名来自《天工开物》，寓意工艺系统化。
+        """
+        try:
+            from smart_office_assistant.src.kaiwu import KaiwuService
+            service = KaiwuService(theme=theme, enable_learning=True, enable_charts=auto_charts)
+            return service.generate_ppt(
+                content=content,
+                format=None,
+                output_path=output_path,
+                beautify=beautify,
+                auto_charts=auto_charts
+            )
+        except ImportError:
+            raise RuntimeError("开物(Kaiwu)模块不可用（python-pptx未安装）")
+
+    def query_domain_nexus(self, query: str, context: str = "", **kwargs):
+        """
+        [v1.1.0] DomainNexus 知识库查询入口
+
+        双向标签匹配 + LRU懒加载。
+        返回匹配的知识格子字典。
+        """
+        self._ensure_domain_nexus()
+        if self._domain_nexus is None:
+            return {}
+        return self._domain_nexus.query(query, context=context, **kwargs)
+
+    def call_claw(self, department: str, claw_name: str, task_description: str, **kwargs):
+        """
+        [v1.1.0] 双轨系统 Claw 调度入口
+
+        通过 TrackBridge 将任务调度到神行轨的指定部门。
+        claw_name 会被注入到 context 中供 B 轨使用。
+        返回 Claw 执行结果。
+        """
+        self._ensure_dual_track()
+        if self._track_bridge is None:
+            return {"error": "双轨系统未初始化"}
+        if self._track_bridge.track_b is None:
+            return {"error": "B轨未初始化"}
+        context = kwargs.pop("context", {}) or {}
+        context["_target_claw"] = claw_name
+        return self._track_bridge.track_b.execute_sync(
+            department=department,
+            task_description=task_description,
+            context=context,
+        )
+
+    def monitor_ecosystem(self) -> Dict[str, Any]:
+        """
+        [v1.2.0] 生态引擎监控入口
+
+        通过 A轨（神政轨）执行全局系统监控。
+        返回完整生态系统报告（健康度、资源、环境变化、演化趋势）。
+        """
+        self._ensure_ecosystem()
+        self._ensure_dual_track()
+        if self._track_bridge is None or self._track_bridge.track_a is None:
+            return {"error": "双轨系统未初始化"}
+        return self._track_bridge.track_a.monitor_system()
+
+    def check_ecosystem_health(self) -> Dict[str, Any]:
+        """
+        [v1.2.0] 快速生态健康检查
+
+        轻量级接口，只返回健康状态概览。
+        """
+        self._ensure_ecosystem()
+        if self._ecosystem is None:
+            return {"overall": "unavailable"}
+        report = self._ecosystem.ecosystem_manager.generate_report()
+        return {
+            "overall": report.get("overall_health", "unknown"),
+            "balanced": report.get("balance_status", False),
+            "alerts": report.get("alerts", []),
+        }
+
+    def process_neural_layout(self, input_data: Any, context: Dict = None) -> Dict[str, Any]:
+        """
+        [v1.3.0] 神经网络布局全链路处理入口
+
+        通过 GlobalNeuralBridge 的 6 个桥接并行调用真实模块：
+        AgentCore / SomnCore / WisdomDispatcher / MemorySystem / LearningSystem / AutonomySystem
+
+        Args:
+            input_data: 输入（字符串或字典）
+            context: 上下文
+
+        Returns:
+            包含激活路径、模块输出、统计信息的字典
+        """
+        self._ensure_neural_layout()
+        if self._neural_layout is None:
+            return {"status": "error", "message": "NeuralLayout 未初始化"}
+        return self._neural_layout.process(input_data, context)
+
+    def get_neural_layout_status(self) -> Dict[str, Any]:
+        """
+        [v1.3.0] 获取神经网络布局状态
+
+        供 API/前端消费，返回桥接状态、布局状态、统计信息。
+        """
+        self._ensure_neural_layout()
+        if self._neural_layout is None:
+            return {"initialized": False, "somn_core_bound": False}
+        return self._neural_layout.get_status()
+
+    @property
+    def neural_layout(self):
+        """[v1.3.0] 神经网络布局集成器实例（延迟初始化）"""
+        self._ensure_neural_layout()
+        return self._neural_layout
+
+    def _ensure_neural_layout(self):
+        """[v1.3.0] 确保神经网络布局已初始化 -- 委托自 _somn_ensure."""
+        _ensure_neural_layout_fn(self)
+
     def run_agent_task(self,
                        description: str,
                        context: Dict[str, Any] = None,
@@ -686,7 +926,7 @@ class SomnCore:
         return _module_run_agent_task(self, description, context, options, evaluation_criteria)
 
     def _run_orchestrator_route(self, requirement: Dict, autonomy_context: Dict, options: Dict) -> Dict:
-        """路径A: SomnOrchestrator 直答路由(快手菜/家常菜). 委托自 _somn_routes."""
+        """路径A: SomnOrchestrator 编排路由(FAST/HOME模式). 委托自 _somn_routes."""
         return _module_run_orchestrator_route(self, requirement, autonomy_context, options)
 
     def _run_local_llm_route(self, requirement: Dict, options: Dict) -> Dict:
@@ -1304,7 +1544,7 @@ class SomnCore:
             return {"status": "failed"}
         return {
             "status": "ready",
-            "version": "v1.0.0",
+            "version": "v6.2.0",
             "components": {
                 "research_framework": "统一研究体系",
                 "divine_architecture": "神之架构V5",

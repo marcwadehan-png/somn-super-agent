@@ -42,7 +42,7 @@ class SanguoStrategyEngine:
     
     def __init__(self):
         """init三国战略引擎"""
-        self.version = "v1.0.0"
+        self.version="6.2.0"
         
         # 三大阵营战略模型
         self.kingdoms = {

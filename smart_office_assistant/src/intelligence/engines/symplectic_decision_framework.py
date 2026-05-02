@@ -280,7 +280,7 @@ class SymplecticDecisionFramework:
             n_dimensions: decision空间维度
         """
         self.name = "SymplecticDecisionFramework"
-        self.version = "1.0.0"
+        self.version="6.2.0"
         
         self.n_dims = n_dimensions
         

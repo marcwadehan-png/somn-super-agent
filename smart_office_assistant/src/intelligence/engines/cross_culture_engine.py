@@ -32,7 +32,7 @@ class CrossCultureEngine:
     def __init__(self):
         """init跨文化沟通引擎"""
         self.name = "CrossCultureEngine"
-        self.version = "v1.0.0"
+        self.version="6.2.0"
 
         # 文化维度(霍夫斯泰德文化维度理论的简化)
         self.cultural_dimensions = {

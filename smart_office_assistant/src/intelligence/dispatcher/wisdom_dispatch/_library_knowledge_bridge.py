@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-藏书阁-知识格子桥接器 v1.0
+藏书阁-知识格子桥接器 v2.0
 _library_knowledge_bridge.py
 
 将独立知识格子系统集成到藏书阁的统一架构中。
@@ -11,6 +11,14 @@ _library_knowledge_bridge.py
   - 藏书阁 → 知识格子 查询接口
   - 方法论检查集成
   - 推理增强接口
+
+[v2.0 新增]
+  - G-4: 知识库管理接口（创建/更新/归档/迭代格子）
+  - G-5: 语义向量编码器集成（自动填充 semantic_embedding）
+  - G-6: 自动跨域关联（基于标签/内容相似度）
+
+版本: v6.2.0
+更新: 2026-04-28
 """
 
 from __future__ import annotations
@@ -255,20 +263,34 @@ class LibraryKnowledgeBridge:
                 )
                 
                 # 准备记忆数据
+                from smart_office_assistant.src.intelligence.dispatcher.wisdom_dispatch._imperial_library import (
+                    MemorySource, MemoryGrade, MemoryCategory, LibraryWing,
+                )
+
                 memory_data = {
                     "title": f"[知识格子] {record.cell_id}_{record.name}",
                     "content": record.content,
-                    "category": "METHODOLOGY",
-                    "source": "KNOWLEDGE_CELLS",
-                    "grade": "YI",
+                    "category": MemoryCategory.METHODOLOGY,
+                    "source": MemorySource.KNOWLEDGE_CELLS,
+                    "grade": MemoryGrade.YI,
                     "tags": list(record.tags) + ["知识格子", record.category, cell_id],
                     "reporting_system": "knowledge_cells",
                 }
                 
                 # 检查是否已存在
-                existing = library.get_cells(tags=["knowledge_cells", cell_id])
+                existing = library.query_cells(tags=["knowledge_cells", cell_id], limit=1)
                 if not existing:
-                    library.submit_memory(**memory_data)
+                    library.submit_cell(
+                        title=memory_data["title"],
+                        content=memory_data["content"],
+                        wing=LibraryWing.LEARN,
+                        shelf="knowledge_sync",
+                        grade=MemoryGrade.YI,
+                        source=MemorySource.KNOWLEDGE_CELLS,
+                        category=MemoryCategory.METHODOLOGY,
+                        tags=memory_data["tags"],
+                        reporting_system="knowledge_cells",
+                    )
                     synced += 1
                 else:
                     skipped += 1
@@ -315,7 +337,54 @@ class LibraryKnowledgeBridge:
             methodology_score=methodology_score,
             suggestions=self._generate_suggestions(related)
         )
-    
+
+    def manage_knowledge_cell(
+        self,
+        action: str,
+        cell_id: str = "",
+        name: str = "",
+        content: str = "",
+        tags: Optional[List[str]] = None,
+        category: str = "A",
+        operator: str = "",
+        reason: str = "",
+        **kwargs,
+    ) -> Dict[str, Any]:
+        """
+        统一管理知识格子（创建/更新/归档）。
+        
+        Args:
+            action: 操作类型 "create" / "update" / "archive"
+            cell_id: 格子ID (如 "A1")
+            name: 格子名称（create/update 时使用）
+            content: 格子内容
+            tags: 标签列表
+            operator: 操作人
+            reason: 原因（archive 时使用）
+            
+        Returns:
+            操作结果字典
+        """
+        if action == "create":
+            return self.create_cell(
+                cell_id=cell_id, name=name, content=content,
+                tags=tags, category=category, operator=operator,
+                **kwargs,
+            )
+        elif action == "update":
+            return self.update_cell(
+                cell_id=cell_id, content=content,
+                tags=tags, operator=operator, **kwargs,
+            )
+        elif action == "archive":
+            return self.archive_cell(
+                cell_id=cell_id,
+                reason=reason or "统一管理操作",
+                operator=operator,
+            )
+        else:
+            return {"error": f"未知操作: {action}", "cell_id": cell_id}
+
     def _extract_keywords(self, text: str) -> Set[str]:
         """提取关键词"""
         words = re.findall(r'[\w]{2,}', text)
@@ -446,6 +515,443 @@ class LibraryKnowledgeBridge:
             "cells_directory": str(self.cells_dir),
         }
 
+    # ═══════════════════════════════════════════════════════════════
+    #  v2.0 G-4: 知识库管理接口（藏书阁工作人员管理格子用）
+    # ═══════════════════════════════════════════════════════════════
+
+    def create_cell(
+        self,
+        cell_id: str,
+        title: str,
+        content: str,
+        category: str = "A",
+        tags: Optional[List[str]] = None,
+        operator: str = "",
+    ) -> KnowledgeCellRecord:
+        """
+        创建新的知识格子 Markdown 文件。
+        
+        需要 WRITE 权限。由藏书阁工作人员调用。
+        
+        Args:
+            cell_id: 格子ID (如 "D1", "E3")
+            title: 格子名称
+            content: Markdown 内容
+            category: 分类前缀 (A=智慧核心, B=知识域策略, C=执行战术)
+            tags: 标签列表
+            operator: 操作者（用于权限记录）
+            
+        Returns:
+            创建的 KnowledgeCellRecord
+            
+        Raises:
+            FileExistsError: 如果格子文件已存在
+            PermissionError: 如果操作者没有写权限
+        """
+        # 权限检查
+        if operator:
+            try:
+                from ._library_staff_registry import get_staff_registry
+                registry = get_staff_registry()
+                if not registry.has_write_privilege(operator):
+                    raise PermissionError(f"'{operator}' 没有知识库写权限")
+            except ImportError:
+                pass  # 注册表不可用时跳过检查
+        
+        file_path = self.cells_dir / f"{cell_id}.md"
+        if file_path.exists():
+            raise FileExistsError(f"知识格子已存在: {cell_id}")
+        
+        # 构建 Markdown 内容（含元信息区块）
+        now_str = __import__("datetime").datetime.now().strftime("%Y-%m-%d %H:%M")
+        meta_block = f"""<!-- 元信息 -->
+激活次数：0
+上次激活：{now_str}
+标签：{', '.join(tags or [])}
+创建者：{operator or 'system'}
+<!-- /元信息 -->
+"""
+        full_content = f"# {cell_id} {title}\n\n{meta_block}\n\n{content}"
+        
+        # 写入文件
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_path.write_text(full_content, encoding="utf-8")
+        
+        record = KnowledgeCellRecord(
+            cell_id=cell_id,
+            name=title,
+            category=category,
+            tags=set(tags or []),
+            content=full_content,
+            metadata_block=meta_block,
+        )
+        self._cell_cache[cell_id] = record
+        
+        logger.info(f"[KnowledgeBridge] {operator} 创建了新格子: {cell_id} - {title}")
+        return record
+
+    def update_cell(
+        self,
+        cell_id: str,
+        content: Optional[str] = None,
+        tags: Optional[List[str]] = None,
+        operator: str = "",
+        iteration_note: str = "",
+    ) -> KnowledgeCellRecord:
+        """
+        更新现有知识格子的内容或标签。
+        
+        Args:
+            cell_id: 目标格子 ID
+            content: 新内容（None 则不更新内容）
+            tags: 新标签列表（None 则不更新标签）
+            operator: 操作者
+            iteration_note: 迭代说明（会追加到文件末尾的迭代历史中）
+            
+        Returns:
+            更新后的 KnowledgeCellRecord
+            
+        Raises:
+            FileNotFoundError: 格子不存在
+        """
+        file_path = self.cells_dir / f"{cell_id}.md"
+        if not file_path.exists():
+            raise FileNotFoundError(f"知识格子不存在: {cell_id}")
+        
+        existing_content = file_path.read_text(encoding="utf-8")
+        
+        # 更新标签（修改元信息区块）
+        if tags is not None:
+            new_tags_str = ", ".join(tags)
+            # 替换元信息中的标签行
+            if "标签[：" in existing_content or "标签[:]" in existing_content:
+                import re as _re
+                existing_content = _re.sub(
+                    r'标签[：:]\s*[^\n]*',
+                    f'标签：{new_tags_str}',
+                    existing_content
+                )
+        
+        # 更新主体内容（保留元信息区块，替换后面的部分）
+        if content is not None:
+            # 找到 <!-- /元信息 --> 之后的内容并替换
+            end_meta_marker = "<!-- /元信息 -->"
+            if end_meta_marker in existing_content:
+                meta_part = existing_content[:existing_content.index(end_meta_marker) + len(end_meta_marker)]
+                
+                # 追加迭代记录
+                new_body = content
+                if iteration_note:
+                    now_str = __import__("datetime").datetime.now().strftime("%Y-%m-%d %H:%M")
+                    iter_record = (
+                        f"\n\n---\n\n"
+                        f"> **迭代记录** | {now_str} | {operator or 'system'}\n>\n> {iteration_note}\n"
+                    )
+                    new_body += iter_record
+                
+                existing_content = meta_part + "\n\n" + new_body
+        
+        file_path.write_text(existing_content, encoding="utf-8")
+        
+        # 刷新缓存
+        record = self.parse_knowledge_cell(file_path)
+        if record:
+            self._cell_cache[cell_id] = record
+        
+        logger.info(f"[KnowledgeBridge] {operator} 更新了格子: {cell_id}" + 
+                     (f" - {iteration_note}" if iteration_note else ""))
+        return record or self._cell_cache.get(cell_id)
+
+    def archive_cell(self, cell_id: str, reason: str, operator: str = "") -> Dict[str, Any]:
+        """
+        归档知识格子（不删除，移至归档目录）。
+        
+        藏书阁原则：绝对禁止删除任何知识点。
+        
+        Args:
+            cell_id: 要归档的格子 ID
+            reason: 归档原因
+            operator: 操作者
+            
+        Raises:
+            FileNotFoundError: 格子不存在
+        """
+        file_path = self.cells_dir / f"{cell_id}.md"
+        if not file_path.exists():
+            raise FileNotFoundError(f"知识格子不存在: {cell_id}")
+        
+        archive_dir = self.cells_dir / "_archived"
+        archive_dir.mkdir(parents=True, exist_ok=True)
+        
+        target_path = archive_dir / f"{cell_id}_{__import__('time').strftime('%Y%m%d_%H%M%S')}.md"
+        file_path.rename(target_path)
+        
+        # 清除缓存
+        self._cell_cache.pop(cell_id, None)
+        
+        result = {
+            "cell_id": cell_id,
+            "archived_to": str(target_path),
+            "reason": reason,
+            "operator": operator,
+            "archived_at": __import__("time").time(),
+        }
+        logger.info(f"[KnowledgeBridge] {operator} 归档了格子: {cell_id} - {reason}")
+        return result
+
+    def iterate_cell(
+        self, cell_id: str, iteration_note: str, operator: str = ""
+    ) -> KnowledgeCellRecord:
+        """
+        迭代一个知识格子的版本（保留完整迭代历史）。
+        
+        这是知识库管理的核心操作——工作人员通过此接口持续改进知识格子。
+        
+        Args:
+            cell_id: 目标格子
+            iteration_note: 本次迭代的说明
+            operator: 迭代者
+            
+        Returns:
+            更新后的记录
+        """
+        return self.update_cell(
+            cell_id=cell_id,
+            content=None,  # 不改内容，只追加迭代记录
+            tags=None,
+            operator=operator,
+            iteration_note=iteration_note,
+        )
+
+    # ═══════════════════════════════════════════════════════════════
+    #  v2.0 G-5: 语义向量编码器
+    # ═══════════════════════════════════════════════════════════════
+
+    @staticmethod
+    def encode_semantic(content: str, dimension: int = 128) -> List[float]:
+        """
+        对文本进行语义编码生成向量。
+        
+        [v2.0 G-5] 委托给独立模块 _semantic_encoder.SemanticEncoder。
+        此方法保留为兼容入口，内部调用 SemanticEncoder.encode()。
+        
+        Args:
+            content: 输入文本
+            dimension: 向量维度（建议 64/128/256/768）
+            
+        Returns:
+            长度为 dimension 的浮点向量（L2 归一化）
+        """
+        try:
+            # 委托给独立编码器模块
+            from ._semantic_encoder import get_semantic_encoder, EncoderConfig
+            encoder = get_semantic_encoder(
+                config=EncoderConfig(dimension=dimension)
+            )
+            return encoder.encode(content)
+        except ImportError:
+            # 降级：如果独立模块不可用，使用内置后备实现
+            import hashlib
+            import math
+            
+            words = re.findall(r'[\u4e00-\u9fff]{2,}|[a-zA-Z]{3,}', content.lower())
+            word_freq: Dict[str, int] = {}
+            for w in words:
+                word_freq[w] = word_freq.get(w, 0) + 1
+            
+            vector = [0.0] * dimension
+            for word, freq in word_freq.items():
+                h = int(hashlib.md5(word.encode()).hexdigest(), 16)
+                idx1 = h % dimension
+                idx2 = (h >> 8) % dimension
+                idx3 = (h >> 16) % dimension
+                
+                weight = (1.0 + math.log(freq)) * (1.0 / (1.0 + math.log(len(words) / max(word_freq[word], 1))))
+                vector[idx1] += weight
+                vector[idx2] += weight * 0.5
+                vector[idx3] += weight * 0.25
+            
+            norm = math.sqrt(sum(v * v for v in vector))
+            if norm > 0:
+                vector = [v / norm for v in vector]
+            
+            return vector
+
+    def encode_cell_for_library(
+        self, cell_record: KnowledgeCellRecord
+    ) -> Optional[List[float]]:
+        """为知识格子生成语义向量（供 CellRecord.semantic_embedding 使用）"""
+        text = f"{cell_record.name} {cell_record.content}"
+        return self.encode_semantic(text)
+
+    # ═══════════════════════════════════════════════════════════════
+    #  v2.0 G-6: 自动跨域关联
+    # ═══════════════════════════════════════════════════════════════
+
+    @staticmethod
+    def cosine_similarity(vec_a: List[float], vec_b: List[float]) -> float:
+        """计算两个向量的余弦相似度"""
+        if not vec_a or not vec_b or len(vec_a) != len(vec_b):
+            return 0.0
+        dot = sum(a * b for a, b in zip(vec_a, vec_b))
+        norm_a = math.sqrt(sum(a * a for a in vec_a))
+        norm_b = math.sqrt(sum(b * b for b in vec_b))
+        if norm_a == 0 or norm_b == 0:
+            return 0.0
+        return dot / (norm_a * norm_b)
+
+    def find_related_cells(
+        self,
+        cell_id: str,
+        threshold: float = 0.3,
+        top_k: int = 5,
+    ) -> List[Dict[str, Any]]:
+        """
+        为指定格子查找相关联的其他格子（用于自动跨域关联）。
+        
+        基于：
+        1. 标签重叠度
+        2. 语义向量余弦相似度
+        3. 内容关键词匹配
+        
+        Args:
+            cell_id: 源格子 ID
+            threshold: 相似度阈值
+            top_k: 返回最相关的 K 个
+            
+        Returns:
+            相关格子列表 [{cell_id, score, reason}, ...]
+        """
+        source = self._cell_cache.get(cell_id)
+        if not source:
+            # 尝试从磁盘加载
+            file_path = self.cells_dir / f"{cell_id}.md"
+            if file_path.exists():
+                source = self.parse_knowledge_cell(file_path)
+                self._cell_cache[cell_id] = source
+            else:
+                return []
+        
+        cells = self.scan_knowledge_cells()
+        candidates = []
+        
+        for cid, record in cells.items():
+            if cid == cell_id:
+                continue
+            
+            score = 0.0
+            reasons = []
+            
+            # 1. 标签重叠
+            tag_overlap = len(source.tags & record.tags)
+            if tag_overlap > 0 and source.tags:
+                tag_score = tag_overlap / max(len(source.tags), 1)
+                score += tag_score * 0.4
+                reasons.append(f"标签重合({tag_overlap})")
+            
+            # 2. 语义向量相似度
+            vec_source = self.encode_semantic(source.content[:2000])
+            vec_target = self.encode_semantic(record.content[:2000])
+            sim = self.cosine_similarity(vec_source, vec_target)
+            if sim >= 0.15:
+                score += sim * 0.4
+                if sim >= 0.3:
+                    reasons.append(f"语义相似({sim:.2f})")
+            
+            # 3. 关键词匹配
+            src_kw = set(re.findall(r'[\w]{2,}', source.content[:500]))
+            tgt_kw = set(re.findall(r'[\w]{2,}', record.content[:500]))
+            kw_overlap = len(src_kw & tgt_kw)
+            if kw_overlap > 3:
+                kw_score = min(kw_overlap * 0.05, 0.2)
+                score += kw_score
+                reasons.append(f"关键词重合({kw_overlap})")
+            
+            if score >= threshold:
+                candidates.append({
+                    "cell_id": cid,
+                    "name": record.name,
+                    "score": round(score, 4),
+                    "reasons": reasons,
+                })
+        
+        candidates.sort(key=lambda x: x["score"], reverse=True)
+        return candidates[:top_k]
+
+    def auto_cross_reference_all(self, library=None, threshold: float = 0.35) -> Dict[str, Any]:
+        """
+        对所有知识格子执行自动跨域关联。
+        
+        将结果写入藏书阁的 cross_references 字段。
+        
+        Args:
+            library: 藏书阁实例（可选）
+            threshold: 关联阈值
+            
+        Returns:
+            统计信息
+        """
+        if library is None:
+            try:
+                from ._imperial_library import ImperialLibrary
+                library = ImperialLibrary()
+            except ImportError:
+                return {"error": "藏书阁不可用"}
+        
+        cells = self.scan_knowledge_cells()
+        total_links = 0
+        
+        for cell_id in cells:
+            related = self.find_related_cells(cell_id, threshold=threshold)
+            if related:
+                ref_ids = [r["cell_id"] for r in related]
+                # 在藏书阁中查找对应的 CellRecord 并更新 cross_references
+                for ref_id in ref_ids:
+                    # 构建可能的藏书阁 ID（格式：{WING}_{SHELF}_{SEQ}）
+                    # 通过标签搜索找到对应记录
+                    matching = library.query_cells(
+                        keyword=ref_id, limit=3
+                    )
+                    for m in matching:
+                        if ref_id in m.title or ref_id in m.content[:100]:
+                            # 双向建立引用
+                            library.add_cross_reference(m.id, f"kb_{cell_id}")
+                            total_links += 1
+        
+        logger.info(f"[KnowledgeBridge] 自动跨域关联完成: {total_links} 条链接")
+        return {
+            "total_cells": len(cells),
+            "cross_references_created": total_links,
+            "threshold": threshold,
+        }
+
+
+# ═══════════════════════════════════════════════════════════════════
+# 全局单例
+# ═══════════════════════════════════════════════════════════════════
+
+_global_bridge: Optional["LibraryKnowledgeBridge"] = None
+
+
+def get_knowledge_bridge(
+    knowledge_cells_dir: Optional[str] = None,
+) -> "LibraryKnowledgeBridge":
+    """
+    获取知识桥接器全局实例。
+    
+    Args:
+        knowledge_cells_dir: 知识格子目录路径（可选）
+        
+    Returns:
+        LibraryKnowledgeBridge 单例实例
+    """
+    global _global_bridge
+    if _global_bridge is None:
+        _global_bridge = LibraryKnowledgeBridge(
+            knowledge_cells_dir=knowledge_cells_dir
+        )
+    return _global_bridge
+
 
 # ═══════════════════════════════════════════════════════════════════
 # 导出
@@ -456,4 +962,5 @@ __all__ = [
     "KnowledgeCellRecord",
     "MethodCheckResult",
     "KnowledgeQueryResult",
+    "get_knowledge_bridge",
 ]

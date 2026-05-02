@@ -318,7 +318,7 @@ class WisdomRecommendation:
 
 @dataclass
 class FusionDecision:
-    """FusionDecision结果 V7.0.0 - 神之架构V4部门调度"""
+    """FusionDecision结果 V6.2.0 - 神之架构V4部门调度"""
     timestamp: datetime
     problem_type: ProblemType
     primary_school: WisdomSchool

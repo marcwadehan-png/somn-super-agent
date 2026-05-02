@@ -1,0 +1,19 @@
+{
+  "id": "lp_5ff6a0952800",
+  "name": "测试学习计划",
+  "folder_path": "D:\\AI\\test",
+  "status": "pending",
+  "created_at": 1777487357.1342723,
+  "updated_at": 1777487357.1342723,
+  "started_at": 0,
+  "completed_at": 0,
+  "config": {},
+  "total_files": 0,
+  "processed_files": 0,
+  "success_files": 0,
+  "failed_files": 0,
+  "total_knowledge": 0,
+  "total_memory": 0,
+  "files": [],
+  "error_message": ""
+}

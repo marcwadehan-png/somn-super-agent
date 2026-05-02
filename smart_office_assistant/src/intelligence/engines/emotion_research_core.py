@@ -58,14 +58,14 @@ class ResearchIntersection:
     neural_mechanisms: List[str] = field(default_factory=list)  # v2.0新增
     ai_applications: List[str] = field(default_factory=list)    # v2.0新增
     sss_wisdom_refs: List[str] = field(default_factory=list)    # Somn智慧引用
-    version: str = "2.0"
+    version: str = "6.2.0"
     last_updated: str = field(default_factory=lambda: datetime.now().isoformat())
 
 
 @dataclass
 class EmotionResearchFramework:
     """情绪研究框架完整定义"""
-    version: str = "2.0.0"
+    version: str = "6.2.0"
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
     intersections: Dict[str, ResearchIntersection] = field(default_factory=dict)
     

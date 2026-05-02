@@ -1,519 +1,442 @@
 """
-__all__ = [
-    'agent_core_handler',
-    'autonomy_handler',
-    'get_bridge_status',
-    'get_global_neural_bridge',
-    'learning_handler',
-    'memory_handler',
-    'process_through_network',
-    'setup_global_bridge',
-    'somn_core_handler',
-    'trace_signal_path',
-    'wisdom_dispatcher_handler',
-]
+全局神经桥梁 v3.0
 
-全局神经桥梁
+将神经网络布局与 Somn 系统的真实模块打通，实现全链路串联。
 
-将神经网络布局与Somn现有系统打通，实现全链路串联
-
-V2.0: 支持真实模块处理器绑定 + 模拟降级
+v3.0 变更：
+- 绑定真实 SomnCore 模块（不再走模拟降级）
+- 通过 NetworkLayoutManager.register_function_handler() 注入真实处理器
+- 6 个桥接全部对接真实模块方法
+- 提供 process_through_network() 完整链路处理
+- 提供 get_neural_status() 状态查询
 """
 
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+__all__ = [
+    'GlobalNeuralBridge',
+    'get_global_neural_bridge',
+    'bind_somn_core',
+    'get_bound_modules',
+]
+
+from typing import Any, Callable, Dict, List, Optional
 from datetime import datetime
 import threading
-import uuid
 import logging
+import time
 
 logger = logging.getLogger(__name__)
-
-from .signal import Signal, SignalType, SignalPriority
-from .synapse_connection import SynapseConnection, ConnectionType
-from .neuron_node import NeuronNode, NeuronType, NeuronState
-from .neural_network import NeuralNetwork
-from .network_layout_manager import NetworkLayoutManager
-
-# 可选的真实模块引用（延迟导入）
-_real_modules: Dict[str, Any] = {}
-
-
-def bind_real_module(module_name: str, instance: Any) -> None:
-    """绑定真实模块实例到桥梁
-    
-    Args:
-        module_name: 模块名称 (agent_core/somn_core/wisdom_dispatcher/memory_system/learning_system/autonomy_system)
-        instance: 模块实例
-    """
-    _real_modules[module_name] = instance
-    logger.info(f"[GlobalNeuralBridge] 已绑定真实模块: {module_name} ({type(instance).__name__})")
-
-
-def unbind_real_module(module_name: str) -> None:
-    """解绑真实模块实例"""
-    if module_name in _real_modules:
-        del _real_modules[module_name]
-        logger.info(f"[GlobalNeuralBridge] 已解绑模块: {module_name}")
-
-
-def get_bound_modules() -> Dict[str, str]:
-    """获取已绑定的模块列表
-    
-    Returns:
-        {module_name: class_name} 字典
-    """
-    return {k: type(v).__name__ for k, v in _real_modules.items()}
 
 
 class GlobalNeuralBridge:
     """
-    全局神经桥梁
-    
-    连接神经网络布局与Somn系统的各个模块：
-    1. AgentCore 集成
-    2. SomnCore 集成
-    3. 智慧调度集成
-    4. 记忆系统集成
-    5. 学习系统集成
-    6. 自主系统集成
-    
-    V2.0: 支持绑定真实模块实例，降级使用模拟处理器
+    全局神经桥梁 v3.0 — 真实模块绑定
+
+    连接神经网络布局与 Somn 系统的各个模块：
+    1. AgentCore → SomnCore.analyze_requirement()
+    2. SomnCore → SomnCore.get_capabilities()
+    3. WisdomDispatcher → SomnCore.super_wisdom.analyze()
+    4. NeuralMemory → SomnCore._query_memory_context()
+    5. LearningCoordinator → SomnCore.learning_coordinator
+    6. AutonomousAgent → SomnCore.autonomous_agent
     """
-    
+
     _instance = None
     _lock = threading.Lock()
-    
+
     def __new__(cls) -> 'GlobalNeuralBridge':
-        """单例模式实现"""
         if cls._instance is None:
             with cls._lock:
                 if cls._instance is None:
                     cls._instance = super().__new__(cls)
                     cls._instance._initialized = False
         return cls._instance
-    
+
     def __init__(self) -> None:
-        """初始化全局神经桥梁"""
         if self._initialized:
             return
-        
-        self.layout_manager = NetworkLayoutManager()
-        self.bridges: Dict[str, Callable[[Signal], Signal]] = {}  # 模块桥接函数
-        self.module_handlers: Dict[str, Any] = {}  # 实际模块处理器
-        self._initialized = True
+
+        # 延迟导入避免循环
+        self._layout_manager = None
+        self._somn_core = None
+        self._bridge_handlers: Dict[str, Callable] = {}
+        self._initialized = False
         self._setup_lock = threading.Lock()
-        self._real_bindings: Dict[str, bool] = {}  # 记录哪些桥接使用了真实模块
-    
-    def setup_global_bridge(self, bind_real: bool = True) -> bool:
-        """设置全局桥梁
-        
-        初始化神经网络布局并注册各模块桥接
-        
+        self._stats = {
+            "total_queries": 0,
+            "bridge_calls": {},
+            "errors": 0,
+            "avg_latency_ms": 0.0,
+        }
+
+    @property
+    def layout_manager(self):
+        """延迟加载 NetworkLayoutManager"""
+        if self._layout_manager is None:
+            from .network_layout_manager import NetworkLayoutManager
+            self._layout_manager = NetworkLayoutManager()
+        return self._layout_manager
+
+    def setup_global_bridge(self, somn_core=None) -> bool:
+        """
+        设置全局桥梁 — 绑定真实模块到神经网络
+
         Args:
-            bind_real: 是否尝试绑定真实模块
-            
+            somn_core: SomnCore 实例，如为 None 则延迟绑定
+
         Returns:
             bool: 设置是否成功
         """
         with self._setup_lock:
+            if somn_core is not None:
+                self._somn_core = somn_core
+
             # 1. 初始化神经网络布局
-            if not self.layout_manager.initialize_global_layout():
-                return False
-            
-            # 2. 注册各模块桥接
-            self._register_agent_core_bridge()
-            self._register_somn_core_bridge()
-            self._register_wisdom_bridge()
-            self._register_memory_bridge()
-            self._register_learning_bridge()
-            self._register_autonomy_bridge()
-            
+            lm = self.layout_manager
+            if not lm.initialized:
+                if not lm.initialize_global_layout():
+                    logger.error("[GlobalNeuralBridge] 神经网络布局初始化失败")
+                    return False
+
+            # 2. 注册真实功能处理器
+            self._register_agent_core_handler()
+            self._register_somn_core_handler()
+            self._register_wisdom_handler()
+            self._register_memory_handler()
+            self._register_learning_handler()
+            self._register_autonomy_handler()
+
+            self._initialized = True
+            logger.info(
+                f"[GlobalNeuralBridge] v3.0 就绪: "
+                f"{len(self._bridge_handlers)} 个真实处理器已绑定, "
+                f"somn_core={'已绑定' if self._somn_core else '延迟'}"
+            )
             return True
-    
-    def _try_get_real_handler(self, module_name: str) -> Optional[Any]:
-        """尝试获取真实模块处理器"""
-        return _real_modules.get(module_name)
-    
-    def _register_agent_core_bridge(self) -> None:
-        """注册AgentCore桥接"""
-        def agent_core_handler(signal: Signal) -> Signal:
-            data = signal.data
-            
-            # 尝试使用真实模块
-            real = self._try_get_real_handler("agent_core")
-            if real and hasattr(real, 'process_input'):
-                try:
-                    query = data.get("query", data) if isinstance(data, dict) else str(data)
-                    result = real.process_input(query, data if isinstance(data, dict) else None)
-                    return signal.copy_with(
-                        source_id="neuron_agent_core",
-                        data={
-                            "processed_by": "AgentCore (real)",
-                            "result": str(result)[:500],
-                            "status": "success",
-                            "timestamp": datetime.now().isoformat(),
-                        },
-                        metadata={"bridge": "agent_core", "real": True}
-                    )
-                except Exception as e:
-                    logger.warning(f"[Bridge] AgentCore 真实调用失败，降级到模拟: {e}")
-            
-            # 模拟处理
-            result = {
-                "processed_by": "AgentCore (simulated)",
-                "input": str(data)[:200],
+
+    def bind_somn_core(self, somn_core) -> None:
+        """绑定/更新 SomnCore 实例，重新注册处理器"""
+        self._somn_core = somn_core
+        if self._initialized:
+            self._register_agent_core_handler()
+            self._register_somn_core_handler()
+            self._register_wisdom_handler()
+            self._register_memory_handler()
+            self._register_learning_handler()
+            self._register_autonomy_handler()
+            logger.info(f"[GlobalNeuralBridge] SomnCore 已重新绑定: {type(somn_core).__name__}")
+
+    def _safe_call(self, bridge_name: str, fn: Callable, *args, **kwargs) -> Any:
+        """安全调用处理器，记录统计"""
+        start = time.time()
+        try:
+            result = fn(*args, **kwargs)
+            elapsed = (time.time() - start) * 1000
+            self._stats["bridge_calls"][bridge_name] = \
+                self._stats["bridge_calls"].get(bridge_name, 0) + 1
+            # 滚动平均延迟
+            total = self._stats["total_queries"]
+            self._stats["avg_latency_ms"] = (
+                (self._stats["avg_latency_ms"] * total + elapsed) / (total + 1)
+            )
+            self._stats["total_queries"] += 1
+            return result
+        except Exception as e:
+            self._stats["errors"] += 1
+            logger.warning(f"[Bridge:{bridge_name}] 调用失败: {e}")
+            return None
+
+    # ─── 真实模块处理器注册 ───
+
+    def _register_agent_core_handler(self) -> None:
+        """注册 AgentCore → SomnCore.analyze_requirement()"""
+        def handler(data: Any) -> Any:
+            core = self._somn_core
+            if core is None:
+                return {"status": "no_somn_core", "bridge": "agent_core"}
+
+            query = data.get("query", data) if isinstance(data, dict) else str(data)
+            context = data.get("context", {}) if isinstance(data, dict) else None
+
+            result = self._safe_call("agent_core", core.analyze_requirement, query, context)
+            if result is None:
+                return {"status": "error", "bridge": "agent_core"}
+
+            # 提取关键信息
+            routing = result.get("routing_decision", {})
+            return {
+                "status": "success",
+                "bridge": "agent_core",
+                "real": True,
+                "route": routing.get("route", "unknown"),
+                "complexity": routing.get("complexity", 0),
+                "task_id": result.get("task_id", ""),
                 "timestamp": datetime.now().isoformat(),
-                "status": "success"
             }
-            
-            return signal.copy_with(
-                source_id="neuron_agent_core",
-                data=result,
-                metadata={"bridge": "agent_core", "real": False}
-            )
-        
-        self.bridges["agent_core"] = agent_core_handler
-        
-        # 绑定到神经元
-        neuron = self.layout_manager.network.neurons.get("neuron_agent_core")
-        if neuron and hasattr(neuron, 'function_handler'):
-            neuron.function_handler = lambda data: agent_core_handler(
-                Signal("input", SignalType.DATA, data)
-            ).data
-    
-    def _register_somn_core_bridge(self) -> None:
-        """注册SomnCore桥接"""
-        def somn_core_handler(signal: Signal) -> Signal:
-            data = signal.data
-            
-            # 尝试使用真实模块
-            real = self._try_get_real_handler("somn_core")
-            if real and hasattr(real, 'analyze_requirement'):
-                try:
-                    query = data.get("query", data) if isinstance(data, dict) else str(data)
-                    result = real.analyze_requirement(query)
-                    return signal.copy_with(
-                        source_id="neuron_somn_core",
-                        data={
-                            "processed_by": "SomnCore (real)",
-                            "result": str(result)[:500],
-                            "capabilities": real.get_capabilities() if hasattr(real, 'get_capabilities') else [],
-                            "timestamp": datetime.now().isoformat(),
-                        },
-                        metadata={"bridge": "somn_core", "real": True}
-                    )
-                except Exception as e:
-                    logger.warning(f"[Bridge] SomnCore 真实调用失败，降级到模拟: {e}")
-            
-            # 模拟SomnCore处理
-            result = {
-                "processed_by": "SomnCore (simulated)",
-                "input": str(data)[:200],
-                "capabilities": [
-                    "analysis", "strategy", "execution",
-                    "evaluation", "learning"
-                ],
-                "timestamp": datetime.now().isoformat()
+
+        self._bridge_handlers["agent_core"] = handler
+        lm = self.layout_manager
+        lm.register_function_handler("AgentCore", handler)
+
+    def _register_somn_core_handler(self) -> None:
+        """注册 SomnCore → SomnCore.get_capabilities()"""
+        def handler(data: Any) -> Any:
+            core = self._somn_core
+            if core is None:
+                return {"status": "no_somn_core", "bridge": "somn_core"}
+
+            caps = self._safe_call("somn_core", core.get_capabilities)
+            if caps is None:
+                return {"status": "error", "bridge": "somn_core"}
+
+            return {
+                "status": "success",
+                "bridge": "somn_core",
+                "real": True,
+                "capabilities": caps,
+                "timestamp": datetime.now().isoformat(),
             }
-            
-            return signal.copy_with(
-                source_id="neuron_somn_core",
-                data=result,
-                metadata={"bridge": "somn_core", "real": False}
-            )
-        
-        self.bridges["somn_core"] = somn_core_handler
-        
-        neuron = self.layout_manager.network.neurons.get("neuron_somn_core")
-        if neuron and hasattr(neuron, 'function_handler'):
-            neuron.function_handler = lambda data: somn_core_handler(
-                Signal("input", SignalType.DATA, data)
-            ).data
-    
-    def _register_wisdom_bridge(self) -> None:
-        """注册智慧调度桥接"""
-        def wisdom_dispatcher_handler(signal: Signal) -> Signal:
-            data = signal.data
-            query = data.get("query", "") if isinstance(data, dict) else str(data)
-            
-            # 尝试使用真实模块
-            real = self._try_get_real_handler("wisdom_dispatcher")
-            if real and hasattr(real, 'dispatch'):
-                try:
-                    dispatch_result = real.dispatch(query)
-                    selected_schools = []
-                    if isinstance(dispatch_result, dict):
-                        selected_schools = dispatch_result.get("selected_schools", [])
-                    elif isinstance(dispatch_result, list):
-                        selected_schools = [str(s) for s in dispatch_result[:5]]
-                    
-                    return signal.copy_with(
-                        source_id="neuron_wisdom_dispatcher",
-                        data={
-                            "processed_by": "WisdomDispatcher (real)",
-                            "query": query,
-                            "selected_schools": selected_schools,
-                            "school_count": len(selected_schools),
-                            "timestamp": datetime.now().isoformat(),
-                        },
-                        metadata={"bridge": "wisdom_dispatcher", "real": True}
-                    )
-                except Exception as e:
-                    logger.warning(f"[Bridge] WisdomDispatcher 真实调用失败，降级到模拟: {e}")
-            
-            # 模拟智慧分发
-            selected_schools = self._select_wisdom_schools(query)
-            
-            result = {
-                "processed_by": "WisdomDispatcher (simulated)",
-                "query": query,
-                "selected_schools": selected_schools,
-                "school_count": len(selected_schools),
-                "timestamp": datetime.now().isoformat()
+
+        self._bridge_handlers["somn_core"] = handler
+        lm = self.layout_manager
+        lm.register_function_handler("SomnCore", handler)
+
+    def _register_wisdom_handler(self) -> None:
+        """注册 WisdomDispatcher → SomnCore.super_wisdom.analyze()"""
+        def handler(data: Any) -> Any:
+            core = self._somn_core
+            if core is None:
+                return {"status": "no_somn_core", "bridge": "wisdom_dispatcher"}
+
+            query = data.get("query", data) if isinstance(data, dict) else str(data)
+            context = data.get("context", {}) if isinstance(data, dict) else {}
+
+            # 确保智慧层已加载
+            core._ensure_wisdom_layers()
+            if core.super_wisdom is None:
+                return {"status": "wisdom_not_loaded", "bridge": "wisdom_dispatcher"}
+
+            result = self._safe_call("wisdom_dispatcher", core.super_wisdom.analyze,
+                                      query_text=query, context=context,
+                                      threshold=0.25, max_schools=6)
+            if result is None:
+                return {"status": "error", "bridge": "wisdom_dispatcher"}
+
+            return {
+                "status": "success",
+                "bridge": "wisdom_dispatcher",
+                "real": True,
+                "primary_insight": getattr(result, 'primary_insight', ''),
+                "schools": getattr(result, 'activated_schools', []),
+                "timestamp": datetime.now().isoformat(),
             }
-            
-            return signal.copy_with(
-                source_id="neuron_wisdom_dispatcher",
-                data=result,
-                metadata={"bridge": "wisdom_dispatcher", "schools": selected_schools, "real": False}
-            )
-        
-        self.bridges["wisdom_dispatcher"] = wisdom_dispatcher_handler
-        
-        neuron = self.layout_manager.network.neurons.get("neuron_wisdom_dispatcher")
-        if neuron and hasattr(neuron, 'function_handler'):
-            neuron.function_handler = lambda data: wisdom_dispatcher_handler(
-                Signal("input", SignalType.DATA, data)
-            ).data
-    
-    def _select_wisdom_schools(self, query: str) -> List[str]:
-        """根据查询选择智慧学派"""
-        schools = []
-        query_lower = query.lower()
-        
-        keywords_map = {
-            "CONFUCIAN": ["仁", "礼", "德", "道德", "伦理"],
-            "TAOIST": ["道", "自然", "无为", "阴阳"],
-            "BUDDHIST": ["佛", "心", "悟", "禅", "空"],
-            "SUNZI": ["兵", "战", "略", "谋", "策"],
-            "SUFU": ["素书", "德", "义", "仁"],
-            "YANGMING": ["心学", "知行合一", "良知"],
-            "DEWEY": ["思维", "反省", "教育"],
-            "TOP_METHODS": ["思维", "模型", "第一性原理"],
-            "PSYCHOLOGY": ["心理", "消费者", "营销"],
-            "SCIENCE": ["科学", "实验", "验证"],
-        }
-        
-        for school, keywords in keywords_map.items():
-            if any(kw in query_lower for kw in keywords):
-                schools.append(school)
-        
-        if not schools:
-            schools = ["CONFUCIAN", "TAOIST", "TOP_METHODS"]
-        
-        return schools[:5]
-    
-    def _register_memory_bridge(self) -> None:
-        """注册记忆系统桥接"""
-        def memory_handler(signal: Signal) -> Signal:
-            operation = signal.metadata.get("memory_operation", "query")
-            
-            # 尝试使用真实模块
-            real = self._try_get_real_handler("memory_system")
-            if real:
-                try:
-                    if operation == "store" and hasattr(real, 'store'):
-                        key = real.store(signal.data)
-                        result = {"stored": True, "key": key}
-                    elif operation == "retrieve" and hasattr(real, 'retrieve'):
-                        result = {"retrieved": real.retrieve(signal.data)}
-                    elif operation == "query" and hasattr(real, 'query'):
-                        result = {"results": real.query(signal.data)}
-                    else:
-                        result = {"operation": operation, "real_module": True}
-                    
-                    return signal.copy_with(
-                        source_id="neuron_neural_memory",
-                        data=result,
-                        metadata={"bridge": "memory_system", "real": True}
-                    )
-                except Exception as e:
-                    logger.warning(f"[Bridge] MemorySystem 真实调用失败，降级到模拟: {e}")
-            
-            # 模拟记忆操作
-            if operation == "store":
-                result = {"stored": True, "key": str(uuid.uuid4())[:8]}
-            elif operation == "retrieve":
-                result = {"retrieved": None, "found": False}
+
+        self._bridge_handlers["wisdom_dispatcher"] = handler
+        lm = self.layout_manager
+        lm.register_function_handler("WisdomDispatcher", handler)
+
+    def _register_memory_handler(self) -> None:
+        """注册 MemorySystem → SomnCore._query_memory_context()"""
+        def handler(data: Any) -> Any:
+            core = self._somn_core
+            if core is None:
+                return {"status": "no_somn_core", "bridge": "memory_system"}
+
+            query = data.get("query", data) if isinstance(data, dict) else str(data)
+            operation = data.get("operation", "query") if isinstance(data, dict) else "query"
+
+            if operation == "query":
+                result = self._safe_call("memory_system", core._query_memory_context, query)
+                if result is None:
+                    return {"status": "error", "bridge": "memory_system"}
+                return {
+                    "status": "success",
+                    "bridge": "memory_system",
+                    "real": True,
+                    "confidence": result.get("confidence", 0.0),
+                    "has_evidence": bool(result.get("evidence_chain")),
+                    "timestamp": datetime.now().isoformat(),
+                }
+            elif operation == "store":
+                # 通过 neural_system 写入
+                core._ensure_layers()
+                if core.neural_system:
+                    title = data.get("title", "neural_bridge_store") if isinstance(data, dict) else "neural_bridge_store"
+                    desc = data.get("description", query) if isinstance(data, dict) else query
+                    self._safe_call("memory_system", core._record_task_memory,
+                                    title, desc, 80, ["neural_bridge"])
+                    return {"status": "success", "bridge": "memory_system", "real": True}
+                return {"status": "no_neural_system", "bridge": "memory_system"}
             else:
-                result = {"operation": operation, "status": "unknown"}
-            
-            return signal.copy_with(
-                source_id="neuron_neural_memory",
-                data=result,
-                metadata={"bridge": "memory_system", "real": False}
-            )
-        
-        self.bridges["memory_system"] = memory_handler
-        
-        neuron = self.layout_manager.network.neurons.get("neuron_neural_memory")
-        if neuron and hasattr(neuron, 'function_handler'):
-            neuron.function_handler = lambda data: memory_handler(
-                Signal("input", SignalType.DATA, data)
-            ).data
-    
-    def _register_learning_bridge(self) -> None:
-        """注册学习系统桥接"""
-        def learning_handler(signal: Signal) -> Signal:
-            data = signal.data
-            
-            # 尝试使用真实模块
-            real = self._try_get_real_handler("learning_system")
-            if real:
-                try:
-                    if hasattr(real, 'learn'):
-                        real.learn(data)
-                        result = {"learned": True}
-                    elif hasattr(real, 'record_feedback'):
-                        real.record_feedback(data)
-                        result = {"feedback_recorded": True}
-                    else:
-                        result = {"processed": True}
-                    
-                    return signal.copy_with(
-                        source_id="neuron_learning_coord",
-                        data={
-                            "processed_by": "LearningCoordinator (real)",
-                            **result,
-                            "timestamp": datetime.now().isoformat(),
-                        },
-                        metadata={"bridge": "learning_system", "real": True}
-                    )
-                except Exception as e:
-                    logger.warning(f"[Bridge] LearningSystem 真实调用失败，降级到模拟: {e}")
-            
-            # 模拟学习处理
-            result = {
-                "processed_by": "LearningCoordinator (simulated)",
-                "learning_type": data.get("type", "general") if isinstance(data, dict) else "general",
-                "feedback_recorded": True,
-                "q_values_updated": True,
-                "timestamp": datetime.now().isoformat()
-            }
-            
-            return signal.copy_with(
-                source_id="neuron_learning_coord",
-                data=result,
-                metadata={"bridge": "learning_system", "real": False}
-            )
-        
-        self.bridges["learning_system"] = learning_handler
-        
-        neuron = self.layout_manager.network.neurons.get("neuron_learning_coord")
-        if neuron and hasattr(neuron, 'function_handler'):
-            neuron.function_handler = lambda data: learning_handler(
-                Signal("input", SignalType.DATA, data)
-            ).data
-    
-    def _register_autonomy_bridge(self) -> None:
-        """注册自主系统桥接"""
-        def autonomy_handler(signal: Signal) -> Signal:
-            data = signal.data
-            
-            # 尝试使用真实模块
-            real = self._try_get_real_handler("autonomy_system")
-            if real:
-                try:
-                    if hasattr(real, 'plan_and_execute'):
-                        result = real.plan_and_execute(data)
-                    elif hasattr(real, 'execute'):
-                        result = real.execute(data)
-                    else:
-                        result = {"processed": True}
-                    
-                    return signal.copy_with(
-                        source_id="neuron_autonomous_agent",
-                        data={
-                            "processed_by": "AutonomousAgent (real)",
-                            **result,
-                            "timestamp": datetime.now().isoformat(),
-                        },
-                        metadata={"bridge": "autonomy_system", "real": True}
-                    )
-                except Exception as e:
-                    logger.warning(f"[Bridge] AutonomySystem 真实调用失败，降级到模拟: {e}")
-            
-            # 模拟自主处理
-            result = {
-                "processed_by": "AutonomousAgent (simulated)",
-                "autonomy_level": "high",
-                "actions_planned": [
-                    "analyze_context",
-                    "select_strategy",
-                    "execute_action",
-                    "monitor_result"
-                ],
-                "timestamp": datetime.now().isoformat()
-            }
-            
-            return signal.copy_with(
-                source_id="neuron_autonomous_agent",
-                data=result,
-                metadata={"bridge": "autonomy_system", "real": False}
-            )
-        
-        self.bridges["autonomy_system"] = autonomy_handler
-        
-        neuron = self.layout_manager.network.neurons.get("neuron_autonomous_agent")
-        if neuron and hasattr(neuron, 'function_handler'):
-            neuron.function_handler = lambda data: autonomy_handler(
-                Signal("input", SignalType.DATA, data)
-            ).data
-    
-    def process_through_network(self, input_data: Any) -> Dict[str, Any]:
-        """通过网络处理输入
-        
-        完整的全链路处理流程
-        """
-        # 1. 激活主链路（集成 Phase4 + Phase3）
-        activation_result = self.layout_manager.activate_main_chain(input_data)
-        
-        # 2. 收集各模块输出
-        module_outputs = {}
-        for bridge_name, bridge_func in self.bridges.items():
+                return {"status": "unknown_operation", "bridge": "memory_system", "operation": operation}
+
+        self._bridge_handlers["memory_system"] = handler
+        lm = self.layout_manager
+        lm.register_function_handler("NeuralMemorySystem", handler)
+
+    def _register_learning_handler(self) -> None:
+        """注册 LearningCoordinator → SomnCore.learning_coordinator"""
+        def handler(data: Any) -> Any:
+            core = self._somn_core
+            if core is None:
+                return {"status": "no_somn_core", "bridge": "learning_system"}
+
+            core._ensure_learning_coordinator()
+            if core.learning_coordinator is None:
+                return {"status": "not_initialized", "bridge": "learning_system"}
+
+            # 获取学习统计
             try:
-                signal = Signal("input", SignalType.DATA, input_data)
-                result = bridge_func(signal)
-                module_outputs[bridge_name] = result.data
+                stats = getattr(core.learning_coordinator, 'get_statistics', lambda: {})()
+                return {
+                    "status": "success",
+                    "bridge": "learning_system",
+                    "real": True,
+                    "stats": stats,
+                    "timestamp": datetime.now().isoformat(),
+                }
             except Exception as e:
-                module_outputs[bridge_name] = {"error": "操作失败"}
-        
-        # 3. 整合结果
+                return {"status": "error", "bridge": "learning_system", "error": str(e)}
+
+        self._bridge_handlers["learning_system"] = handler
+        lm = self.layout_manager
+        lm.register_function_handler("LearningCoordinator", handler)
+
+    def _register_autonomy_handler(self) -> None:
+        """注册 AutonomousAgent → SomnCore.autonomous_agent"""
+        def handler(data: Any) -> Any:
+            core = self._somn_core
+            if core is None:
+                return {"status": "no_somn_core", "bridge": "autonomy_system"}
+
+            core._ensure_autonomous_agent()
+            if core.autonomous_agent is None:
+                return {"status": "not_initialized", "bridge": "autonomy_system"}
+
+            # 获取自主目标
+            try:
+                goals = getattr(core.autonomous_agent, 'goal_system', None)
+                ready = []
+                if goals:
+                    ready = [
+                        {"id": g.id, "title": g.title, "status": g.status}
+                        for g in (goals.get_ready_goals() if hasattr(goals, 'get_ready_goals') else [])
+                    ]
+                return {
+                    "status": "success",
+                    "bridge": "autonomy_system",
+                    "real": True,
+                    "ready_goals": ready[:5],
+                    "timestamp": datetime.now().isoformat(),
+                }
+            except Exception as e:
+                return {"status": "error", "bridge": "autonomy_system", "error": str(e)}
+
+        self._bridge_handlers["autonomy_system"] = handler
+        lm = self.layout_manager
+        lm.register_function_handler("AutonomousAgent", handler)
+
+    # ─── 核心处理接口 ───
+
+    def process_through_network(self, input_data: Any) -> Dict[str, Any]:
+        """
+        通过神经网络处理输入 — 真实全链路
+
+        数据流: input_user → neuron_agent_core → neuron_somn_core →
+                neuron_super_wisdom → neuron_wisdom_dispatcher → (22学派) →
+                neuron_thinking_fusion → neuron_deep_reasoning → neuron_narrative_intel →
+                output_response
+
+        Returns:
+            包含激活结果、各模块输出、处理统计的字典
+        """
+        start_time = time.time()
+
+        # 1. 激活主链路（神经网络传播）
+        activation_result = self.layout_manager.activate_main_chain(input_data)
+
+        # 2. 并行调用各桥接模块
+        module_outputs = {}
+        for bridge_name, handler in self._bridge_handlers.items():
+            try:
+                result = handler(input_data)
+                module_outputs[bridge_name] = result
+            except Exception as e:
+                module_outputs[bridge_name] = {"error": str(e)}
+
+        processing_time_ms = (time.time() - start_time) * 1000
+
         return {
-            "network_activation": activation_result,
+            "status": "success",
+            "activation": activation_result,
             "module_outputs": module_outputs,
+            "bridge_stats": dict(self._stats),
             "network_state": self.layout_manager.get_layout_status(),
             "phase_status": self.layout_manager.get_phase_status(),
-            "bound_modules": get_bound_modules(),
-            "timestamp": datetime.now().isoformat()
+            "processing_time_ms": round(processing_time_ms, 2),
+            "timestamp": datetime.now().isoformat(),
         }
-    
+
     def get_bridge_status(self) -> Dict[str, Any]:
         """获取桥梁状态"""
         return {
             "initialized": self._initialized,
-            "bridges_registered": len(self.bridges),
-            "bridge_names": list(self.bridges.keys()),
-            "bound_real_modules": get_bound_modules(),
+            "somn_core_bound": self._somn_core is not None,
+            "bridges_registered": len(self._bridge_handlers),
+            "bridge_names": list(self._bridge_handlers.keys()),
+            "stats": dict(self._stats),
             "layout_status": self.layout_manager.get_layout_status(),
             "phase_status": self.layout_manager.get_phase_status(),
         }
-    
+
     def trace_signal_path(self, start_module: str, end_module: str) -> Optional[List[str]]:
         """追踪信号路径"""
         return self.layout_manager.find_optimal_path(start_module, end_module)
 
-# 全局实例
+    def get_neural_status(self) -> Dict[str, Any]:
+        """获取神经网络完整状态（供 API/前端使用）"""
+        return {
+            "bridge": self.get_bridge_status(),
+            "layout": self.layout_manager.get_layout_status(),
+            "phases": self.layout_manager.get_phase_status(),
+            "execution_history": self.layout_manager.get_execution_history(limit=10),
+            "stats": dict(self._stats),
+        }
+
+
+# ─── 全局单例 ───
+
+_bridge_instance: Optional[GlobalNeuralBridge] = None
+_bridge_lock = threading.Lock()
+
+
 def get_global_neural_bridge() -> GlobalNeuralBridge:
-    """获取全局神经桥梁实例（单例）"""
-    return GlobalNeuralBridge()
+    """获取全局神经桥梁实例（线程安全单例）"""
+    global _bridge_instance
+    if _bridge_instance is None:
+        with _bridge_lock:
+            if _bridge_instance is None:
+                _bridge_instance = GlobalNeuralBridge()
+    return _bridge_instance
+
+
+def bind_somn_core(somn_core) -> GlobalNeuralBridge:
+    """
+    便捷函数：获取桥梁并绑定 SomnCore
+
+    Args:
+        somn_core: SomnCore 实例
+
+    Returns:
+        GlobalNeuralBridge 实例
+    """
+    bridge = get_global_neural_bridge()
+    bridge.setup_global_bridge(somn_core=somn_core)
+    return bridge
+
+
+def get_bound_modules() -> Dict[str, str]:
+    """获取已绑定的模块列表"""
+    bridge = get_global_neural_bridge()
+    return {
+        name: "active" for name in bridge._bridge_handlers
+    }

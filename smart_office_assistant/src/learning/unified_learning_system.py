@@ -416,23 +416,3 @@ def create_unified_system(target_drive: str = "E:",
     return system
 
 # 主程序
-# if __name__ == "__main__":
-# #     raise RuntimeError("此入口已禁用 - 请使用 tests/ 目录")
-
-    logger = logging.getLogger(__name__)
-    logger.info("启动unified学习系统")
-
-    # 创建系统
-    system = create_unified_system(
-        target_drive="E:",
-        max_concurrent=4,
-        continuous=False
-    )
-
-    # 执行学习
-    system.start_learning(continuous=False)
-
-    # get状态
-    status = system.get_status()
-    logger.info("学习状态")
-    logger.info(json.dumps(status, indent=2, ensure_ascii=False))

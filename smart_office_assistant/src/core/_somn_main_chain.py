@@ -518,7 +518,7 @@ def _execute_route_D_full_workflow(
     _task_guard: Any,
     _task_start: float,
 ) -> tuple:
-    """[单一职责] 路由D：完整工作流（大餐）含超时保护"""
+    """[单一职责] 路由D：完整工作流（FEAST模式）含超时保护"""
     import time as _time
     from .timeout_guard import should_skip_heavy_ops
     
@@ -528,7 +528,7 @@ def _execute_route_D_full_workflow(
             return True
         return False
     
-    logger.info(f"[路由D] 完整工作流(大餐): {description[:50]}...")
+    logger.info(f"[路由D] 完整工作流(FEAST模式): {description[:50]}...")
     
     # 并形模式：并行增强
     parallel_output = None
@@ -745,6 +745,51 @@ def _module_run_agent_task(
         execution = wisdom_result.get("execution", {}) or {}
         evaluation = wisdom_result.get("evaluation", {}) or {}
         reflection_text = wisdom_result.get("reflection", "") or ""
+
+    elif route == "sage_dispatch":
+        logger.info(f"[路由E] SageDispatch贤者调度: {description[:50]}...")
+        from ._somn_routes import _module_run_sage_dispatch_route
+        sage_result = _module_run_sage_dispatch_route(self, requirement, options)
+        strategy = sage_result.get("strategy", {}) or {}
+        execution = sage_result.get("execution", {}) or {}
+        evaluation = sage_result.get("evaluation", {}) or {}
+        reflection_text = sage_result.get("reflection", "") or ""
+
+    elif route == "divine_reason":
+        logger.info(f"[路由F] DivineReason统一推理: {description[:50]}...")
+        from ._somn_routes import _module_run_divine_reason_route
+        reason_result = _module_run_divine_reason_route(self, requirement, options)
+        strategy = reason_result.get("strategy", {}) or {}
+        execution = reason_result.get("execution", {}) or {}
+        evaluation = reason_result.get("evaluation", {}) or {}
+        reflection_text = reason_result.get("reflection", "") or ""
+
+    elif route == "tianshu_pipeline":
+        logger.info(f"[路由G] 天枢八层管道: {description[:50]}...")
+        from ._somn_routes import _module_run_tianshu_pipeline_route
+        pipeline_result = _module_run_tianshu_pipeline_route(self, requirement, options)
+        strategy = pipeline_result.get("strategy", {}) or {}
+        execution = pipeline_result.get("execution", {}) or {}
+        evaluation = pipeline_result.get("evaluation", {}) or {}
+        reflection_text = pipeline_result.get("reflection", "") or ""
+
+    elif route == "ppt_generate":
+        logger.info(f"[路由PPT] PPT子系统强化处理: {description[:50]}...")
+        from ._somn_routes import _module_run_ppt_route
+        ppt_result = _module_run_ppt_route(self, requirement, options)
+        strategy = ppt_result.get("strategy", {}) or {}
+        execution = ppt_result.get("execution", {}) or {}
+        evaluation = ppt_result.get("evaluation", {}) or {}
+        reflection_text = ppt_result.get("reflection", "") or ""
+
+    elif route == "neural_layout":
+        logger.info(f"[路由NL] NeuralLayout神经网络布局: {description[:50]}...")
+        from ._somn_routes import _module_run_neural_layout_route
+        nl_result = _module_run_neural_layout_route(self, requirement, options)
+        strategy = nl_result.get("strategy", {}) or {}
+        execution = nl_result.get("execution", {}) or {}
+        evaluation = nl_result.get("evaluation", {}) or {}
+        reflection_text = nl_result.get("reflection", "") or ""
 
     else:
         strategy, execution, evaluation, reflection_text = _execute_route_D_full_workflow(

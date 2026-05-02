@@ -44,7 +44,7 @@ class 罗隐诗歌characteristics:
 class 罗隐深化引擎:
     """罗隐诗文深化分析引擎 v8.2.0"""
 
-    VERSION = "v8.2.0"
+    VERSION = "6.2.0"
 
     def __init__(self):
         self.诗歌characteristics = self._init_characteristics()

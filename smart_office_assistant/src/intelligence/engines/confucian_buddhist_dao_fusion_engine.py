@@ -129,7 +129,7 @@ class ConfucianBuddhistDaoFusion:
     def __init__(self):
         """init儒释道fusion引擎"""
         self.name = "ConfucianBuddhistDaoFusion"
-        self.version = "v1.0.0"
+        self.version="6.2.0"
         
         # ═══════════════════════════════════════════════════════
         # 儒家核心智慧

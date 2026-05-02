@@ -127,7 +127,7 @@ class SupremeWisdomCoordinator:
     def __init__(self):
         """init智慧协调器"""
         self.name = "SupremeWisdomCoordinator"
-        self.version = "v1.0"
+        self.version="6.2.0"
         self.active_systems: Dict[str, Any] = {}
         self.coordination_history: List[WisdomCoordinationResult] = []
 

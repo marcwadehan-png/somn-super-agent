@@ -54,7 +54,7 @@ class MarvelWisdomCore:
     
     def __init__(self):
         self.name = "漫威智慧核心"
-        self.version = "1.0.1"
+        self.version="6.2.0"
         self.wisdom_quotes = [
             "能力越大,责任越大.",
             "重要的不是你有多强大,而是你如何使用你的力量.",

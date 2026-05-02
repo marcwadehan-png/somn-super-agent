@@ -91,7 +91,7 @@ class YangmingReasoningEngine:
     4. 面对实践检验 → 事上磨炼推理(事上磨炼)
     """
 
-    VERSION = "2.0.0"
+    VERSION = "6.2.0"
     
     # 心学核心原则
     CORE_PRINCIPLES = {

@@ -17,6 +17,16 @@ logger = logging.getLogger(__name__)
 def register_analysis_routes(app, app_state):
     """注册分析相关路由"""
 
+    @app.get("/api/v1/analysis", tags=["分析"])
+    async def analysis_health():
+        """分析服务健康检查"""
+        return {
+            "success": True,
+            "message": "分析服务运行中",
+            "timestamp": datetime.now().isoformat(),
+            "data": {"status": "healthy"}
+        }
+
     @app.post("/api/v1/analysis/strategy", tags=["分析"])
     async def strategy_analysis(request_body: dict):
         """策略分析"""
@@ -104,6 +114,16 @@ def register_analysis_routes(app, app_state):
 def register_document_routes(app, app_state):
     """注册文档生成路由"""
 
+    @app.get("/api/v1/documents", tags=["文档"])
+    async def documents_health():
+        """文档服务健康检查"""
+        return {
+            "success": True,
+            "message": "文档服务运行中",
+            "timestamp": datetime.now().isoformat(),
+            "data": {"status": "healthy"}
+        }
+
     @app.post("/api/v1/documents/generate", tags=["文档"])
     async def generate_document(request_body: dict):
         """生成文档"""
@@ -137,6 +157,16 @@ def register_document_routes(app, app_state):
 
 def register_wisdom_routes(app, app_state):
     """注册智慧引擎路由"""
+
+    @app.get("/api/v1/wisdom", tags=["智慧引擎"])
+    async def wisdom_health():
+        """智慧引擎健康检查"""
+        return {
+            "success": True,
+            "message": "智慧引擎运行中",
+            "timestamp": datetime.now().isoformat(),
+            "data": {"status": "healthy"}
+        }
 
     @app.get("/api/v1/wisdom/schools", tags=["智慧引擎"])
     async def list_wisdom_schools():
@@ -201,7 +231,23 @@ def register_wisdom_routes(app, app_state):
 
 
 def register_memory_routes(app, app_state):
-    """注册记忆系统路由"""
+    """注册记忆系统路由 — 对接 NeuralMemory v7 / NeuralExecutor / MemoryLifecycleManager"""
+
+    def _get_neural_executor():
+        """尝试获取 NeuralExecutor（优先）"""
+        try:
+            from smart_office_assistant.src.neural_memory.neural_executor import NeuralExecutor
+            return NeuralExecutor()
+        except Exception:
+            return None
+
+    def _get_knowledge_registry():
+        """尝试获取 MemoryLifecycleManager（知识注册表）"""
+        try:
+            from smart_office_assistant.src.neural_memory.memory_lifecycle_manager import get_knowledge_registry
+            return get_knowledge_registry()
+        except Exception:
+            return None
 
     @app.get("/api/v1/memory", tags=["记忆"])
     async def list_memories(
@@ -209,44 +255,109 @@ def register_memory_routes(app, app_state):
         page_size: int = 20,
         memory_type: Optional[str] = None,
     ):
-        """获取记忆列表"""
+        """获取记忆列表 — 优先从 NeuralMemory 知识注册表获取"""
         try:
-            agent = app_state.get_agent_core()
-            memories = []
+            items = []
+            total = 0
+            source = ""
 
-            # AgentCore 属性名是 self.memory (不是 memory_system)
-            ms = agent.memory if hasattr(agent, 'memory') else None
-            if ms is not None:
-                # MemorySystem 的方法是 search_memories (参数: limit, 非 top_k)
-                if hasattr(ms, 'get_stats'):
-                    stats = ms.get_stats()
-                    total = sum(v for v in stats.values() if isinstance(v, int))
-                    # search_memories 参数: query, memory_type, tags, limit
-                    all_memories = ms.search_memories("", limit=total) if hasattr(ms, 'search_memories') else []
-                    memories = all_memories
-                else:
-                    total = 0
-            else:
-                total = 0
+            # 第一优先：MemoryLifecycleManager 知识注册表
+            registry = _get_knowledge_registry()
+            if registry is not None:
+                source = "NeuralMemory (知识注册表)"
+                try:
+                    entries = registry.get_knowledge_registry()
+                    total = len(entries)
+                    items = [e.to_dict() for e in entries]
+                except Exception as e:
+                    logger.warning(f"知识注册表查询失败: {e}")
+
+            # 第二优先：NeuralExecutor retrieve
+            if not items:
+                executor = _get_neural_executor()
+                if executor is not None:
+                    source = "NeuralMemory (NeuralExecutor)"
+                    try:
+                        result = executor.retrieve("", limit=200)
+                        if isinstance(result, list):
+                            items = [r if isinstance(r, dict) else {"content": str(r)} for r in result]
+                            total = len(items)
+                    except Exception as e:
+                        logger.warning(f"NeuralExecutor retrieve 失败: {e}")
+
+            # 降级：AgentCore MemorySystem
+            if not items:
+                source = "AgentCore (MemorySystem)"
+                try:
+                    agent = app_state.get_agent_core()
+                    ms = agent.memory if hasattr(agent, 'memory') else None
+                    if ms is not None:
+                        if hasattr(ms, 'get_stats'):
+                            stats = ms.get_stats()
+                            total = sum(v for v in stats.values() if isinstance(v, int))
+                            if hasattr(ms, 'search_memories'):
+                                all_memories = ms.search_memories("", limit=total)
+                                items = all_memories
+                except Exception as e:
+                    logger.warning(f"MemorySystem 降级失败: {e}")
 
             # 分页
             offset = (page - 1) * page_size
-            paged = memories[offset:offset + page_size] if isinstance(memories, list) else []
+            paged = items[offset:offset + page_size] if isinstance(items, list) else []
+            paged = [m.to_dict() if hasattr(m, 'to_dict') else m for m in paged]
 
             return {
                 "success": True,
                 "message": "记忆列表",
                 "timestamp": datetime.now().isoformat(),
                 "data": {
-                    "total": total if total else len(memories),
+                    "total": total,
                     "page": page,
                     "page_size": page_size,
-                    "items": [m.to_dict() if hasattr(m, 'to_dict') else m for m in paged],
+                    "items": paged,
+                    "source": source,
                 }
             }
         except Exception as e:
             logger.error(f"获取记忆失败: {e}", exc_info=True)
             return _error("获取记忆失败")
+
+    @app.get("/api/v1/memory/stats", tags=["记忆"])
+    async def memory_stats():
+        """获取记忆系统统计"""
+        try:
+            stats = {}
+            # NeuralExecutor 统计
+            executor = _get_neural_executor()
+            if executor is not None:
+                try:
+                    stats["executor"] = executor.get_stats()
+                except Exception:
+                    pass
+
+            # KnowledgeRegistry 统计
+            registry = _get_knowledge_registry()
+            if registry is not None:
+                try:
+                    report = registry.get_health_report()
+                    stats["registry"] = {
+                        "health_score": report.health_score,
+                        "total_knowledge": report.total_knowledge,
+                        "active_count": report.active_count,
+                        "stale_count": report.stale_count,
+                    }
+                except Exception:
+                    pass
+
+            return {
+                "success": True,
+                "message": "记忆统计",
+                "timestamp": datetime.now().isoformat(),
+                "data": stats,
+            }
+        except Exception as e:
+            logger.error(f"获取记忆统计失败: {e}", exc_info=True)
+            return _error("获取记忆统计失败")
 
 
 def register_learning_routes(app, app_state):

@@ -7,7 +7,17 @@ from __future__ import annotations
 import logging
 from typing import List, Dict, Optional, Any, Tuple
 from dataclasses import dataclass, field
-from ._claw_architect import ClawIdentity
+
+# 从父级模块导入ClawIdentity（v3.2修复）
+try:
+    from .._claw_architect import ClawIdentity
+except ImportError:
+    @dataclass
+    class ClawIdentity:
+        name: str = ""
+        role_primary: str = ""
+        role_secondary: List[str] = field(default_factory=list)
+        skills_tags: List[str] = field(default_factory=list)
 
 logger = logging.getLogger(__name__)
 

@@ -105,7 +105,7 @@ class UnifiedConfucianWisdom:
     def __init__(self):
         """init儒家智慧fusion系统"""
         self.name = "UnifiedConfucianWisdom"
-        self.version = "v1.0.0"
+        self.version="6.2.0"
 
         # init各子系统
         self.ru_core = get_ru_core()

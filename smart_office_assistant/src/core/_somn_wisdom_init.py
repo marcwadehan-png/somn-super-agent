@@ -87,19 +87,19 @@ def init_autonomous_agent(base_path) -> Any:
 
 def init_cloud_learning_system(base_path, llm_service, print_fn=print) -> dict:
     """
-    init云端老师-本地学生-编排器体系 -- v14.0.0 全局打通
+    init云端模型调度体系 -- v14.0.0 全局打通
 
-    核心理念:
-    - 云端大模型 = 老师:知识渊博,视野开阔,擅长解答,但不懂 Somn
-    - 本地大模型 = 学生:正在学习,效率高,成本低,隐私好
-    - Somn = 教务主任:调配资源,决定何时问老师,何时让学生答,评估学习效果
+    架构定位:
+    - CloudModelHub: 统一管理云端大模型 API 接入与切换
+    - TeacherStudentEngine: 云端-本地模型协同引擎，质量评估与模型选择
+    - SomnOrchestrator: 请求编排器，根据任务复杂度选择处理策略(FAST/HOME/FEAST)
 
-    三模块联动:
-    - CloudModelHub:管理所有云端模型 API
-    - TeacherStudentEngine:协调师生学习过程
-    - SomnOrchestrator:智能编排,决定烹饪模式
+    在主链路中的角色:
+    - 作为路径A(orchestrator)的处理后端
+    - 由 _somn_main_chain 四路路由分发调用
+    - AgentCore → SomnCore → _somn_main_chain → 路径A → SomnOrchestrator.serve()
     """
-    print_fn("  📦 init云端老师-本地学生体系...")
+    print_fn("  📦 init云端模型调度体系...")
 
     result = {}
 
@@ -108,7 +108,7 @@ def init_cloud_learning_system(base_path, llm_service, print_fn=print) -> dict:
         from ..tool_layer.cloud_model_hub import CloudModelHub
         cloud_model_hub = CloudModelHub(str(base_path / "data/cloud_hub"))
         teacher_count = len(cloud_model_hub.list_teachers())
-        print_fn(f"    ✅ CloudModelHub 加载成功({teacher_count} 位预设老师)")
+        print_fn(f"    ✅ CloudModelHub 加载成功({teacher_count} 个预设模型)")
         result["cloud_model_hub"] = cloud_model_hub
     except Exception as e:
         logger.warning(f"    ⚠️ CloudModelHub 加载失败: {e}")
@@ -139,11 +139,11 @@ def init_cloud_learning_system(base_path, llm_service, print_fn=print) -> dict:
             teacher_student_engine=result["teacher_student_engine"],
             llm_service=llm_service,
         )
-        print_fn("    ✅ SomnOrchestrator 加载成功(3种烹饪模式就绪)")
+        print_fn("    ✅ SomnOrchestrator 加载成功(3种编排模式就绪: FAST/HOME/FEAST)")
         result["somn_orchestrator"] = somn_orchestrator
     except Exception as e:
         logger.warning(f"    ⚠️ SomnOrchestrator 加载失败: {e}")
         result["somn_orchestrator"] = None
 
-    print_fn("  📦 云端老师-本地学生体系init完成")
+    print_fn("  📦 云端模型调度体系init完成")
     return result

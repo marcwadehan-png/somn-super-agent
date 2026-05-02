@@ -44,7 +44,7 @@ class 晏几道诗歌characteristics:
 class 晏几道深化引擎:
     """晏几道词深化分析引擎 v8.2.0"""
 
-    VERSION = "v8.2.0"
+    VERSION = "6.2.0"
 
     def __init__(self):
         self.诗歌characteristics = self._init_characteristics()

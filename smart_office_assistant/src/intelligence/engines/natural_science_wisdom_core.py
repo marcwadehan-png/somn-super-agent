@@ -14,7 +14,7 @@ __all__ = [
 class NaturalScienceWisdomCore:
     """面向物理,化学,量子,热力学,相对论,粒子物理的轻量知识核心."""
 
-    VERSION = "1.0.0"
+    VERSION = "6.2.0"
 
     def __init__(self) -> None:
         self._knowledge_base: Dict[str, Dict[str, Any]] = {

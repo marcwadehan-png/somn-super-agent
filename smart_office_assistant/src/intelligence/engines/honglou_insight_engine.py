@@ -39,7 +39,7 @@ class HonglouInsightEngine:
     
     def __init__(self):
         """init红楼洞察引擎"""
-        self.version = "v1.0.0"
+        self.version="6.2.0"
         
         # 家族兴衰周期模型
         self.family_cycle = {

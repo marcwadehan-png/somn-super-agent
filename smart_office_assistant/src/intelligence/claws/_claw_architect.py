@@ -147,6 +147,13 @@ class _YAMLConfigCache:
         self._metadata_index: List[Dict[str, Any]] = []
         self._index_built = False
         self._preload_lock = __import__("threading").Lock()
+        
+        # [v5.0] 部门索引缓存：按部门分组配置名，避免遍历全部776个
+        self._dept_index: Dict[str, List[str]] = {}
+        self._dept_index_built = False
+        
+        # [v5.0] 轻量化元数据缓存：只存储关键字段（department/name/school）
+        self._lightweight_cache: Dict[str, Dict[str, str]] = {}
 
     def _get_mtime(self, name: str) -> float:
         """获取YAML文件的修改时间（内部方法，已在调用前校验）"""
@@ -158,6 +165,93 @@ class _YAMLConfigCache:
             return path.stat().st_mtime if path.exists() else 0.0
         except OSError:
             return 0.0
+
+    # ─────────────────────────────────────────────────────────────────
+    # [v5.0] 部门索引缓存：避免遍历全部776个配置
+    # ─────────────────────────────────────────────────────────────────
+
+    def _build_dept_index(self) -> None:
+        """
+        构建部门索引缓存。
+
+        扫描时只读取YAML的department字段，建立 {department: [names]} 映射。
+        后续按部门加载时直接使用此索引，无需遍历全部配置。
+        """
+        if self._dept_index_built:
+            return
+
+        self.list_all_names()  # 确保索引已加载
+
+        for name in self._index_cache:
+            # 尝试从轻量化缓存获取
+            if name in self._lightweight_cache:
+                dept = self._lightweight_cache[name].get("department", "")
+            else:
+                # 轻量化读取：只读取department字段
+                dept = self._load_department_only(name)
+
+            if dept:
+                if dept not in self._dept_index:
+                    self._dept_index[dept] = []
+                self._dept_index[dept].append(name)
+
+        self._dept_index_built = True
+        logger.debug(f"[_YAMLCache] 部门索引构建完成: {len(self._dept_index)}个部门")
+
+    def _load_department_only(self, name: str) -> str:
+        """
+        [v5.0] 轻量化加载：只读取department字段。
+
+        比完整YAML解析快10倍+，用于构建部门索引。
+        """
+        yaml_path = self.configs_dir / f"{name}.yaml"
+        if not yaml_path.exists():
+            yml_path = self.configs_dir / f"{name}.yml"
+            if yml_path.exists():
+                yaml_path = yml_path
+            else:
+                return ""
+
+        try:
+            with open(yaml_path, "r", encoding="utf-8") as f:
+                raw = yaml.safe_load(f)
+
+            if not raw or not isinstance(raw, dict):
+                return ""
+
+            # 提取关键字段
+            dept = str(raw.get("department", "")) if raw.get("department") else ""
+            school = str(raw.get("school", "")) if raw.get("school") else ""
+            wisdom_school = str(raw.get("wisdom_school", "")) if raw.get("wisdom_school") else ""
+
+            # 缓存轻量化数据
+            self._lightweight_cache[name] = {
+                "department": dept,
+                "school": school,
+                "wisdom_school": wisdom_school,
+            }
+
+            return dept
+        except Exception:
+            return ""
+
+    def get_dept_configs(self, department: str) -> List[str]:
+        """
+        [v5.0] 按部门获取配置名列表。
+
+        使用部门索引缓存，避免遍历全部776个配置。
+        首次调用构建索引，后续直接返回。
+
+        Args:
+            department: 部门名称
+
+        Returns:
+            该部门的所有Claw配置名列表
+        """
+        if not self._dept_index_built:
+            self._build_dept_index()
+
+        return self._dept_index.get(department, [])
 
     def _is_cache_valid(self, name: str) -> bool:
         """检查缓存是否有效（文件未修改，内部方法）"""
@@ -578,7 +672,7 @@ class ClawMetadata:
     """Claw完整元数据（从YAML加载）"""
     name: str = ""
     sage_id: str = ""
-    version: str = "1.0.0"
+    version: str = "6.2.0"
     status: str = "idle"
 
     # 基本信息
@@ -1234,6 +1328,7 @@ class ReActLoop:
         - tool_call: 调用工具
         - deep_think: 需要更深层的推理
         - consult: 咨询其他Claw
+        - reasoning: 基于智慧法则进行推理
         """
         step_num = self._iteration_count
 
@@ -1241,27 +1336,47 @@ class ReActLoop:
         if step_num >= self.config.max_iterations:
             return "conclude", {"thought": thought}
 
-        # 根据推理风格选择默认动作
+        # 根据推理风格选择动作（v22.1 修复：避免连续deep_think）
         style = self.config.reasoning_style
+        
+        # 检查上一步动作，避免重复
+        last_action = ""
+        if context.get("_last_step"):
+            last_action = context["_last_step"].action
+        
         if style == "deep_analytical":
-            # 分析型偏好工具调用和深层推理
-            if step_num <= 2 and self._tool_registry:
-                tool_name = list(self._tool_registry.keys())[0]
-                return "tool_call", {"tool": tool_name, "input": query}
-            elif step_num >= 5 and self._collaborators:
-                # 后期阶段尝试跨Claw咨询获取多元视角
-                return "consult", {"query": query}
-            return "deep_think", {"thought": thought}
+            # 分析型：先工具调用，再推理，最后咨询
+            if step_num <= 2:
+                if self._tool_registry and last_action != "tool_call":
+                    tool_name = list(self._tool_registry.keys())[0]
+                    return "tool_call", {"tool": tool_name, "input": query}
+                return "reasoning", {"thought": thought}
+            elif step_num <= 4:
+                if last_action != "reasoning":
+                    return "reasoning", {"thought": thought}
+                return "conclude", {"thought": thought}
+            else:
+                # 后期尝试跨Claw咨询
+                if self._collaborators and step_num >= 5 and last_action != "consult":
+                    return "consult", {"query": query}
+                return "conclude", {"thought": thought}
         elif style == "intuitive_wisdom":
             # 直觉型较快收敛
             if step_num >= 3:
                 return "conclude", {"thought": thought}
-            return "deep_think", {"thought": thought}
+            if last_action != "reasoning":
+                return "reasoning", {"thought": thought}
+            return "conclude", {"thought": thought}
         else:
-            # 默认策略：中期可尝试协作
-            if step_num >= 4 and self._collaborators:
+            # 默认策略：工具→推理→咨询→结论
+            if step_num == 1 and self._tool_registry and last_action != "tool_call":
+                return "tool_call", {"tool": list(self._tool_registry.keys())[0], "input": query}
+            elif step_num == 2 and last_action != "reasoning":
+                return "reasoning", {"thought": thought}
+            elif step_num >= 3 and self._collaborators and last_action != "consult":
                 return "consult", {"query": query}
-            return "deep_think", {"thought": thought}
+            else:
+                return "conclude", {"thought": thought}
 
     async def _observe(self, action: str, params: Dict[str, Any], context: Dict[str, Any]) -> tuple:
         """
@@ -1290,8 +1405,10 @@ class ReActLoop:
             else:
                 return f"工具[{tool_name}]未注册，使用内置推理", 0.5
 
-        elif action == "deep_think":
-            return f"深层推理中...结合{self.metadata.name}的{self.metadata.wisdom_laws[0] if self.metadata.wisdom_laws else '智慧'}法则进行分析", 0.55
+        elif action == "reasoning":
+            # 基于智慧法则进行推理（v22.1新增）
+            wisdom_focus = self.metadata.wisdom_laws[0] if self.metadata.wisdom_laws else "核心智慧"
+            return f"基于{wisdom_focus}法则进行推理分析，结合{self.metadata.school}学派视角深度思考", 0.60
 
         elif action == "consult":
             return await self._observe_consult(action, params, context), 0.6

@@ -331,7 +331,13 @@ class WisdomDispatcher:
                 return False
             with open(cache_path, "rb") as f:
                 # SECURITY: pickle仅用于内部缓存，数据由本模块生成
-                data = pickle.load(f)
+                try:
+                    data = pickle.load(f)
+                except (pickle.UnpicklingError, EOFError, ValueError, AttributeError) as e:
+                    __import__("logging").getLogger(__name__).warning(
+                        f"[_dispatch] pickle缓存损坏，将重新生成: {e}"
+                    )
+                    return False
 
             # [v22.5 版本控制] 检查缓存版本
             if isinstance(data, dict) and "version" in data and "engines" in data:

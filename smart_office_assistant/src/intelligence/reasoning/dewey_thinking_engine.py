@@ -304,7 +304,7 @@ class DeweyThinkingEngine:
     def __init__(self):
         """init杜威思维引擎"""
         self.name = "杜威思维训练引擎"
-        self.version = "v7.0.0"
+        self.version="6.2.0"
         logger.info(f"{self.name} {self.version} init完成")
     
     def apply_five_step_method(self,

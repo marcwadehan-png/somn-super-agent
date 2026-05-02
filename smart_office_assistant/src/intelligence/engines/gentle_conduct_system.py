@@ -32,7 +32,7 @@ class GentleConductSystem:
     def __init__(self):
         """init温良行为准则系统"""
         self.name = "GentleConductSystem"
-        self.version = "v1.0.0"
+        self.version="6.2.0"
 
         # 五大特质的定义
         self.five_traits = {

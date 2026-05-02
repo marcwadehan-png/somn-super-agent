@@ -398,23 +398,3 @@ def get_main_chain_scheduler() -> MainChainScheduler:
 
 # ── 使用示例 ─────────────────────────────────────────────────
 
-# if __name__ == "__main__":
-# #     raise RuntimeError("此入口已禁用 - 请使用 tests/ 目录")
-
-    # 创建上下文
-    context = ChainContext(
-        context_id="test_001",
-        user_input="分析公司增长策略",
-        task_type="growth_strategy",
-        wisdom_mode=RunMode.AUTO
-    )
-
-    # 执行主线
-    result = scheduler.execute(context)
-
-    logger.info(f"结果ID: {result.result_id}")
-    logger.info(f"成功: {result.success}")
-    logger.info(f"模式: {result.mode.value}")
-    logger.info(f"耗时: {result.execution_time:.2f}s")
-    logger.info(f"执行节点: {result.nodes_executed}")
-    logger.info(f"洞察: {result.insights}")

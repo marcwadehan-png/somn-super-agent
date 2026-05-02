@@ -5,11 +5,18 @@ __all__ = [
     'LearningPipeline',
 ]
 
-学习流水线 - Learning Pipeline v1.0.0
+学习流水线 - Learning Pipeline v2.0.0
 整合所有学习组件，提供端到端的学习流程
 
 流程:
-输入 → 数据扫描 → 场景分析 → 策略选择 → 多策略执行 → 反馈整合 → 知识更新 → 输出
+输入 → 数据扫描 → 场景分析 → 策略选择 → 多策略执行
+    ↓
+反馈整合 → 知识更新 → 经验回放(LearningReplayBuffer) → 闭环强化
+
+[v2.0 新增]
+- 双向闭环：LearningReplayBuffer 从藏书阁提取经验回放到学习系统
+- 知识库迁移：从 DomainNexus 抽取模式注入学习
+- 定时触发回放：与 _library_review_scheduler 协同
 
 组件:
 1. 数据扫描 - UnifiedDataScanner
@@ -17,6 +24,7 @@ __all__ = [
 3. 策略执行 - UnifiedLearningOrchestrator
 4. 反馈整合 - FeedbackPipeline + ReinforcementBridge
 5. 知识更新 - MemoryLifecycleManager
+6. [v2.0] 经验回放 - LearningReplayBuffer（双向闭环核心）
 """
 
 from __future__ import annotations
@@ -69,29 +77,37 @@ class PipelineStageResult:
 @dataclass
 class PipelineResult:
     """流水线执行结果"""
+    # 必填字段
     pipeline_id: str
     start_time: str
     end_time: str
     duration_seconds: float
     config: Dict
-    
     stages: Dict[str, PipelineStageResult]
-    
     total_events: int
     total_updates: int
     strategies_executed: List[str]
     feedback_integrated: int
     knowledge_evolved: int
-    
-    success: bool
-    summary: str
-    recommendations: List[str]
-    
+    # v2.0: 经验回放统计
+    replay_extracted: int = 0
+    replay_replayed: int = 0
+    replay_buffer_size: int = 0
+    # 可选字段
+    success: bool = False
+    summary: str = ""
     scene_type: str = ""
     health_score: float = 0.0
+    recommendations: List[str] = field(default_factory=list)
+
 
 class LearningPipeline:
-    """学习流水线 v1.0.0 - 整合所有学习组件的端到端流水线"""
+    """学习流水线 v2.0.0 - 整合所有学习组件的端到端流水线
+    
+    [v2.0 双向闭环]
+    - 正向：数据扫描 → 策略执行 → 知识更新 → 藏书阁入库
+    - 反向：藏书阁经验提取 → ReplayBuffer → 策略强化（新增）
+    """
     
     def __init__(self, base_path: str = None):
         self.base_path = Path(base_path) if base_path else LEARNING_DIR
@@ -105,9 +121,18 @@ class LearningPipeline:
         self._feedback_pipeline = None
         self._rl_bridge = None
         self._lifecycle_manager = None
+        self._replay_buffer = None      # v2.0: 经验回放缓冲区
         self._scan_cache: Dict = {}
         
-        logger.info("学习流水线初始化完成")
+        logger.info("学习流水线 v2.0 初始化完成")
+    
+    @property
+    def replay_buffer(self):
+        """延迟加载经验回放缓冲区"""
+        if self._replay_buffer is None:
+            from .learning_replay_buffer import get_replay_buffer
+            self._replay_buffer = get_replay_buffer()
+        return self._replay_buffer
     
     @property
     def scanner(self):
@@ -168,6 +193,9 @@ class LearningPipeline:
         feedback_integrated = 0
         knowledge_evolved = 0
         scene_type = "unknown"
+        # v2.0: 经验回放统计（在 try 外初始化，确保 report 阶段可访问）
+        replay_extracted = 0
+        replay_replayed = 0
         
         logger.info(f"开始执行学习流水线: {pipeline_id}")
         
@@ -307,6 +335,57 @@ class LearningPipeline:
                     duration_seconds=(datetime.now() - stage_start).total_seconds(),
                     error="学习管道执行失败"
                 )
+
+        # Stage 6.5: [v2.0] 经验回放 — 双向闭环核心
+        replay_extracted = 0
+        replay_replayed = 0
+        stage_start = datetime.now()
+        try:
+            rb = self.replay_buffer
+            
+            # 1) 从藏书阁提取经验
+            replay_extracted = rb.extract_from_library()
+            
+            # 2) 从知识库(DomainNexus)提取模式
+            kb_extracted = rb.extract_from_knowledge_base()
+            replay_extracted += kb_extracted
+            
+            # 3) 获取回放批次并"学习"这些经验
+            batch = rb.get_replay_batch(batch_size=12, balanced=True)
+            if batch:
+                replay_replayed = len(batch.entries)
+                # 将回放条目转化为强化学习的经验样本
+                for entry in batch.entries:
+                    # 通过 RL Bridge 注入经验
+                    experience = {
+                        "source": entry.source.name,
+                        "content": entry.content,
+                        "lesson_type": entry.lesson_type,
+                        "value_score": entry.value_score,
+                        "importance_weight": entry.importance_weight,
+                        "tags": entry.tags,
+                    }
+                    self.rl_bridge.feedback_to_experience(experience, context)
+                # 标记已消费
+                for entry in batch.entries:
+                    rb.consume_entry(entry.entry_id, feedback="pipeline_replay")
+            
+            stages["experience_replay"] = PipelineStageResult(
+                stage="experience_replay", success=True,
+                duration_seconds=(datetime.now() - stage_start).total_seconds(),
+                data={
+                    "extracted": replay_extracted,
+                    "replayed": replay_replayed,
+                    "buffer_size": len(rb._buffer),
+                },
+            )
+            logger.info(f"[阶段6.5] 经验回放完成: 提取{replay_extracted}条, 回放{replay_replayed}条")
+        except Exception as e:
+            stages["experience_replay"] = PipelineStageResult(
+                stage="experience_replay", success=False,
+                duration_seconds=(datetime.now() - stage_start).total_seconds(),
+                error=str(e)[:100]
+            )
         
         # Stage 7: 报告生成
         end_time = datetime.now()
@@ -317,6 +396,10 @@ class LearningPipeline:
             recommendations.append("无新增学习事件，考虑增加数据源")
         if feedback_integrated > 0:
             recommendations.append(f"已整合{feedback_integrated}条反馈用于RL学习")
+        if replay_replayed > 0:
+            recommendations.append(f"[v2.0] 经验回放: 提取{replay_extracted}条, 回放{replay_replayed}条")
+        if replay_extracted == 0 and replay_replayed == 0:
+            recommendations.append("[v2.0] 回放缓冲区为空，建议先入库记忆到藏书阁")
         
         success = all(s.success for s in stages.values())
         summary = f"执行{len(stages)}个阶段, {total_events}事件, {total_updates}更新"
@@ -336,6 +419,9 @@ class LearningPipeline:
             strategies_executed=strategies_executed,
             feedback_integrated=feedback_integrated,
             knowledge_evolved=knowledge_evolved,
+            # v2.0: 经验回放统计
+            replay_extracted=replay_extracted,
+            replay_replayed=replay_replayed,
             success=success,
             summary=summary,
             recommendations=recommendations,
@@ -348,8 +434,8 @@ class LearningPipeline:
         return result
     
     def get_status(self) -> Dict:
-        """获取流水线状态"""
-        return {
+        """获取流水线状态（含 v2.0 回放缓冲区状态）"""
+        status = {
             "config": {
                 "enable_adaptive": self.config.enable_adaptive,
                 "enable_feedback": self.config.enable_feedback,
@@ -358,12 +444,20 @@ class LearningPipeline:
             "components_initialized": {
                 "scanner": self._scanner is not None,
                 "strategy_engine": self._strategy_engine is not None,
-                "orchestrator": self._orchestrator is not None
+                "orchestrator": self._orchestrator is not None,
+                "replay_buffer": self._replay_buffer is not None,  # v2.0
             }
         }
+        # v2.0: 加入回放缓冲区实时统计
+        try:
+            rb = self.replay_buffer
+            status["replay_buffer_stats"] = rb.get_statistics()
+        except Exception:
+            pass
+        return status
     
     def _save_report(self, result: PipelineResult):
-        """保存执行报告"""
+        """保存执行报告（v2.0 含经验回放统计）"""
         try:
             report_file = self.reports_path / f"{result.pipeline_id}.json"
             data = {
@@ -375,6 +469,10 @@ class LearningPipeline:
                 "total_events": result.total_events,
                 "strategies": result.strategies_executed,
                 "feedback_integrated": result.feedback_integrated,
+                # v2.0: 经验回放统计
+                "replay_extracted": getattr(result, 'replay_extracted', 0),
+                "replay_replayed": getattr(result, 'replay_replayed', 0),
+                "replay_buffer_size": getattr(result, 'replay_buffer_size', 0),
                 "success": result.success,
                 "summary": result.summary,
                 "recommendations": result.recommendations,

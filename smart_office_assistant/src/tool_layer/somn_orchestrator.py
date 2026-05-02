@@ -7,12 +7,19 @@ __all__ = [
     'thoughtful_answer',
 ]
 
-Somn 编排器 - Somn Orchestrator
-===============================
-核心:Somn = 磨坊 + 厨师
-- 大模型+搜索 = 小麦(原材料)
-- Somn = 磨坊+厨师(加工能力)
-三种模式:快手菜(FAST)/家常菜(HOME)/大餐(FEAST)
+Somn 请求编排器 - Somn Orchestrator
+=====================================
+核心定位:根据任务复杂度选择最优处理策略，协调云端/本地模型协同完成请求。
+
+在主链路中的角色:
+- 作为路径A(orchestrator)的处理后端
+- 由 _somn_main_chain 四路路由分发调用
+- 调用链: AgentCore → SomnCore → _somn_main_chain → 路径A → SomnOrchestrator.serve()
+
+三种编排策略:
+- FAST(快速):本地模型直接响应，适用于简单问答
+- HOME(标准):本地+云端协同，适用于需要深度分析的常规任务
+- FEAST(深度):多云端模型综合裁定，适用于复杂推理和决策场景
 """
 
 import json
@@ -24,9 +31,9 @@ from datetime import datetime
 from enum import Enum
 
 class CuisineMode(Enum):
-    FAST = "fast"     # 快手菜:本地直答
-    HOME = "home"     # 家常菜:本地+云端辅助
-    FEAST = "feast"   # 大餐:多云端民主投票
+    FAST = "fast"     # 快速:本地模型直答
+    HOME = "home"     # 标准:本地+云端协同
+    FEAST = "feast"   # 深度:多云端模型综合裁定
 
 class DishType(Enum):
     SOUP = "soup"
@@ -58,7 +65,7 @@ class SomnResponse:
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
 
 class SomnOrchestrator:
-    """Somn 编排器 - 磨坊 + 厨师"""
+    """Somn 请求编排器 - 根据任务复杂度选择 FAST/HOME/FEAST 策略"""
 
     def __init__(self, cloud_hub=None, teacher_student_engine=None, llm_service=None):
         self.cloud_hub = cloud_hub
@@ -107,7 +114,7 @@ class SomnOrchestrator:
         feast_keywords = [
             "研究", "分析报告", "深度", "论证", "全面", "系统",
             "generate一份", "generate一份详细", "详细的研究报告", "深度分析",
-            "generate报告", "generate研究", "报告", "大餐", "完整", "完整分析", "系统性",
+            "generate报告", "generate研究", "报告", "完整", "完整分析", "系统性",
         ]
         for kw in feast_keywords:
             if kw in name:
@@ -124,7 +131,7 @@ class SomnOrchestrator:
             return CuisineMode.FAST
 
         # 中等复杂度 → HOME(任务驱动型)
-        # 包含"帮我/给我/制定"等动作词 → 家常菜(本地+云端)
+        # 包含"帮我/给我/制定"等动作词 → HOME模式(本地+云端协同)
         home_keywords = ["帮我", "给我", "制定", "增长", "strategy", "方案", "评估", "建议", "分析"]
         for kw in home_keywords:
             if kw in name:
@@ -182,7 +189,7 @@ class SomnOrchestrator:
     def _cook_llm_direct(self, req: MenuRequest) -> Dict[str, Any]:
         if not self.llm_service:
             return {
-                "final_response": "[Somn 厨房未营业] 本地模型和云端老师都不可用",
+                "final_response": "[Somn 编排器不可用] 本地模型和云端模型都不可用",
                 "quality": {"overall": 0.1},
                 "ingredients_used": [],
                 "teachers_used": [],
@@ -205,7 +212,7 @@ class SomnOrchestrator:
             }
         except Exception as e:
             return {
-                "final_response": "[Somn 烹饪失败]",
+                "final_response": "[Somn 编排失败]",
                 "quality": {"overall": 0.0},
                 "ingredients_used": [],
                 "teachers_used": [],
@@ -236,7 +243,7 @@ class SomnOrchestrator:
             qstr = "返工"
         mstr = {"direct": "快手", "preview": "预习", "review": "复习", "democratic": "民主"}.get(mode, mode)
         if teachers:
-            tstr = "请教了" + str(len(teachers)) + "位老师"
+            tstr = "调用了" + str(len(teachers)) + "个云端模型"
         else:
             tstr = "独立完成"
         return qstr + " | " + mstr + "模式 | " + tstr
@@ -257,7 +264,7 @@ class SomnOrchestrator:
 
     def get_kitchen_status(self) -> Dict[str, Any]:
         status = {
-            "modes": {"fast": "快手菜(本地直答)", "home": "家常菜(本地+云端)", "feast": "大餐(多云端民主)"},
+            "modes": {"fast": "FAST(本地直答)", "home": "HOME(本地+云端协同)", "feast": "FEAST(多云端综合裁定)"},
             "dishes": [d.value for d in DishType],
         }
         if self.teacher_student_engine:

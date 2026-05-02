@@ -39,7 +39,7 @@ class P2UnifiedFusionSystem:
 
     def __init__(self):
         self.系统名称 = "P2UnifiedFusionSystem"
-        self.版本 = "v8.2.0 P2级"
+        self.版本 = "v6.2.0 P2级"
         self.更新日期 = "2026-04-03"
 
         # init各子系统

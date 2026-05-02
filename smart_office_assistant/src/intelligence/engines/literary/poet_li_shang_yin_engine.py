@@ -18,7 +18,7 @@ from typing import Dict, List, Any
 class 李商隐深化引擎:
     """李商隐诗歌深化分析引擎 v9.0.0"""
     
-    VERSION = "v9.0.0"
+    VERSION = "6.2.0"
     
     def __init__(self):
         self.诗歌characteristics = self._init_characteristics()

@@ -1,0 +1,535 @@
+{
+  "timestamp": "2026-04-29 22:36:35",
+  "total": 102,
+  "passed": 88,
+  "failed": 14,
+  "success_rate": "86.3%",
+  "errors": [
+    "导入 9个调度器类: unmatched '}' (dispatchers.py, line 1256)",
+    "调度器 SD-P1 单点调用: called=False, conf=0.000",
+    "调度器 SD-F1 单点调用: called=False, conf=0.000",
+    "调度器 SD-F2 单点调用: called=False, conf=0.000",
+    "调度器 SD-R1 单点调用: called=False, conf=0.000",
+    "调度器 SD-R2 单点调用: called=False, conf=0.000",
+    "调度器 SD-C1 单点调用: called=False, conf=0.000",
+    "调度器 SD-C2 单点调用: called=False, conf=0.000",
+    "调度器 SD-E1 单点调用: called=False, conf=0.000",
+    "调度器 SD-L1 单点调用: called=False, conf=0.000",
+    "调度器 SD-D1 严格调用: called=False, conf=0.000",
+    "调度器 SD-D2 严格调用: called=False, conf=0.000",
+    "调度器 SD-D3 严格调用: called=False, conf=0.000",
+    "翰林院审核 passed: passed=False, conf=0.030"
+  ],
+  "details": [
+    {
+      "status": "PASS",
+      "name": "导入 eight_layer_pipeline",
+      "msg": "OK"
+    },
+    {
+      "status": "PASS",
+      "name": "导入 _query_knowledge_base 桥接",
+      "msg": "_query_knowledge_base 可导入"
+    },
+    {
+      "status": "PASS",
+      "name": "导入 domain_nexus",
+      "msg": "OK"
+    },
+    {
+      "status": "PASS",
+      "name": "导入所有14个公共类",
+      "msg": "14个公共类全部可导入"
+    },
+    {
+      "status": "PASS",
+      "name": "导入 lazy_loader",
+      "msg": "lazy_loader 3个加载器可导入"
+    },
+    {
+      "status": "PASS",
+      "name": "导入 pan_wisdom_core",
+      "msg": "pan_wisdom_core 可导入(包名)"
+    },
+    {
+      "status": "PASS",
+      "name": "导入 core 引擎",
+      "msg": "core 引擎可导入"
+    },
+    {
+      "status": "ERR",
+      "name": "导入 9个调度器类",
+      "msg": "unmatched '}' (dispatchers.py, line 1256)\nTraceback (most recent call last):\n  File \"d:\\AI\\somn\\knowledge_cells\\test_sage_ab.py\", line 46, in test\n    ok, msg = func()\n              ~~~~^^\n  File \"d:\\AI\\somn\\knowledge_cells\\test_sage_ab.py\", line 158, in test_import_dispatchers\n    from dispatchers import (\n    ...<3 lines>...\n    )\n  File \"d:\\AI\\somn\\knowledge_cells\\dispatchers.py\", line 1256\n    }\n    ^\nSyntaxError: unmatched '}'\n"
+    },
+    {
+      "status": "PASS",
+      "name": "版本号非空",
+      "msg": "version='7.1.0'"
+    },
+    {
+      "status": "PASS",
+      "name": "__init__ 导出项>=40",
+      "msg": "__all__ 包含 171 项"
+    },
+    {
+      "status": "FAIL",
+      "name": "调度器 SD-P1 单点调用",
+      "msg": "called=False, conf=0.000"
+    },
+    {
+      "status": "FAIL",
+      "name": "调度器 SD-F1 单点调用",
+      "msg": "called=False, conf=0.000"
+    },
+    {
+      "status": "FAIL",
+      "name": "调度器 SD-F2 单点调用",
+      "msg": "called=False, conf=0.000"
+    },
+    {
+      "status": "FAIL",
+      "name": "调度器 SD-R1 单点调用",
+      "msg": "called=False, conf=0.000"
+    },
+    {
+      "status": "FAIL",
+      "name": "调度器 SD-R2 单点调用",
+      "msg": "called=False, conf=0.000"
+    },
+    {
+      "status": "FAIL",
+      "name": "调度器 SD-C1 单点调用",
+      "msg": "called=False, conf=0.000"
+    },
+    {
+      "status": "FAIL",
+      "name": "调度器 SD-C2 单点调用",
+      "msg": "called=False, conf=0.000"
+    },
+    {
+      "status": "FAIL",
+      "name": "调度器 SD-E1 单点调用",
+      "msg": "called=False, conf=0.000"
+    },
+    {
+      "status": "FAIL",
+      "name": "调度器 SD-L1 单点调用",
+      "msg": "called=False, conf=0.000"
+    },
+    {
+      "status": "FAIL",
+      "name": "调度器 SD-D1 严格调用",
+      "msg": "called=False, conf=0.000"
+    },
+    {
+      "status": "FAIL",
+      "name": "调度器 SD-D2 严格调用",
+      "msg": "called=False, conf=0.000"
+    },
+    {
+      "status": "FAIL",
+      "name": "调度器 SD-D3 严格调用",
+      "msg": "called=False, conf=0.000"
+    },
+    {
+      "status": "PASS",
+      "name": "链式调度 P1→F2→E1",
+      "msg": "链长=3, called=0/3"
+    },
+    {
+      "status": "PASS",
+      "name": "链式调度 Super P1→F1→F2→E1",
+      "msg": "链长=4"
+    },
+    {
+      "status": "PASS",
+      "name": "L1 输入清洗",
+      "msg": "cleaned='测试文本'"
+    },
+    {
+      "status": "PASS",
+      "name": "L2 保留用户原文",
+      "msg": "text='如何提升直播电商的GMV增长率？...'"
+    },
+    {
+      "status": "PASS",
+      "name": "L2 有 demand_type",
+      "msg": "demand_type=战略规划"
+    },
+    {
+      "status": "PASS",
+      "name": "L2 有 domain",
+      "msg": "domain=DomainCategory.TECHNOLOGY"
+    },
+    {
+      "status": "PASS",
+      "name": "L2 data 包含 text",
+      "msg": "keys=['text', 'intent', 'demand_type', 'domain', 'domain_scores', 'complexity', 'urgency', 'entities']"
+    },
+    {
+      "status": "PASS",
+      "name": "L4 接收用户原文(非模板)",
+      "msg": "conclusion长度=472, is_template=False"
+    },
+    {
+      "status": "PASS",
+      "name": "L5 能获取用户原文",
+      "msg": "conclusion长度=472"
+    },
+    {
+      "status": "PASS",
+      "name": "L7 有最终回答",
+      "msg": "final_answer长度=1384"
+    },
+    {
+      "status": "PASS",
+      "name": "L8 有优化建议",
+      "msg": "suggestions=2"
+    },
+    {
+      "status": "PASS",
+      "name": "八层全部存在",
+      "msg": "layers={'nl_analysis', 'classification', 'reasoning', 'input', 'output', 'routing', 'argumentation', 'optimization'}"
+    },
+    {
+      "status": "PASS",
+      "name": "知识库桥接基本",
+      "msg": "queried=True, answer长度=827"
+    },
+    {
+      "status": "PASS",
+      "name": "知识库返回格子",
+      "msg": "cells=2, answer长度=482"
+    },
+    {
+      "status": "PASS",
+      "name": "Basic L5 注入知识库",
+      "msg": "knowledge_used=True, chain长度=5"
+    },
+    {
+      "status": "PASS",
+      "name": "Deep L5 注入知识库",
+      "msg": "knowledge_used=True"
+    },
+    {
+      "status": "PASS",
+      "name": "Super L5 注入知识库",
+      "msg": "knowledge_used=True"
+    },
+    {
+      "status": "PASS",
+      "name": "knowledge_cells 正确填充",
+      "msg": "type=list, len=3"
+    },
+    {
+      "status": "PASS",
+      "name": "结论非纯模板",
+      "msg": "conclusion长度=481, is_template=False"
+    },
+    {
+      "status": "PASS",
+      "name": "结论包含问题引用",
+      "msg": "conclusion长度=477"
+    },
+    {
+      "status": "PASS",
+      "name": "知识库内容时结论够长",
+      "msg": "conclusion长度=473, kb_score=0.9"
+    },
+    {
+      "status": "PASS",
+      "name": "结论有结构化内容",
+      "msg": "has_struct=True, 长度=484"
+    },
+    {
+      "status": "PASS",
+      "name": "分析框架降级方案",
+      "msg": "长度=132"
+    },
+    {
+      "status": "PASS",
+      "name": "Basic 不进神之架构",
+      "msg": "enter_divine=False"
+    },
+    {
+      "status": "PASS",
+      "name": "Basic 调度器 P1→F2→E1",
+      "msg": "dispatchers=['SD-P1', 'SD-F2', 'SD-E1']"
+    },
+    {
+      "status": "PASS",
+      "name": "Basic 无 SD-F1",
+      "msg": "dispatchers=['SD-P1', 'SD-F2', 'SD-E1']"
+    },
+    {
+      "status": "PASS",
+      "name": "Deep 进入神之架构",
+      "msg": "enter_divine=True"
+    },
+    {
+      "status": "PASS",
+      "name": "Deep Claw 讨论",
+      "msg": "claw_discussion=True"
+    },
+    {
+      "status": "PASS",
+      "name": "Super 含 SD-F1",
+      "msg": "dispatchers=['SD-P1', 'SD-F1', 'SD-F2', 'SD-R2', 'SD-E1', 'SD-L1']"
+    },
+    {
+      "status": "PASS",
+      "name": "推理调度器 Basic=C2+D1",
+      "msg": "dispatchers=['SD-C2', 'SD-D1']"
+    },
+    {
+      "status": "PASS",
+      "name": "推理调度器 Deep=C1+D2",
+      "msg": "dispatchers=['SD-C1', 'SD-D2']"
+    },
+    {
+      "status": "PASS",
+      "name": "推理调度器 Super=C1+C2+D3",
+      "msg": "dispatchers=['SD-C1', 'SD-C2', 'SD-D3']"
+    },
+    {
+      "status": "PASS",
+      "name": "回退历史存在",
+      "msg": "attempts=3"
+    },
+    {
+      "status": "PASS",
+      "name": "最大重试<=3",
+      "msg": "attempts=3"
+    },
+    {
+      "status": "PASS",
+      "name": "metadata 完整",
+      "msg": "meta_keys=['text_length', 'input_type', 'demand_type', 'output_artifact', 'reroute_history', 'total_attempts', 'argumentation_final_passed']"
+    },
+    {
+      "status": "PASS",
+      "name": "论证数据结构完整",
+      "msg": "has_keys=True"
+    },
+    {
+      "status": "PASS",
+      "name": "R2 论证结构完整",
+      "msg": "keys=['argument_score', 'dispatcher_called', 'dispatcher_error', 'fallacies_detected', 'grade', 'method', 'passed', 'recommendation']"
+    },
+    {
+      "status": "PASS",
+      "name": "RefuteCore 导入",
+      "msg": "available=True"
+    },
+    {
+      "status": "PASS",
+      "name": "RefuteCore 调用",
+      "msg": "called=True, passed=False"
+    },
+    {
+      "status": "PASS",
+      "name": "T2 仅 Super 模式",
+      "msg": "t2_present=False"
+    },
+    {
+      "status": "PASS",
+      "name": "T2 Super 模式存在",
+      "msg": "t2_present=True, method=T2 RefuteCore 驳心引擎 v3.2 (真实引擎)"
+    },
+    {
+      "status": "PASS",
+      "name": "T2 结果结构完整",
+      "msg": "keys=['method', 'engine_called', 'version', 'passed', 'confidence', 'strength_grade', 'risk_level', 'assessment_details']"
+    },
+    {
+      "status": "PASS",
+      "name": "T2 passed 逻辑检查",
+      "msg": "passed=False, strength=C, risk=🟠 高风险"
+    },
+    {
+      "status": "PASS",
+      "name": "空输入",
+      "msg": "answer长度=12"
+    },
+    {
+      "status": "PASS",
+      "name": "None 输入",
+      "msg": "success=True"
+    },
+    {
+      "status": "PASS",
+      "name": "单字符输入",
+      "msg": "conf=0.638"
+    },
+    {
+      "status": "PASS",
+      "name": "超长输入",
+      "msg": "输入长度=2000, 输出正常"
+    },
+    {
+      "status": "PASS",
+      "name": "特殊字符输入",
+      "msg": "conf=0.638"
+    },
+    {
+      "status": "PASS",
+      "name": "知识库空查询",
+      "msg": "answer='请输入要查询的问题'"
+    },
+    {
+      "status": "PASS",
+      "name": "知识库无匹配",
+      "msg": "queried=True"
+    },
+    {
+      "status": "PASS",
+      "name": "字典输入",
+      "msg": "conf=0.697"
+    },
+    {
+      "status": "PASS",
+      "name": "Unicode 输入",
+      "msg": "conf=0.697"
+    },
+    {
+      "status": "PASS",
+      "name": "E2E-商业分析",
+      "msg": "耗时=0.34s, conf=0.697, 结论长度=477"
+    },
+    {
+      "status": "PASS",
+      "name": "E2E-战略规划",
+      "msg": "耗时=0.43s, conf=0.662, 结论长度=490"
+    },
+    {
+      "status": "PASS",
+      "name": "E2E-创新突破",
+      "msg": "耗时=0.53s, conf=0.703, 结论长度=483"
+    },
+    {
+      "status": "PASS",
+      "name": "E2E-私域运营",
+      "msg": "耗时=0.45s, conf=0.697, 结论长度=445"
+    },
+    {
+      "status": "PASS",
+      "name": "E2E-技术决策",
+      "msg": "耗时=0.41s, conf=0.662, 结论长度=472"
+    },
+    {
+      "status": "PASS",
+      "name": "Basic 性能 < 5s",
+      "msg": "耗时=0.40s"
+    },
+    {
+      "status": "PASS",
+      "name": "Deep 性能 < 10s",
+      "msg": "耗时=0.45s"
+    },
+    {
+      "status": "PASS",
+      "name": "Super 性能 < 15s",
+      "msg": "耗时=0.52s"
+    },
+    {
+      "status": "PASS",
+      "name": "知识库查询 < 1s",
+      "msg": "耗时=0ms"
+    },
+    {
+      "status": "PASS",
+      "name": "Pipeline 实例化 < 100ms",
+      "msg": "耗时=0.0ms"
+    },
+    {
+      "status": "PASS",
+      "name": "单调度器调用 < 200ms",
+      "msg": "耗时=11.7ms"
+    },
+    {
+      "status": "PASS",
+      "name": "置信度全链路传播",
+      "msg": "layers=8, final=0.659"
+    },
+    {
+      "status": "PASS",
+      "name": "知识库命中提升置信度",
+      "msg": "kb=True, conf=0.288"
+    },
+    {
+      "status": "PASS",
+      "name": "R1 监管存在",
+      "msg": "compliance=True, called=False"
+    },
+    {
+      "status": "PASS",
+      "name": "翰林院审核存在",
+      "msg": "passed=False"
+    },
+    {
+      "status": "FAIL",
+      "name": "翰林院审核 passed",
+      "msg": "passed=False, conf=0.030"
+    },
+    {
+      "status": "PASS",
+      "name": "knowledge_used 一致性",
+      "msg": "used=True, score=0.90"
+    },
+    {
+      "status": "PASS",
+      "name": "PipelineResult 含 output_format",
+      "msg": "format=text"
+    },
+    {
+      "status": "PASS",
+      "name": "PipelineResult 含 output_artifact",
+      "msg": "format=text"
+    },
+    {
+      "status": "PASS",
+      "name": "信息查询->TEXT",
+      "msg": "format=text"
+    },
+    {
+      "status": "PASS",
+      "name": "metadata 含 artifact_info",
+      "msg": "keys=['format', 'file_name', 'file_path', 'size_bytes', 'render_ms']"
+    },
+    {
+      "status": "PASS",
+      "name": "Deep 等级格式升级",
+      "msg": "demand_type=分析研究, format=html"
+    },
+    {
+      "status": "PASS",
+      "name": "Super 等级格式升级",
+      "msg": "format=pdf"
+    },
+    {
+      "status": "PASS",
+      "name": "输出失败不崩溃",
+      "msg": "answer_len=973"
+    },
+    {
+      "status": "PASS",
+      "name": "OutputEngine 导入",
+      "msg": "all 4 classes importable"
+    },
+    {
+      "status": "PASS",
+      "name": "格式检测一致性",
+      "msg": "detected=text, actual=text, demand_type=信息查询"
+    },
+    {
+      "status": "PASS",
+      "name": "新字段默认值",
+      "msg": "format=None, artifact=None"
+    },
+    {
+      "status": "PASS",
+      "name": "size_bytes 自动计算",
+      "msg": "size_bytes=11"
+    }
+  ]
+}

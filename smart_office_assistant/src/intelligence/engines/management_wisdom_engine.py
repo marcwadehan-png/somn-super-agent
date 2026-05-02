@@ -95,7 +95,7 @@ class ManagementWisdomEngine:
     提供战略、组织、绩效、变革、创新等全方位管理智慧。
     """
     
-    VERSION = "V1.0.0"
+    VERSION = "6.2.0"
     
     def __init__(self):
         self.name = "管理学智慧引擎"

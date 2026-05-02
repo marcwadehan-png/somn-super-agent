@@ -83,7 +83,7 @@ class ScienceThinkingEngine:
     核心价值:让系统具备严格的科学思维框架,而非模糊的"理性"
     """
 
-    VERSION = "v1.0.0"
+    VERSION = "6.2.0"
     
     def __init__(self):
         # === 科学方法论五步模型 ===

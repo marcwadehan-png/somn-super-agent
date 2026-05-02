@@ -101,4 +101,4 @@ __all__ = [
     "auto_backup_to_library",
 ]
 
-__version__ = "1.1"
+__version__ = "6.2.0"

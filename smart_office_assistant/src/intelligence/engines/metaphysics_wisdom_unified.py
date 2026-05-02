@@ -35,7 +35,7 @@ class MetaphysicsWisdomUnified:
         self.fengshui = get_fengshui_environment_engine()
         self.dao_core = DaoWisdomCore() if DaoWisdomCore else None
         self.name = "MetaphysicsWisdomUnified"
-        self.version = "v1.0.0"
+        self.version="6.2.0"
 
     def analyze_comprehensive(self, scenario: Dict[str, Any]) -> Dict[str, Any]:
         """synthesize分析入口"""

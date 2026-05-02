@@ -1,4 +1,4 @@
-"""CloudModelHub - Unified Free Cloud LLM Hub.
+"""CloudModelHub - Unified Cloud LLM Hub.
 
 __all__ = [
     'consult_multiple',
@@ -9,7 +9,7 @@ __all__ = [
     'score_teacher',
 ]
 
-Manages all free/low-cost cloud LLM APIs as "teachers".
+Manages cloud LLM API endpoints with unified interface.
 """
 
 import logging

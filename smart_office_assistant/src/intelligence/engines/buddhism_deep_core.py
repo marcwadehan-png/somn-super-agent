@@ -52,7 +52,7 @@ class 佛学核心深化系统:
 
     def __init__(self):
         self.系统名称 = "佛学核心深化系统"
-        self.版本 = "v8.2.0 P2级"
+        self.版本 = "v6.2.0 P2级"
 
         # 核心经典库
         self.核心经典库: Dict[str, 佛学经典] = {

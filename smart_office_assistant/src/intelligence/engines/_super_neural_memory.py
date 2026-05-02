@@ -24,6 +24,7 @@
 """
 
 import logging
+import threading
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Set
 from dataclasses import dataclass, field, asdict
@@ -134,30 +135,35 @@ class SuperNeuralMemory:
         self._index_by_school: Dict[str, Set[str]] = {}
         self._index_by_tier: Dict[str, Set[str]] = {}
         self._initialized = False
+        self._init_lock = threading.Lock()
     
     def initialize(self) -> None:
-        """初始化所有记忆源"""
+        """初始化所有记忆源（线程安全）"""
         if self._initialized:
             return
         
-        logger.info("[SuperNeuralMemory] 初始化超级神经记忆系统...")
+        with self._init_lock:
+            if self._initialized:
+                return
+            
+            logger.info("[SuperNeuralMemory] 初始化超级神经记忆系统...")
         
-        # 1. 加载贤者记忆
-        self._load_sage_memories()
-        
-        # 2. 加载蒸馏记忆
-        self._load_distillation_memories()
-        
-        # 3. 加载Claw记忆
-        self._load_claw_memories()
-        
-        # 4. 加载协作记忆
-        self._load_collaboration_memories()
-        
-        self._build_indexes()
-        
-        self._initialized = True
-        logger.info(f"[SuperNeuralMemory] 初始化完成，共 {len(self._memories)} 条记忆")
+            # 1. 加载贤者记忆
+            self._load_sage_memories()
+            
+            # 2. 加载蒸馏记忆
+            self._load_distillation_memories()
+            
+            # 3. 加载Claw记忆
+            self._load_claw_memories()
+            
+            # 4. 加载协作记忆
+            self._load_collaboration_memories()
+            
+            self._build_indexes()
+            
+            self._initialized = True
+            logger.info(f"[SuperNeuralMemory] 初始化完成，共 {len(self._memories)} 条记忆")
     
     def _load_sage_memories(self) -> None:
         """加载贤者智慧记忆"""

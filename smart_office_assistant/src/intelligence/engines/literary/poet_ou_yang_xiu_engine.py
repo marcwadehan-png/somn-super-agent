@@ -40,7 +40,7 @@ class 欧阳修诗歌characteristics:
 class 欧阳修深化引擎:
     """欧阳修诗文深化分析引擎 v8.2.0"""
 
-    VERSION = "v8.2.0"
+    VERSION = "6.2.0"
 
     def __init__(self):
         self.诗歌characteristics = self._init_characteristics()
@@ -215,6 +215,3 @@ class 欧阳修深化引擎:
             "地位": "唐宋八大家之一,北宋古文运动领袖"
         }
 
-# if __name__ == "__main__":
-# #     raise RuntimeError("此入口已禁用 - 请使用 tests/ 目录")
-__all__ = ['欧阳修style类型', '欧阳修意象类型']

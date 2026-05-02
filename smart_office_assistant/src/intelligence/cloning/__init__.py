@@ -30,4 +30,4 @@ __all__ = [
     "get_clone_engine",
 ]
 
-__version__ = "1.0.0"
+__version__ = "6.2.0"

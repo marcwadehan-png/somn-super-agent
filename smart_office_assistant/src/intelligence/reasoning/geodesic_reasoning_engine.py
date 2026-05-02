@@ -173,7 +173,7 @@ class GeodesicReasoningEngine:
     def __init__(self, beta: float = 0.5):
         """init引擎"""
         self.name = "GeodesicReasoningEngine"
-        self.version = "1.0.0"
+        self.version="6.2.0"
         
         # 亚黎曼几何计算器
         self.sr_geometry = SubRiemannianGeometry(beta=beta)

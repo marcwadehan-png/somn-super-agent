@@ -45,7 +45,7 @@ class 韩愈诗歌characteristics:
 class 韩愈深化引擎:
     """韩愈诗文深化分析引擎 v8.2.0"""
 
-    VERSION = "v8.2.0"
+    VERSION = "6.2.0"
 
     def __init__(self):
         self.诗歌characteristics = self._init_characteristics()
@@ -221,30 +221,3 @@ class 韩愈深化引擎:
             "并称": "与柳宗元并称'韩柳'",
             "地位": "唐宋八大家之首,古文运动领袖"
         }
-
-# 测试函数
-# if __name__ == "__main__":
-# #     raise RuntimeError("此入口已禁用 - 请使用 tests/ 目录")
-
-    print("=" * 50)
-    print("韩愈深化引擎 v8.2.0 测试")
-    print("=" * 50)
-
-    test_texts = [
-        "师者,所以传道受业解惑也",
-        "业精于勤荒于嬉,行成于思毁于随",
-        "天街小雨润如酥,草色遥看近却无",
-        "一封朝奏九重天,夕贬潮州路八千"
-    ]
-
-    print("\n[文本style分析测试]")
-    for text in test_texts:
-        result = engine.分析文本(text)
-        print(f"文本: {text}")
-        print(f"  得分: {result['score']}, judge: {result['judge']}")
-        print()
-
-    print("\n[生平摘要]")
-    bio = engine.get生平摘要()
-    for k, v in bio.items():
-        print(f"  {k}: {v}")

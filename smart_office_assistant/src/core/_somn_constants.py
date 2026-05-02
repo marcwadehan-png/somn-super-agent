@@ -97,9 +97,9 @@ ROUTING_COMPLEXITY_MEDIUM: float = 0.55  # < 0.55 → orchestrator (home)
 # 路由模式映射
 # ══════════════════════════════════════════════════════
 ROUTING_MODE_MAP: Dict[str, tuple] = {
-    "fast":      ("orchestrator", "fast", "simple", "用户指定快手菜模式"),
-    "home":      ("orchestrator", "home", "medium", "用户指定家常菜模式"),
-    "feast":     ("full_workflow", "feast", "complex", "用户指定大餐模式"),
+    "fast":      ("orchestrator", "fast", "simple", "用户指定FAST模式"),
+    "home":      ("orchestrator", "home", "medium", "用户指定HOME模式"),
+    "feast":     ("full_workflow", "feast", "complex", "用户指定FEAST模式"),
     "direct":    ("orchestrator", "fast", "simple", "用户指定直接模式"),
     "preview":   ("orchestrator", "home", "medium", "用户指定预习模式"),
     "review":    ("orchestrator", "home", "medium", "用户指定复习模式"),

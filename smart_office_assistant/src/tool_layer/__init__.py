@@ -4,9 +4,9 @@ Tool Layer - 毫秒级启动
 
 集成能力:
 - LLM模型服务(本地+云端)
-- 云端模型枢纽(CloudModelHub - 所有免费云端大模型"老师们")
-- 师生学习引擎(TeacherStudentEngine - 云端老师+本地学生协作学习)
-- Somn编排器(SomnOrchestrator - 磨坊+厨师,决定如何加工"小麦")
+- 云端模型枢纽(CloudModelHub - 统一管理云端大模型 API 接入)
+- 云端-本地协同引擎(TeacherStudentEngine - 云端模型+本地模型协同调度与质量评估)
+- 请求编排器(SomnOrchestrator - 根据任务复杂度选择处理策略: FAST/HOME/FEAST)
 
 [v19.0 优化] 所有子模块延迟加载，启动时间 -95%
 """
@@ -40,7 +40,7 @@ def __getattr__(name: str) -> Any:
         from . import cloud_model_hub
         return getattr(cloud_model_hub, name)
     
-    # 师生学习引擎
+    # 云端-本地协同引擎
     elif name in ('TeacherStudentEngine', 'LearningMode', 'StudentStatus'):
         from . import teacher_student_engine
         return getattr(teacher_student_engine, name)

@@ -30,8 +30,11 @@ from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from urllib import request, error
+import logging
 
 from src.core.paths import DATA_DIR
+
+logger = logging.getLogger("Somn.LLM.Service")
 from src.utils.retry_utils import get_circuit_breaker, RetryConfig, http_retry_with_status
 import threading
 
@@ -262,14 +265,37 @@ class LLMService:
         )
 
     def get_default_model(self) -> str:
-        """get默认模型,优先本地模型"""
+        """get默认模型,优先使用 SOMN_DEFAULT_MODEL 环境变量,其次本地,再次云端,最后mock"""
         preferred = os.getenv("SOMN_DEFAULT_MODEL", "").strip()
         if preferred and preferred in self.configs:
             return preferred
 
+        # 1. 优先本地模型（如果有 API base 且可达）
         local_config = self.configs.get("local-default")
         if local_config and local_config.api_base:
-            return "local-default"
+            # 快速检测本地模型是否可用（不阻塞）
+            try:
+                from urllib import request as urllib_request
+                from urllib import error as urllib_error
+                base = local_config.api_base.rstrip("/")
+                if not base.endswith("/models"):
+                    check_url = base + "/models"
+                else:
+                    check_url = base
+                req = urllib_request.Request(check_url, method="GET")
+                urllib_request.urlopen(req, timeout=2)
+                return "local-default"
+            except Exception:
+                pass  # 本地模型不可用，继续尝试云端
+
+        # 2. 云端模型优先级：minimax > deepseek > hunyuan > doubao > qwen > openai
+        cloud_priority = ["minimax", "deepseek", "hunyuan", "doubao", "qwen", "openai"]
+        for model_name in cloud_priority:
+            config = self.configs.get(model_name)
+            if config and config.api_key and config.api_base:
+                return model_name
+
+        # 3. 兜底 mock
         return "mock"
 
     def register_model(self, name: str, config: LLMConfig):
@@ -1035,6 +1061,7 @@ class LLMService:
                 api_key=os.getenv("MINIMAX_API_KEY"),
                 temperature=0.7,
                 max_tokens=4000,
+                timeout=120,  # MiniMax响应较慢，增加超时到120秒
                 capabilities=[ModelCapability.CHAT, ModelCapability.ANALYSIS, ModelCapability.CODE]
             )
 

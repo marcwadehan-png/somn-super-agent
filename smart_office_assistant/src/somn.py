@@ -14,7 +14,7 @@ v19.0 - 全面延迟加载优化版
 - v4.1.0 - 文学智能增强版
 - v19.0 - 全面延迟加载，毫秒级启动
 
-方法体已拆分到 somn_legacy/ 子包:
+方法体已拆分到 somn_core/ 子包:
 - _types: SomnConfig, AnalysisRequest, AnalysisResult
 - _init: 各层初始化逻辑
 - _analysis: analyze() 及分析子方法
@@ -60,13 +60,13 @@ def setup_logging():
 
 # 类型延迟导入
 def _get_types():
-    from somn_legacy._types import SomnConfig, AnalysisRequest, AnalysisResult
+    from somn_core._types import SomnConfig, AnalysisRequest, AnalysisResult
     return SomnConfig, AnalysisRequest, AnalysisResult
 
 
 # 各层初始化延迟导入
 def _get_init_funcs():
-    from somn_legacy._init import (
+    from somn_core._init import (
         init_layer1, init_layer2, init_layer3,
         init_layer4, init_layer5, init_narrative_layer
     )
@@ -75,7 +75,7 @@ def _get_init_funcs():
 
 # 分析方法延迟导入
 def _get_analysis_funcs():
-    from somn_legacy._analysis import (
+    from somn_core._analysis import (
         analyze, generate_growth_plan, analyze_demand,
         analyze_funnel, map_user_journey, diagnose_business,
         narrative_analysis
@@ -85,7 +85,7 @@ def _get_analysis_funcs():
 
 # 解决方案方法延迟导入
 def _get_solution_funcs():
-    from somn_legacy._solutions import (
+    from somn_core._solutions import (
         get_solution_recommendations, assess_solution_v2,
         get_solution_details, list_all_solutions
     )
@@ -94,7 +94,7 @@ def _get_solution_funcs():
 
 # 工具方法延迟导入
 def _get_utils_funcs():
-    from somn_legacy._utils import export_result, get_capabilities, health_check
+    from somn_core._utils import export_result, get_capabilities, health_check
     return export_result, get_capabilities, health_check
 
 
@@ -177,7 +177,7 @@ class Somn:
             return self._load_optimizer.get_module('kg_engine')
         # 降级方案：使用原来的延迟加载
         if 'kg_engine' not in self._layers_initialized:
-            from somn_legacy._init import init_kg_engine
+            from somn_core._init import init_kg_engine
             init_kg_engine(self)
             self._layers_initialized.add('kg_engine')
         return self._layers.get('kg_engine', None)
@@ -190,7 +190,7 @@ class Somn:
             return self._load_optimizer.get_module('web_search')
         # 降级方案：使用原来的延迟加载
         if 'web_search' not in self._layers_initialized:
-            from somn_legacy._init import init_web_search
+            from somn_core._init import init_web_search
             init_web_search(self)
             self._layers_initialized.add('web_search')
         return self._layers.get('web_search', None)
@@ -203,7 +203,7 @@ class Somn:
             return self._load_optimizer.get_module('memory_system')
         # 降级方案：使用原来的延迟加载
         if 'memory_system' not in self._layers_initialized:
-            from somn_legacy._init import init_memory_system
+            from somn_core._init import init_memory_system
             init_memory_system(self)
             self._layers_initialized.add('memory_system')
         return self._layers.get('memory_system', None)

@@ -78,7 +78,7 @@ class DeZhiPlanner:
     def __init__(self):
         """init德治规划器"""
         self.name = "DeZhiPlanner"
-        self.version = "v1.0.0"
+        self.version="6.2.0"
 
         # 尚书德治核心思想
         self.de_zhi_principles = {

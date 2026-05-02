@@ -114,7 +114,7 @@ class SolutionLearningStrategy(BaseLearningStrategy):
         report_copy["report_metadata"] = {
             "generated_at": datetime.now().isoformat(),
             "report_type": "daily_learning",
-            "system_version": "v2.2.0",
+            "system_version": "v6.2.0",
             "engine": "SolutionLearningEngine",
         }
         with open(report_file, "w", encoding="utf-8") as f:

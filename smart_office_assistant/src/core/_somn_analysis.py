@@ -338,25 +338,25 @@ def _module_assess_task_routing(
         route = "orchestrator"
         cuisine_mode = "fast"
         cuisine_level = "simple"
-        reasoning = "简单任务,本地模型快速响应(快手菜)"
+        reasoning = "简单任务,本地模型快速响应(FAST模式)"
     elif complexity < 0.55:
         route = "orchestrator"
         cuisine_mode = "home"
         cuisine_level = "medium"
-        reasoning = "中等任务,本地+云端老师辅助(家常菜)"
+        reasoning = "中等任务,本地+云端协同(HOME模式)"
     else:
         route = "full_workflow"
         cuisine_mode = "feast"
         cuisine_level = "complex"
-        reasoning = "复杂任务,完整工作流执行(大餐)"
+        reasoning = "复杂任务,完整工作流执行(FEAST模式)"
 
     # 用户显式指定优先
     user_mode_override = context.get("dining_mode") or context.get("cuisine_mode") or context.get("learning_mode")
     if user_mode_override:
         mode_map = {
-            "fast": ("orchestrator", "fast", "simple", "用户指定快手菜模式"),
-            "home": ("orchestrator", "home", "medium", "用户指定家常菜模式"),
-            "feast": ("full_workflow", "feast", "complex", "用户指定大餐模式"),
+            "fast": ("orchestrator", "fast", "simple", "用户指定FAST模式"),
+            "home": ("orchestrator", "home", "medium", "用户指定HOME模式"),
+            "feast": ("full_workflow", "feast", "complex", "用户指定FEAST模式"),
             "direct": ("orchestrator", "fast", "simple", "用户指定直接模式"),
             "preview": ("orchestrator", "home", "medium", "用户指定预习模式"),
             "review": ("orchestrator", "home", "medium", "用户指定复习模式"),
@@ -364,6 +364,50 @@ def _module_assess_task_routing(
         }
         if user_mode_override in mode_map:
             route, cuisine_mode, cuisine_level, reasoning = mode_map[user_mode_override]
+
+    # PPT输出类型检测 -- 仅当用户明确将PPT/PDF作为主要输出格式时触发
+    # 排除：否定语、只是附带提及、chat类问题
+    text_lower = text.lower()
+
+    # 否定排除
+    negated_phrases = ["不要ppt", "不需要ppt", "不要pdf", "不需要pdf",
+                      "不要幻灯片", "不想做ppt", "别用ppt", "不用pdf"]
+    if any(neg in text_lower for neg in negated_phrases):
+        has_ppt_output = False
+        has_ppt_format_hint = False
+    else:
+        # 强意图关键词（明确的动作+输出格式）
+        ppt_strong_intent = [
+            "生成ppt", "输出ppt", "制作ppt", "做成ppt", "输出为ppt",
+            "generate ppt", "制作幻灯片", "生成幻灯片",
+            "输出pdf", "生成pdf", "制作pdf", "做成pdf",
+        ]
+        # 格式声明关键词
+        ppt_format_hint = [
+            "输出类型是ppt", "输出类型是pdf", "输出格式为ppt", "输出格式为pdf",
+            "output type is ppt", "output as ppt", "以ppt输出", "以pdf输出",
+            "pdf格式的报告", "ppt格式", "pdf文档", "ppt文档",
+        ]
+        # 弱意图（仅关键词，无动作）-- 需要配合动作词才触发
+        ppt_weak_mention = [
+            "powerpoint", ".pptx", "幻灯片",
+        ]
+        action_verbs = ["生成", "制作", "输出", "做", "输出为", "做成", "输出成",
+                        "generate", "输出"]
+
+        has_ppt_output = any(kw in text_lower for kw in ppt_strong_intent)
+        has_ppt_format_hint = any(kw in text_lower for kw in ppt_format_hint)
+        # 弱关键词必须配合动作词
+        has_weak_with_action = (
+            any(kw in text_lower for kw in ppt_weak_mention) and
+            any(v in text for v in action_verbs)
+        )
+
+        if has_ppt_output or has_ppt_format_hint or has_weak_with_action:
+            route = "ppt_generate"
+            cuisine_mode = "feast"
+            cuisine_level = "complex"
+            reasoning = "明确指定PPT/PDF输出，路由到PPT子系统强化处理"
 
     orchestrator_available = somn_core.somn_orchestrator is not None
     cloud_hub_available = somn_core.cloud_model_hub is not None
@@ -401,7 +445,7 @@ def _module_assess_task_routing(
 
     logger.info(
         f"[路由decision] 复杂度={complexity:.2f}({cuisine_level}) | "
-        f"路由={route} | 烹饪={cuisine_mode} | 推理={reasoning}"
+        f"路由={route} | 模式={cuisine_mode} | 推理={reasoning}"
     )
     return result
 

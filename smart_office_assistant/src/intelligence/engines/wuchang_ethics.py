@@ -77,7 +77,7 @@ class WuchangEthicsEvaluator:
     def __init__(self):
         """init五常评估器"""
         self.name = "WuchangEthicsEvaluator"
-        self.version = "v1.0.0"
+        self.version="6.2.0"
 
         # 五常核心定义
         self.wuchang_definitions = {

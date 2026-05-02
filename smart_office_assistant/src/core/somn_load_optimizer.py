@@ -259,7 +259,7 @@ class SomnLoadOptimizer:
 
 def patch_somn_config():
     """给 SomnConfig 添加加载优化配置"""
-    from somn_legacy._types import SomnConfig
+    from somn_core._types import SomnConfig
     
     # 添加新字段（如果不存在）
     if not hasattr(SomnConfig, 'enable_preload'):

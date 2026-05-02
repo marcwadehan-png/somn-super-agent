@@ -18,9 +18,9 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
+from datetime import datetime
 
-# 延迟导入避免循环依赖
-_knowledge_system = None
+_nexus = None
 _library_bridge = None
 
 # 尝试导入藏书阁知识桥接器
@@ -35,12 +35,12 @@ except ImportError:
 
 
 def get_knowledge_system():
-    """获取知识系统单例"""
-    global _knowledge_system
-    if _knowledge_system is None:
-        from knowledge_cells import get_knowledge_system as _get
-        _knowledge_system = _get()
-    return _knowledge_system
+    """获取 DomainNexus 单例"""
+    global _nexus
+    if _nexus is None:
+        from knowledge_cells import get_nexus
+        _nexus = get_nexus()
+    return _nexus
 
 
 def get_library_bridge():
@@ -135,77 +135,143 @@ class StatusResponse(BaseModel):
 router = APIRouter(prefix="/api/v1/cells", tags=["知识格子"])
 
 
-@router.get("", response_model=List[Dict[str, Any]])
+@router.get("", response_model=Dict[str, Any])
 async def list_cells():
     """获取所有格子"""
-    system = get_knowledge_system()
-    return system.list_all_cells()
+    try:
+        system = get_knowledge_system()
+        cells = system.list_cells()
+        return {
+            "success": True,
+            "message": "知识格子列表",
+            "timestamp": datetime.now().isoformat(),
+            "data": {
+                "cells": cells,
+                "total": len(cells)
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/status", response_model=StatusResponse)
+@router.get("/status")
 async def get_status():
     """获取系统状态"""
-    system = get_knowledge_system()
-    return system.get_status()
+    try:
+        system = get_knowledge_system()
+        status = system.get_status()
+        status["success"] = True
+        status["timestamp"] = datetime.now().isoformat()
+        return status
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/search", response_model=List[Dict[str, Any]])
 async def search_cells(keyword: str):
     """搜索格子"""
-    system = get_knowledge_system()
-    return system.search_cells(keyword)
+    try:
+        system = get_knowledge_system()
+        indices = system.search_indices(keyword)
+        return [
+            {
+                "cell_id": idx.cell_id,
+                "name": idx.name,
+                "tags": list(idx.tags) if isinstance(idx.tags, set) else idx.tags,
+                "summary_preview": idx.summary_preview,
+            }
+            for idx in indices
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/hot", response_model=List[Dict[str, Any]])
 async def get_hot_cells(top_n: int = 5):
     """获取最热格子"""
-    system = get_knowledge_system()
-    return system.get_hot_cells(top_n)
+    try:
+        system = get_knowledge_system()
+        return system.get_hot_cells(top_n)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/graph", response_model=KnowledgeGraph)
+@router.get("/graph")
 async def get_graph():
     """获取知识图谱"""
-    system = get_knowledge_system()
-    data = system.get_knowledge_graph()
-    return KnowledgeGraph(
-        nodes=[GraphNode(**n) for n in data['nodes']],
-        links=[GraphLink(**l) for l in data['links']]
-    )
+    try:
+        system = get_knowledge_system()
+        data = system.get_knowledge_graph()
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/{cell_id}", response_model=Optional[Dict[str, Any]])
+@router.get("/{cell_id}")
 async def get_cell(cell_id: str):
-    """获取指定格子"""
-    system = get_knowledge_system()
-    cell = system.get_cell_content(cell_id.upper())
-    if not cell:
-        raise HTTPException(status_code=404, detail=f"格子 {cell_id} 不存在")
-    return cell
+    """获取指定格子详情"""
+    try:
+        system = get_knowledge_system()
+        # DomainNexus 的 get_cell 在 cell_manager 上
+        cell = None
+        if hasattr(system, 'cell_manager') and hasattr(system.cell_manager, 'get_cell'):
+            cell = system.cell_manager.get_cell(cell_id.upper())
+        if cell is None and hasattr(system, 'get_cell'):
+            cell = system.get_cell(cell_id.upper())
+        if not cell:
+            raise HTTPException(status_code=404, detail=f"格子 {cell_id} 不存在")
+        # CellContent 是 dataclass，序列化所有字段
+        if hasattr(cell, '__dataclass_fields__'):
+            from dataclasses import asdict
+            return asdict(cell)
+        return cell.to_dict() if hasattr(cell, 'to_dict') else dict(cell)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/{cell_id}/related", response_model=List[RelatedCell])
 async def get_related_cells(cell_id: str, threshold: float = 0.6):
     """获取关联格子"""
-    system = get_knowledge_system()
-    related = system.get_related_cells(cell_id.upper(), threshold)
-    return [RelatedCell(**r) for r in related]
+    try:
+        system = get_knowledge_system()
+        # DomainNexus 方法名是 find_related_cells_graph
+        if hasattr(system, 'find_related_cells_graph'):
+            related = system.find_related_cells_graph(cell_id.upper(), threshold)
+        elif hasattr(system, 'get_related_cells'):
+            related = system.get_related_cells(cell_id.upper(), threshold)
+        else:
+            related = []
+        if isinstance(related, dict) and 'cells' in related:
+            related = related['cells']
+        if isinstance(related, dict):
+            related = [{"cell_id": k, "name": k, "weight": v} for k, v in related.items()]
+        return [RelatedCell(**r) if isinstance(r, dict) else RelatedCell(cell_id=str(r), name=str(r), weight=0.5) for r in related]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/query", response_model=QueryResponse)
+@router.post("/query")
 async def query_knowledge(request: QueryRequest):
     """知识查询"""
-    system = get_knowledge_system()
-    result = system.query(request.question, request.context or "")
-    return QueryResponse(**result)
+    try:
+        system = get_knowledge_system()
+        result = system.query(request.question, request.context or "")
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/check", response_model=CheckResponse)
+@router.post("/check")
 async def check_methodology(request: CheckRequest):
     """方法论检查"""
-    system = get_knowledge_system()
-    result = system.check_methodology(request.content, request.context or "")
-    return CheckResponse(**result)
+    try:
+        system = get_knowledge_system()
+        result = system.check_methodology(request.content, request.context or "")
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ============ 藏书阁集成路由 ============

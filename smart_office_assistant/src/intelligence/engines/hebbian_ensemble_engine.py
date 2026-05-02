@@ -461,7 +461,7 @@ class HebbianEnsembleEngine:
     def __init__(self):
         """init引擎"""
         self.name = "HebbianEnsembleEngine"
-        self.version = "1.0.0"
+        self.version="6.2.0"
         
         # 学习规则
         self.learning_rule = HebbianLearningRule()

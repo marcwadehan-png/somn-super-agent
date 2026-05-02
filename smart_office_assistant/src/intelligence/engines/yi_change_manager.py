@@ -82,7 +82,7 @@ class YiChangeManager:
     def __init__(self):
         """init易变管理器"""
         self.name = "YiChangeManager"
-        self.version = "v1.0.0"
+        self.version="6.2.0"
 
         # 易经核心思想
         self.yijing_principles = {

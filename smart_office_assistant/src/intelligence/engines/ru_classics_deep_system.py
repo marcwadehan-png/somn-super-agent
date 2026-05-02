@@ -47,7 +47,7 @@ class 儒xue十三经bu全深hua系tong:
 
     def __init__(self):
         self.系统名称 = "儒学十三经补全深化系统"
-        self.版本 = "v8.2.0 P2级"
+        self.版本 = "v6.2.0 P2级"
 
         # 十三经信息库
         self.十三经信息库: Dict[str, 儒经信息] = {

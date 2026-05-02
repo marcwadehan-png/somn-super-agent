@@ -1,0 +1,25 @@
+============================================================
+test_sage_ab.py 诊断
+============================================================
+
+Working directory: D:\AI
+Python: 3.13.12 (main, Feb  3 2026, 22:53:26) [MSC v.1944 64 bit (AMD64)]
+=== G1: 导入测试 ===
+  EightLayerPipeline: OK
+  ProblemDispatcher: OK
+  SchoolFusion: OK
+  FourLevelDispatchController: OK
+  DivineReasonNetwork: FAILED - No module named 'divine_reason_network'
+  PanWisdomTree: FAILED - attempted relative import with no known parent package
+  TrackBExecutor: OK
+
+=== G3-G4: 管道测试 ===
+  Pipeline created: OK
+  BASIC process: OK, grade=ProcessingGrade.BASIC
+  all_layers keys: ['input', 'nl_analysis', 'classification', 'routing', 'reasoning', 'argumentation', 'output', 'optimization']
+  reasoning layer data keys: ['grade', 'reasoning_result', 'r1_supervision', 'reasoning_chain', 'web_enhancement']
+  reasoning_result type: dict
+
+============================================================
+诊断完成
+============================================================

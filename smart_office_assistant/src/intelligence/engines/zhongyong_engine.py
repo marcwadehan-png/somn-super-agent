@@ -77,7 +77,7 @@ class ZhongYongEngine:
     def __init__(self):
         """init中庸引擎"""
         self.name = "ZhongYongEngine"
-        self.version = "v1.0.0"
+        self.version="6.2.0"
 
         # 中庸核心语录
         self.zhongyong_quotes = {

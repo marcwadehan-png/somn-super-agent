@@ -8,7 +8,29 @@ import logging
 from typing import List, Dict, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
-from ._claw_architect import ClawSoul, ClawIdentity
+
+# 从父级模块导入ClawSoul和ClawIdentity（v3.1修复）
+try:
+    from .._claw_architect import ClawSoul, ClawIdentity
+except ImportError:
+    # 兼容没有identity的情况
+    @dataclass
+    class ClawSoul:
+        beliefs: List[str] = field(default_factory=list)
+        values: List[str] = field(default_factory=list)
+        discipline: List[str] = field(default_factory=list)
+        personality_traits: List[str] = field(default_factory=list)
+        response_style: Dict[str, str] = field(default_factory=dict)
+        
+        def get_response_style(self, context: str = "default") -> str:
+            return self.response_style.get(context, self.response_style.get("default", ""))
+    
+    @dataclass
+    class ClawIdentity:
+        name: str = ""
+        role_primary: str = ""
+        role_secondary: List[str] = field(default_factory=list)
+        skills_tags: List[str] = field(default_factory=list)
 
 logger = logging.getLogger(__name__)
 

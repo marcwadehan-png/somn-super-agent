@@ -177,3 +177,30 @@ dmypy.json
 # Temporary data files
 _court_*.json
 _temp_*
+
+# Demo/test output files
+demo_*.txt
+demo_*.py
+*_test_*.py
+_test_*.py
+_test_*.txt
+debug*.py
+test_closed_loop*.py
+test_executor*.py
+test_init_syntax.py
+test_result.txt
+quick_run.py
+quick_test_*.py
+SomnApp.py
+fix_init*.py
+
+# Outputs & temp results
+outputs/
+_start_web.py
+启动*.py
+
+# Typo directory (smart_office_assitant vs smart_office_assistant)
+smart_office_assitant/
+
+# Static assets (build artifacts)
+static/

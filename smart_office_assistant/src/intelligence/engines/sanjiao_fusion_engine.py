@@ -127,7 +127,7 @@ class SanjiaoFusionEngine:
     def __init__(self):
         """init三教合一fusion引擎"""
         self.name = "SanjiaoFusionEngine"
-        self.version = "v1.0.0"
+        self.version="6.2.0"
         
         # init三家智慧核心
         self.ru_core = RuWisdomCore()

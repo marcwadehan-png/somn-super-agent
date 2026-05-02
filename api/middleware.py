@@ -134,9 +134,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     def __init__(
         self,
         app: ASGIApp,
-        global_limit: int = 100,
-        ip_limit: int = 30,
-        user_limit: int = 60,
+        global_limit: int = 500,      # 放宽到500请求/分钟
+        ip_limit: int = 100,       # 放宽到100请求/分钟
+        user_limit: int = 200,     # 放宽到200请求/分钟
         window_seconds: int = 60,
     ):
         super().__init__(app)

@@ -109,7 +109,7 @@ class RuWisdomCore:
     
     def __init__(self):
         self.name = "儒家智慧核心"
-        self.version = "1.0.1"
+        self.version="6.2.0"
         self.classics = [c.value for c in ConfucianClassic]
         
     def get_classic_guidance(self, classic: ConfucianClassic, situation: str) -> Dict[str, Any]:

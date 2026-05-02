@@ -113,7 +113,7 @@ def __getattr__(name: str) -> Any:
 
 
 # 包版本
-__version__ = "21.0.0"
+__version__ = "6.2.0"
 
 # 公开 API（保持向后兼容）
 __all__ = [

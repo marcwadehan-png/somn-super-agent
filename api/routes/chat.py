@@ -62,17 +62,21 @@ def register_chat_routes(app, app_state):
             elapsed = (time.time() - start) * 1000
 
             # 提取回复文本 — AgentResponse 是 dataclass，有 content/message/success 字段
+            # 注意：content 默认=""，message 才是实际回复，需按优先级正确提取
             reply = ""
-            if hasattr(response, 'content'):
-                reply = response.content
-            elif hasattr(response, 'message'):
-                reply = response.message
-            elif isinstance(response, dict):
+            _resp_type = type(response).__name__
+            _resp_content = getattr(response, 'content', '[N/A]') if not isinstance(response, dict) else '[dict]'
+            _resp_message = getattr(response, 'message', '[N/A]') if not isinstance(response, dict) else '[dict]'
+            if isinstance(response, dict):
                 reply = response.get("response", response.get("reply", response.get("message", str(response))))
+            elif hasattr(response, 'message') and response.message:
+                reply = response.message
+            elif hasattr(response, 'content') and response.content:
+                reply = response.content
             elif isinstance(response, str):
                 reply = response
             else:
-                reply = str(response)
+                reply = str(response) if not isinstance(response, type(None)) else ""
 
             return {
                 "success": True,
@@ -84,7 +88,12 @@ def register_chat_routes(app, app_state):
                     "wisdom_insights": [],
                     "confidence": 0.85,
                     "processing_time_ms": round(elapsed, 1),
-                    "metadata": {"raw_type": type(response).__name__},
+                    "metadata": {
+                        "raw_type": _resp_type,
+                        "resp_content": str(_resp_content)[:100],
+                        "resp_message": str(_resp_message)[:100],
+                        "reply_source": "message" if (hasattr(response, 'message') and response.message) else ("content" if (hasattr(response, 'content') and response.content) else "other")
+                    },
                 }
             }
         except Exception as e:

@@ -118,7 +118,7 @@ class CollaborationProtocol:
         max_count: int = 3,
     ) -> List[Tuple[str, CollaborationRole]]:
         """
-        发现可用的协作Claw
+        发现可用的协作Claw（V3.1: 按品秩优先级排序）
         
         Args:
             primary_claw: 主Claw名称
@@ -127,7 +127,7 @@ class CollaborationProtocol:
             max_count: 最大协作Claw数量
             
         Returns:
-            [(claw_name, role), ...]
+            [(claw_name, role), ...] 按品秩从高到低排序
         """
         collaborators = []
         
@@ -165,6 +165,17 @@ class CollaborationProtocol:
             for c in other_dept_claws:
                 if c != primary_claw and c not in [x[0] for x in collaborators] and len(collaborators) < max_count:
                     collaborators.append((c, CollaborationRole.REVIEWER))
+        
+        # ── V3.1: 按品秩排序（权威值低的排前面）──
+        if len(collaborators) > 1:
+            try:
+                from ...dual_track.sage_collaboration_rules import get_sage_collaboration_rules
+                rules = get_sage_collaboration_rules()
+                collaborators.sort(
+                    key=lambda x: rules.get_authority_value(x[0])
+                )
+            except Exception as e:
+                logger.debug(f"[Collaboration] 品秩排序跳过: {e}")
         
         return collaborators[:max_count]
     
@@ -323,10 +334,45 @@ class CollaborationProtocol:
         contributions: List[ContributionResult],
         roles: Dict[str, CollaborationRole],
     ) -> Dict[str, Any]:
-        """合成多Claw结果"""
+        """合成多Claw结果（V3.1: 集成品秩仲裁）"""
         
         if not contributions:
             return {"answer": "无法处理该问题", "notes": "无有效贡献", "confidence": 0.0}
+        
+        # ── V3.1: 品秩仲裁 — 当贡献者之间有冲突时，用品秩裁决 ──
+        if len(contributions) > 1:
+            try:
+                from ...dual_track.sage_collaboration_rules import get_sage_collaboration_rules, ConflictStrategy
+                rules = get_sage_collaboration_rules()
+                
+                # 构建结论列表
+                conclusions = []
+                for c in contributions:
+                    conclusions.append({
+                        "author": c.claw_name,
+                        "content": c.content,
+                        "timestamp": 0,  # 同步执行无时间差
+                        "confidence": c.confidence,
+                    })
+                
+                # 品秩仲裁: 权威最高的贤者的结论为主
+                accepted, rejected = rules.resolve_conflict(
+                    conclusions, ConflictStrategy.NOBILITY_ARBITRATION
+                )
+                
+                if accepted and rejected:
+                    # 有仲裁结果，重新排序贡献
+                    winner_name = accepted[0]["author"]
+                    logger.info(
+                        f"[Collaboration] 品秩仲裁: {winner_name} 的结论为主, "
+                        f"丢弃 {len(rejected)} 个低品秩结论"
+                    )
+                    # 将winner移到第一位
+                    contributions.sort(
+                        key=lambda c: 0 if c.claw_name == winner_name else 1
+                    )
+            except Exception as e:
+                logger.debug(f"[Collaboration] 品秩仲裁跳过: {e}")
         
         # 按角色排序
         primary = None

@@ -12,7 +12,7 @@ from typing import Dict, List, Optional, Tuple, Any
 from ._dispatch_enums import WisdomSchool, ProblemType, FusionDecision
 
 def make_fusion_decision(self, problem: str, context: Optional[Dict[str, Any]] = None) -> FusionDecision:
-    """fusiondecision - 整合五大智慧体系做出synthesize决策（v2.1.0 含部门路由）"""
+    """fusiondecision - 整合五大智慧体系做出synthesize决策（v6.2.0 含部门路由）"""
     problem_type = self.identify_problem_type(problem)
     schools = self.get_recommended_schools(problem, problem_type)
     # ── v2.1.0: 确定部门路由 ──

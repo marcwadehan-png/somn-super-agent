@@ -16,7 +16,7 @@ __all__ = [
     'make_strategic_decision',
 ]
 
-CLASSIC_WISDOM_VERSION = "2.0.0"
+CLASSIC_WISDOM_VERSION = "6.2.0"
 BOOK_TYPES = ["sanguo", "shuihu", "xiyou", "honglou"]
 
 try:
@@ -39,7 +39,7 @@ class ClassicWisdomEngine:
 
     def __init__(self):
         """初始化四大名著智慧引擎"""
-        self.version = "v2.0.0"
+        self.version="6.2.0"
         self.sanguo_wisdom = SAN_GUO_WISDOM
         self.shuihu_wisdom = SHUIHU_WISDOM
         self.xiyou_wisdom = XIYOU_WISDOM

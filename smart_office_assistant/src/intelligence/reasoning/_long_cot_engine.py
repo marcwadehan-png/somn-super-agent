@@ -758,7 +758,7 @@ class LongCoTReasoningEngine:
     顿悟时刻检测和自我纠错机制。
     """
     
-    VERSION = "V1.0.0"
+    VERSION = "6.2.0"
     
     def __init__(
         self,

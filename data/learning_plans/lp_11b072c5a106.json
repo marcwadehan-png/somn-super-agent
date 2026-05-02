@@ -1,0 +1,19 @@
+{
+  "id": "lp_11b072c5a106",
+  "name": "Plan A",
+  "folder_path": "D:\\AI",
+  "status": "pending",
+  "created_at": 1777482370.6532483,
+  "updated_at": 1777482370.6532483,
+  "started_at": 0,
+  "completed_at": 0,
+  "config": {},
+  "total_files": 0,
+  "processed_files": 0,
+  "success_files": 0,
+  "failed_files": 0,
+  "total_knowledge": 0,
+  "total_memory": 0,
+  "files": [],
+  "error_message": ""
+}

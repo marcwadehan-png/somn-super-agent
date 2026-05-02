@@ -171,7 +171,8 @@ class ClawIndependentWorker:
             # 6. ReAct闭环处理（如有architect）
             react_result = None
             if self.architect:
-                react_result = await self.architect.execute(query)
+                # ClawArchitect的process方法返回ReActResult
+                react_result = await self.architect.process(query, {"independent_mode": True})
             
             # 7. 学习记录
             learning_result = self.learning_engine.learn(

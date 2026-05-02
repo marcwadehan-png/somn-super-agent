@@ -415,17 +415,17 @@ def assess_task_routing(description: str, structured_req: Dict, context: Dict,
         route = "orchestrator"
         cuisine_mode = "fast"
         cuisine_level = "simple"
-        reasoning = "简单任务,本地模型快速响应(快手菜)"
+        reasoning = "简单任务,本地模型快速响应(FAST模式)"
     elif complexity < ROUTING_COMPLEXITY_MEDIUM:
         route = "orchestrator"
         cuisine_mode = "home"
         cuisine_level = "medium"
-        reasoning = "中等任务,本地+云端老师辅助(家常菜)"
+        reasoning = "中等任务,本地+云端协同(HOME模式)"
     else:
         route = "full_workflow"
         cuisine_mode = "feast"
         cuisine_level = "complex"
-        reasoning = "复杂任务,完整工作流执行(大餐)"
+        reasoning = "复杂任务,完整工作流执行(FEAST模式)"
 
     user_mode_override = context.get("dining_mode") or context.get("cuisine_mode") or context.get("learning_mode")
     if user_mode_override and user_mode_override in ROUTING_MODE_MAP:

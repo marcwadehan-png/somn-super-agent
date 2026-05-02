@@ -38,7 +38,7 @@ class XiyouGrowthEngine:
     
     def __init__(self):
         """init西游成长引擎"""
-        self.version = "v1.0.0"
+        self.version="6.2.0"
         
         # 取经团队角色分析
         self.pilgrim_team = {

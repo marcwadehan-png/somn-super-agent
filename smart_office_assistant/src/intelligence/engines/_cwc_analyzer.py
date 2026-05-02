@@ -53,7 +53,7 @@ class ClassicWisdomEngine:
 
     def __init__(self):
         """初始化四大名著智慧引擎，加载所有知识库。"""
-        self.version = "v2.0.0"
+        self.version="6.2.0"
         self.initialized = True
         self._init_sanguo_wisdom()
         self._init_shuihu_wisdom()

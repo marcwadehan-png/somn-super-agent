@@ -62,7 +62,7 @@ class ScienceDomain(Enum):
 class NaturalScienceUnified:
     """自然科学智慧unified入口 v1.0.1 (v8.4.3 修复版)"""
 
-    VERSION = "1.0.1"
+    VERSION = "6.2.0"
     DESCRIPTION = "自然科学智慧unified系统 - 从量子到宇宙的全谱系知识引擎"
 
     def __init__(self):

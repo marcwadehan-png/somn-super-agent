@@ -607,7 +607,11 @@ class ReinforcementLearningSystemV3:
         
         with open(path, 'rb') as f:
             # SECURITY: pickle仅用于内部模型文件，数据由本模块生成
-            model_data = pickle.load(f)
+            try:
+                model_data = pickle.load(f)
+            except (pickle.UnpicklingError, EOFError, ValueError, AttributeError) as e:
+                logger.warning(f"模型文件损坏，将使用默认状态: {e}")
+                return
         
         self.q_table = defaultdict(lambda: defaultdict(float), model_data.get("q_table", {}))
         

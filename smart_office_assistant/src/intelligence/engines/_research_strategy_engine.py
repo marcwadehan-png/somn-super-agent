@@ -220,7 +220,7 @@ class Strategy:
     validation_results: List[Dict] = field(default_factory=list)
 
     # 版本
-    current_version: str = "1.0"
+    current_version: str = "6.2.0"
     version_history: List[StrategyVersion] = field(default_factory=list)
 
     # 关联
@@ -304,7 +304,7 @@ class ResearchStrategyEngine:
     5. 鼓励策略淘汰 - 无效策略及时退役，避免沉没成本
     """
 
-    VERSION = "2.0.0"
+    VERSION = "6.2.0"
 
     def __init__(self, data_dir: Optional[str] = None):
         """
@@ -593,7 +593,7 @@ class ResearchStrategyEngine:
 
         # 创建初始版本记录
         initial_version = StrategyVersion(
-            version="1.0",
+            version="6.2.0",
             date=datetime.now().strftime('%Y-%m-%d'),
             source_finding_ids=[f.finding_id for f in findings],
             changes="初始版本",
@@ -610,7 +610,7 @@ class ResearchStrategyEngine:
             application_guide=application_guide,
             implementation_steps=steps,
             validation_status=ValidationStatus.PENDING,
-            current_version="1.0",
+            current_version="6.2.0",
             version_history=[initial_version],
             source_finding_ids=[f.finding_id for f in findings],
             related_scenarios=list(set(
@@ -1280,7 +1280,7 @@ class ResearchStrategyEngine:
                 implementation_steps=data.get("implementation_steps", []),
                 validation_status=validation,
                 validation_plan=data.get("validation_plan", {}),
-                current_version=data.get("current_version", "1.0"),
+                current_version=data.get("current_version", "6.2.0"),
                 source_finding_ids=data.get("source_finding_ids", []),
                 related_scenarios=data.get("related_scenarios", []),
                 priority=data.get("priority", 5),

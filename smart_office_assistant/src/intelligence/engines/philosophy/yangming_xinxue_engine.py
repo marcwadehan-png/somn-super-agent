@@ -230,7 +230,7 @@ class YangmingXinxueEngine:
     def __init__(self):
         """initxinxue引擎"""
         self.name = "王阳明xinxuefusion引擎"
-        self.version = "v7.0.0"
+        self.version="6.2.0"
         logger.info(f"{self.name} {self.version} init完成")
     
     def analyze_decision(self, 

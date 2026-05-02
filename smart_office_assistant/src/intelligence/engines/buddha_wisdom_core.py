@@ -128,7 +128,7 @@ class BuddhaWisdomCore:
     def __init__(self):
         """init佛家智慧核心"""
         self.name = "BuddhaWisdomCore"
-        self.version = "v1.0.0"
+        self.version="6.2.0"
         
         # 四圣谛详解
         self.four_truths = {

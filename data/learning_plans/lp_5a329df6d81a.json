@@ -1,0 +1,19 @@
+{
+  "id": "lp_5a329df6d81a",
+  "name": "AB测试",
+  "folder_path": "D:\\AI\\test",
+  "status": "pending",
+  "created_at": 1777519112.1162307,
+  "updated_at": 1777519112.1162307,
+  "started_at": 0,
+  "completed_at": 0,
+  "config": {},
+  "total_files": 0,
+  "processed_files": 0,
+  "success_files": 0,
+  "failed_files": 0,
+  "total_knowledge": 0,
+  "total_memory": 0,
+  "files": [],
+  "error_message": ""
+}

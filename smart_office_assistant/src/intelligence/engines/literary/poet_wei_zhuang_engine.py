@@ -44,7 +44,7 @@ class 韦庄诗歌characteristics:
 class 韦庄深化引擎:
     """韦庄诗文深化分析引擎 v8.2.0"""
 
-    VERSION = "v8.2.0"
+    VERSION = "6.2.0"
 
     def __init__(self):
         self.诗歌characteristics = self._init_characteristics()

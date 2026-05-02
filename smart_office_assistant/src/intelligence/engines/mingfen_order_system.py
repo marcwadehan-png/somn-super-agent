@@ -35,7 +35,7 @@ class MingFenSystem:
     def __init__(self):
         """init名分秩序系统"""
         self.name = "MingFenSystem"
-        self.version = "v1.0.0"
+        self.version="6.2.0"
 
         # 名分秩序的核心要素
         self.core_elements = {

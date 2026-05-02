@@ -68,7 +68,7 @@ class 弗洛伊德潜意识引擎:
     
     def __init__(self):
         self.name = "弗洛伊德潜意识引擎"
-        self.version = "8.2.0"
+        self.version="6.2.0"
         
         # 潜意识需求分类
         self.潜意识需求表 = {

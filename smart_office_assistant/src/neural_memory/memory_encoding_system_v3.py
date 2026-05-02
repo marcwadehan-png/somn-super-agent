@@ -91,16 +91,34 @@ class MemoryEncoderV3:
         else:
             self.model = None
 
-    def encode(self, texts, normalize: bool = True) -> "np.ndarray":
+    def encode(
+        self,
+        texts=None,
+        normalize: bool = True,
+        content=None,  # 兼容 V3 调用
+        context=None,  # 兼容 V3 调用
+        granularity=None,  # 兼容 V3 调用
+        modality=None,  # 兼容 V3 调用
+        **kwargs  # 忽略其他未知参数
+    ) -> "np.ndarray":
         """编码文本为向量
-        
+
         Args:
-            texts: 字符串或字符串列表
+            texts: 字符串或字符串列表 (主参数)
             normalize: 是否 L2 归一化
-        
+            content: 兼容 V3 (等同于 texts)
+            context: 兼容 V3 (忽略)
+            granularity: 兼容 V3 (忽略)
+            modality: 兼容 V3 (忽略)
+
         Returns:
             numpy 数组，shape = (len(texts), embedding_dim)
         """
+        # 兼容 V3 的 content 参数
+        if texts is None and content is not None:
+            texts = content
+        if texts is None:
+            return np.array([])
         if self.model is not None:
             embeddings = self.model.encode(texts, normalize_embeddings=normalize)
             return embeddings

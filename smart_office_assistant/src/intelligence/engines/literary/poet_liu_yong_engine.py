@@ -69,7 +69,7 @@ class 柳永深化引擎:
     4. ci_pattern分析 - 分析不同ci_pattern的特点
     """
     
-    VERSION = "v1.0.0"
+    VERSION = "6.2.0"
     
     def __init__(self):
         self.poet_info = self._init_poet_info()

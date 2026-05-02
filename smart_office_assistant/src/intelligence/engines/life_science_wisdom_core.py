@@ -14,7 +14,7 @@ __all__ = [
 class LifeScienceWisdomCore:
     """面向分子生物学,演化,生态,基因组学与神经科学的轻量知识核心."""
 
-    VERSION = "1.0.0"
+    VERSION = "6.2.0"
 
     def __init__(self) -> None:
         self._knowledge_base: Dict[str, Dict[str, Any]] = {

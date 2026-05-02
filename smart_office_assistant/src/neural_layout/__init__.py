@@ -44,9 +44,9 @@ from .verifier import NetworkVerifier, verify_network
 from .integration import (
     NeuralLayoutIntegration,
     get_neural_integration,
+    initialize_neural_layout,
     process_with_neural_layout,
-    integrate_with_somn_core,
-    integrate_with_agent_core
+    get_neural_status,
 )
 
 # 新增串联优化组件
@@ -94,8 +94,7 @@ __all__ = [
     'NetworkVerifier', 'verify_network',
     # 集成
     'NeuralLayoutIntegration', 'get_neural_integration',
-    'process_with_neural_layout',
-    'integrate_with_somn_core', 'integrate_with_agent_core',
+    'initialize_neural_layout', 'process_with_neural_layout', 'get_neural_status',
     # 新增: 编排器桥梁
     'OrchestratorBridge', 'get_orchestrator_bridge',
     # 新增: 自主-反馈融合
@@ -108,4 +107,4 @@ __all__ = [
     'get_cross_module_insight_generator',
 ]
 
-__version__ = "1.1.0"
+__version__ = "6.2.0"

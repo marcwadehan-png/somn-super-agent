@@ -744,26 +744,3 @@ def get_cross_weaver() -> CrossWeaver:
 
 # ── 使用示例 ─────────────────────────────────────────────────
 
-# if __name__ == "__main__":
-# #     raise RuntimeError("此入口已禁用 - 请使用 tests/ 目录")
-
-    # 执行交叉织网
-    initial = {"problem": "测试问题", "solution": "初始方案"}
-
-    result = weaver.weave(initial, {"hints": ["优化建议1", "优化建议2"]}, max_iterations=3)
-
-    logger.info(f"交叉结果ID: {result.result_id}")
-    logger.info(f"迭代次数: {result.iterations}")
-    logger.info(f"收敛: {result.convergence}")
-    logger.info(f"洞察: {result.insights}")
-    logger.info(f"进化模块: {result.evolved_modules}")
-    logger.info(f"总耗时: {result.total_time:.2f}s")
-
-    # 获取交叉网络状态
-    network = weaver.get_cross_network()
-    logger.info(f"交叉网络状态: 链接数={network['total_links']}, 模块数={len(network['modules'])}")
-
-    # 发送信号
-    sig_id = weaver.send_signal("wisdom_dispatcher", "deep_reasoning",
-                                {"refined": True}, FeedbackType.POSITIVE)
-    logger.info(f"信号发送: {sig_id}")

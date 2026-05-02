@@ -46,29 +46,28 @@ def register_health_routes(app, app_state):
         }
     )
     async def health_check():
-        """后端健康检查"""
+        """后端健康检查 - 轻量级，不触发阻塞初始化"""
         uptime = time.time() - app_state.start_time if app_state.start_time else 0
 
-        # 检查各组件状态
+        # 轻量级检查：只检查 API 服务器状态，不触发 SomnCore 初始化
         components = {"api_server": "healthy"}
 
-        # 检查 SomnCore 是否可用
+        # 尝试非阻塞获取 SomnCore 状态（如果已初始化）
         try:
-            core = app_state.get_somn_core()
-            components["somn_core"] = "healthy"
-        except Exception as e:
-            logger.debug(f"SomnCore 健康检查异常: {e}")
-            components["somn_core"] = "unavailable"
+            # 使用非阻塞方式检查，避免触发初始化
+            if hasattr(app_state, '_somn_core_ready') and app_state._somn_core_ready:
+                components["somn_core"] = "healthy"
+            else:
+                components["somn_core"] = "not_initialized"
+        except Exception:
+            components["somn_core"] = "unknown"
 
-        # 确定整体状态
-        unhealthy_count = sum(1 for v in components.values() if v != "healthy")
-        status = "healthy" if unhealthy_count == 0 else (
-            "degraded" if unhealthy_count < 2 else "unhealthy"
-        )
+        # 快速返回状态
+        status = "healthy" if components.get("api_server") == "healthy" else "unhealthy"
 
         return {
             "success": True,
-            "message": "Somn API Server 运行中" if status == "healthy" else "部分组件异常",
+            "message": "Somn API Server 运行中",
             "timestamp": datetime.now().isoformat(),
             "data": {
                 "status": status,

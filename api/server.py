@@ -120,6 +120,22 @@ def create_app(project_root: Path = None, config: dict = None) -> "FastAPI":
     # ── 保存 app_state 到 app.state ──
     app.state._app_state = app_state
 
+    # ── 挂载静态文件 + 前端页面 ──
+    from fastapi.responses import FileResponse
+    from fastapi.staticfiles import StaticFiles
+
+    static_dir = project_root / "static"
+    if static_dir.exists():
+        app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
+    @app.get("/")
+    async def serve_index():
+        """前端单页应用入口"""
+        index_path = project_root / "static" / "index.html"
+        if index_path.exists():
+            return FileResponse(str(index_path))
+        return {"message": "Somn API Server v6.2.0", "docs": "/api/docs"}
+
     # ── 详细健康检查端点 ──
     @app.get("/api/v1/health/detail")
     async def health_check_detail():

@@ -445,7 +445,7 @@ class WCCEvolutionaryCore:
     
     def __init__(self):
         self.name = "WCCEvolutionaryCore"
-        self.version = "v1.0.0"
+        self.version="6.2.0"
         
     def trace_cosmic_evolution(self, from_stage: str = "planck", 
                                 to_stage: str = "solar_system") -> Dict[str, Any]:

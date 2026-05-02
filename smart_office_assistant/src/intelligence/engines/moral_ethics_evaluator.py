@@ -28,7 +28,7 @@ class MoralEthicsEvaluator:
     def __init__(self):
         """init道德伦理评估器"""
         self.name = "MoralEthicsEvaluator"
-        self.version = "v1.0.0"
+        self.version="6.2.0"
 
         # 核心道德原则(儒家五常)
         self.five_constants = {

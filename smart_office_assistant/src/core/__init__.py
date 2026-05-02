@@ -55,17 +55,18 @@ def __getattr__(name: str) -> Any:
             MainChainScheduler,
             MainChainMonitor,
         )
-    _import_map = {
-        "get_main_chain_integration": get_main_chain_integration,
-        "get_parallel_router": get_parallel_router,
-        "get_cross_weaver": get_cross_weaver,
-        "get_main_chain_scheduler": get_main_chain_scheduler,
-        "get_main_chain_monitor": get_main_chain_monitor,
-        "MainChainIntegration": MainChainIntegration,
-        "MainChainScheduler": MainChainScheduler,
-        "MainChainMonitor": MainChainMonitor,
-    }
-    return _import_map[name]
+        _import_map = {
+            "get_main_chain_integration": get_main_chain_integration,
+            "get_parallel_router": get_parallel_router,
+            "get_cross_weaver": get_cross_weaver,
+            "get_main_chain_scheduler": get_main_chain_scheduler,
+            "get_main_chain_monitor": get_main_chain_monitor,
+            "MainChainIntegration": MainChainIntegration,
+            "MainChainScheduler": MainChainScheduler,
+            "MainChainMonitor": MainChainMonitor,
+        }
+        return _import_map[name]
+    # 不在处理范围内，抛出 AttributeError
     raise AttributeError(f"module 'src.core' has no attribute {name}")
 
 __all__ = [

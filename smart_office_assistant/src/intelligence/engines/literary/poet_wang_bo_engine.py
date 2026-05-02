@@ -36,7 +36,7 @@ class 王勃代表作品(Enum):
 class 王勃深化引擎:
     """王勃诗词深化分析引擎 v8.2.0"""
 
-    VERSION = "v8.2.0"
+    VERSION = "6.2.0"
 
     def __init__(self):
         self.诗歌characteristics = self._init_characteristics()

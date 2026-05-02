@@ -306,7 +306,7 @@ class MultiScaleFeatureSystem:
     ):
         """init"""
         self.name = "MultiScaleFeatureSystem"
-        self.version = "1.0.0"
+        self.version="6.2.0"
         
         self.filter_bank = GaborFilterBank(
             n_orientations=n_orientations,
@@ -615,7 +615,7 @@ class GaborFeatureSystem:
     ):
         """init"""
         self.name = "GaborFeatureSystem"
-        self.version = "1.0.0"
+        self.version="6.2.0"
         
         self.multi_scale = MultiScaleFeatureSystem(
             n_orientations=n_orientations,

@@ -43,7 +43,7 @@ class 孟郊诗歌characteristics:
 class 孟郊深化引擎:
     """孟郊诗歌深化分析引擎 v8.2.0"""
 
-    VERSION = "v8.2.0"
+    VERSION = "6.2.0"
 
     def __init__(self):
         self.诗歌characteristics = self._init_characteristics()
