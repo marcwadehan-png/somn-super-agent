@@ -12,7 +12,7 @@ openpyxl>=3.1.0
 
 # PDF Generation & Processing
 # WeasyPrint>=60.0  # 依赖GTK3，Windows上使用reportlab替代
-PyPDF2>=3.0.0
+PyPDF2>=3.0.1
 
 # Data Processing
 pandas>=2.0.0
